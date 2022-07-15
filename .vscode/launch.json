@@ -18,7 +18,7 @@
             "program": "${workspaceFolder}/src/train.py",
             "console": "integratedTerminal",
             "justMyCode": true,
-            "args": ["--algorithm", "svea", "--seed", "0", "--eval_mode", "distracting_cs", "--distracting_cs_intensity", "1"]
+            "args": ["--algorithm", "svea", "--seed", "0", "--eval_mode", "distracting_cs", "--distracting_cs_intensity", "0.5"]
         }
     ]
 }

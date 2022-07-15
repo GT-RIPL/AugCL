@@ -69,8 +69,8 @@ def main(args):
     )
     print("Working directory:", work_dir)
     assert os.path.exists(work_dir), "specified working directory does not exist"
-    model_dir = os.makedirs(os.path.join(work_dir, "model"), exist_ok=True)
-    video_dir = os.makedirs(os.path.join(work_dir, "video"), exist_ok=True)
+    model_dir = utils.make_dir(os.path.join(work_dir, "model"), exist_ok=True)
+    video_dir = utils.make_dir(os.path.join(work_dir, "video"), exist_ok=True)
     video = VideoRecorder(video_dir if args.save_video else None, height=448, width=448)
 
     # Check if evaluation has already been run

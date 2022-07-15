@@ -9,10 +9,15 @@ import subprocess
 from datetime import datetime
 
 
-def dump_args_json(args: dict, log_dir: str, checkpoint_dir: str):
+def make_dir(dir_path, exist_ok=True):
+    os.makedirs(dir_path, exist_ok=exist_ok)
+    return dir_path
+
+
+def dump_args_json(args: dict, log_dir: str, model_dir: str):
     with open(os.path.join(log_dir, "args.json"), "w") as f:
         json_dict = vars(args)
-        json_dict["checkpoint_dir"] = checkpoint_dir
+        json_dict["checkpoint_dir"] = model_dir
         json.dump(json_dict, f, sort_keys=True, indent=4)
 
 

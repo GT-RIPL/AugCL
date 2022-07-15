@@ -69,17 +69,21 @@ def main(args):
         args.log_dir,
         args.domain_name + "_" + args.task_name,
         args.algorithm,
-        str(args.seed),
+        "seed_" + str(args.seed),
+        # If args.id given bottom dir name is set to args.id otherwise set to current month, day
+        time.strftime("%m-%d", time.gmtime()) if args.id is None else args.id,
     )
     print("Working directory:", work_dir)
-    assert not os.path.exists(
-        os.path.join(work_dir, "train.log")
-    ), "specified working directory already exists"
-    utils.make_dir(work_dir)
-    model_dir = os.makedirs(os.path.join(work_dir, "model"), exist_ok=True)
-    video_dir = os.makedirs(os.path.join(work_dir, "video"), exist_ok=True)
+    for dir, _, files in os.walk(work_dir):
+        assert (
+            not files
+        ), f"Files already exists in sub-directory:{dir}, of {work_dir}. Ending program."
+    os.makedirs(work_dir, exist_ok=True)
+    model_dir = utils.make_dir(os.path.join(work_dir, "model"))
+    video_dir = utils.make_dir(os.path.join(work_dir, "video"))
     video = VideoRecorder(video_dir if args.save_video else None, height=448, width=448)
     utils.write_info(args, os.path.join(work_dir, "info.log"))
+    utils.dump_args_json(args=args, log_dir=work_dir, model_dir=model_dir)
 
     # Prepare agent
     assert torch.cuda.is_available(), "must have cuda enabled"
@@ -112,15 +116,20 @@ def main(args):
 
             # Evaluate agent periodically
             if step % args.eval_freq == 0:
+                num_episodes = (
+                    args.eval_episodes_final_step
+                    if step == args.train_steps
+                    else args.eval_episodes
+                )
                 print("Evaluating:", work_dir)
                 L.log("eval/episode", episode, step)
-                evaluate(env, agent, video, args.eval_episodes, L, step)
+                evaluate(env, agent, video, num_episodes, L, step)
                 if test_env is not None:
                     evaluate(
                         test_env,
                         agent,
                         video,
-                        args.eval_episodes,
+                        num_episodes,
                         L,
                         step,
                         test_env=True,
