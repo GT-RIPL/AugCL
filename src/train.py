@@ -70,8 +70,8 @@ def main(args):
         args.domain_name + "_" + args.task_name,
         args.algorithm,
         "seed_" + str(args.seed),
-        # If args.id given bottom dir name is set to args.id otherwise set to current month, day
-        time.strftime("%m-%d", time.gmtime()) if args.id is None else args.id,
+        args.id if args.id else "",
+        time.strftime("%m-%d", time.gmtime()),
     )
     print("Working directory:", work_dir)
 
