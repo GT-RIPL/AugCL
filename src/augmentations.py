@@ -15,6 +15,7 @@ data_iter = None
 def _load_data(
     sub_path: str, batch_size: int = 256, image_size: int = 84, num_workers: int = 16
 ):
+    global data_iter, dataloader
     for data_dir in utils.load_config("datasets"):
         if os.path.exists(data_dir):
             fp = os.path.join(data_dir, sub_path)
@@ -46,7 +47,6 @@ def _load_data(
 
 
 def _load_places(batch_size=256, image_size=84, num_workers=16, use_val=False):
-    global dataloader, data_iter
     partition = "val" if use_val else "train"
     sub_path = os.path.join("places365_standard", partition)
     print(f"Loading {partition} partition of places365_standard...")
@@ -59,7 +59,6 @@ def _load_places(batch_size=256, image_size=84, num_workers=16, use_val=False):
 
 
 def _load_coco(batch_size=256, image_size=84, num_workers=16, use_val=False):
-    global dataloader, data_iter
     sub_path = "COCO"
     print(f"Loading COCO 2017 Val...")
     _load_data(
