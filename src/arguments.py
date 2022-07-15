@@ -59,6 +59,9 @@ def parse_args():
     parser.add_argument("--svea_alpha", default=0.5, type=float)
     parser.add_argument("--svea_beta", default=0.5, type=float)
 
+    # svea and soda
+    parser.add_argument("--use_overlay", default=False, type=bool)
+
     # eval
     parser.add_argument("--save_freq", default="100k", type=str)
     parser.add_argument("--eval_freq", default="10k", type=str)
@@ -72,6 +75,7 @@ def parse_args():
     parser.add_argument("--log_dir", default="logs", type=str)
     parser.add_argument("--config_path", default=None, type=str)
     parser.add_argument("--save_video", default=False, action="store_true")
+    parser.add_argument("--test_code_mode", default=False, type=bool)
 
     args = parser.parse_args()
 

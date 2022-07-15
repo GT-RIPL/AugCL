@@ -15,6 +15,7 @@ class SODA(SAC):
         self.aux_update_freq = args.aux_update_freq
         self.soda_batch_size = args.soda_batch_size
         self.soda_tau = args.soda_tau
+        self.aug_func = augmentations.random_overlay if args.use_overlay else augmentations.random_conv
 
         shared_cnn = self.critic.encoder.shared_cnn
         aux_cnn = self.critic.encoder.head_cnn
@@ -54,7 +55,7 @@ class SODA(SAC):
 
         x = augmentations.random_crop(x)
         aug_x = augmentations.random_crop(aug_x)
-        aug_x = augmentations.random_overlay(aug_x)
+        aug_x = self.aug_func(aug_x)
 
         soda_loss = self.compute_soda_loss(aug_x, x)
 

@@ -74,7 +74,11 @@ def main(args):
         time.strftime("%m-%d", time.gmtime()) if args.id is None else args.id,
     )
     print("Working directory:", work_dir)
-    assert not os.path.exists(os.path.join(work_dir, 'train.log')), 'Specified working directory has existing train.log. Ending program.'
+
+    if not args.test_code_mode:
+        assert not os.path.exists(
+            os.path.join(work_dir, "train.log")
+        ), "Specified working directory has existing train.log. Ending program."
     os.makedirs(work_dir, exist_ok=True)
     model_dir = utils.make_dir(os.path.join(work_dir, "model"))
 

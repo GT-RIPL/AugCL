@@ -11,6 +11,11 @@ class SVEA(SAC):
         super().__init__(obs_shape, action_shape, args)
         self.svea_alpha = args.svea_alpha
         self.svea_beta = args.svea_beta
+        self.aug_func = (
+            augmentations.random_overlay
+            if args.use_overlay
+            else augmentations.random_conv
+        )
 
     def update_critic(self, obs, action, reward, next_obs, not_done, L=None, step=None):
         with torch.no_grad():
@@ -20,7 +25,7 @@ class SVEA(SAC):
             target_Q = reward + (not_done * self.discount * target_V)
 
         if self.svea_alpha == self.svea_beta:
-            obs = utils.cat(obs, augmentations.random_conv(obs.clone()))
+            obs = utils.cat(obs, self.aug_func(obs.clone()))
             action = utils.cat(action, action)
             target_Q = utils.cat(target_Q, target_Q)
 
@@ -34,7 +39,7 @@ class SVEA(SAC):
                 F.mse_loss(current_Q1, target_Q) + F.mse_loss(current_Q2, target_Q)
             )
 
-            obs_aug = augmentations.random_conv(obs.clone())
+            obs_aug = self.aug_func(obs.clone())
             current_Q1_aug, current_Q2_aug = self.critic(obs_aug, action)
             critic_loss += self.svea_beta * (
                 F.mse_loss(current_Q1_aug, target_Q)
