@@ -8,21 +8,19 @@ import utils
 import os
 
 
-places_dataloader = None
-places_iter = None
+dataloader = None
+data_iter = None
 
 
-def _load_places(batch_size=256, image_size=84, num_workers=16, use_val=False):
-    global places_dataloader, places_iter
-    partition = "val" if use_val else "train"
-    print(f"Loading {partition} partition of places365_standard...")
+def _load_data(
+    sub_path: str, batch_size: int = 256, image_size: int = 84, num_workers: int = 16
+):
     for data_dir in utils.load_config("datasets"):
         if os.path.exists(data_dir):
-            fp = os.path.join(data_dir, "places365_standard", partition)
+            fp = os.path.join(data_dir, sub_path)
             if not os.path.exists(fp):
                 print(f"Warning: path {fp} does not exist, falling back to {data_dir}")
-                fp = data_dir
-            places_dataloader = torch.utils.data.DataLoader(
+            dataloader = torch.utils.data.DataLoader(
                 datasets.ImageFolder(
                     fp,
                     TF.Compose(
@@ -38,41 +36,70 @@ def _load_places(batch_size=256, image_size=84, num_workers=16, use_val=False):
                 num_workers=num_workers,
                 pin_memory=True,
             )
-            places_iter = iter(places_dataloader)
+            data_iter = iter(dataloader)
             break
-    if places_iter is None:
+    if data_iter is None:
         raise FileNotFoundError(
-            "failed to find places365 data at any of the specified paths"
+            "failed to find image data at any of the specified paths"
         )
     print("Loaded dataset from", data_dir)
 
 
-def _get_places_batch(batch_size):
-    global places_iter
+def _load_places(batch_size=256, image_size=84, num_workers=16, use_val=False):
+    global dataloader, data_iter
+    partition = "val" if use_val else "train"
+    sub_path = os.path.join("places365_standard", partition)
+    print(f"Loading {partition} partition of places365_standard...")
+    _load_data(
+        sub_path=sub_path,
+        batch_size=batch_size,
+        image_size=image_size,
+        num_workers=num_workers,
+    )
+
+
+def _load_coco(batch_size=256, image_size=84, num_workers=16, use_val=False):
+    global dataloader, data_iter
+    sub_path = "COCO"
+    print(f"Loading COCO 2017 Val...")
+    _load_data(
+        sub_path=sub_path,
+        batch_size=batch_size,
+        image_size=image_size,
+        num_workers=num_workers,
+    )
+
+
+def _get_data_batch(batch_size):
+    global data_iter
     try:
-        imgs, _ = next(places_iter)
+        imgs, _ = next(data_iter)
         if imgs.size(0) < batch_size:
-            places_iter = iter(places_dataloader)
-            imgs, _ = next(places_iter)
+            data_iter = iter(dataloader)
+            imgs, _ = next(data_iter)
     except StopIteration:
-        places_iter = iter(places_dataloader)
-        imgs, _ = next(places_iter)
+        data_iter = iter(dataloader)
+        imgs, _ = next(data_iter)
     return imgs.cuda()
 
 
-def random_overlay(x, dataset="places365_standard"):
-    """Randomly overlay an image from Places"""
-    global places_iter
+def random_overlay(x, dataset="coco"):
+    """Randomly overlay an image from Places or COCO"""
+    global data_iter
     alpha = 0.5
 
     if dataset == "places365_standard":
-        if places_dataloader is None:
+        if dataloader is None:
             _load_places(batch_size=x.size(0), image_size=x.size(-1))
-        imgs = _get_places_batch(batch_size=x.size(0)).repeat(1, x.size(1) // 3, 1, 1)
+    elif dataset == "coco":
+        if dataloader is None:
+            _load_coco(batch_size=x.size(0), image_size=x.size(-1))
     else:
         raise NotImplementedError(
             f'overlay has not been implemented for dataset "{dataset}"'
         )
+
+    imgs = _get_data_batch(batch_size=x.size(0)).repeat(1, x.size(1) // 3, 1, 1)
 
     return ((1 - alpha) * (x / 255.0) + (alpha) * imgs) * 255.0
 

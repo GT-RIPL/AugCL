@@ -74,19 +74,14 @@ def main(args):
         time.strftime("%m-%d", time.gmtime()) if args.id is None else args.id,
     )
     print("Working directory:", work_dir)
-    for dir, _, files in os.walk(work_dir):
-        assert (
-            not files
-        ), f"Files already exists in sub-directory:{dir}, of {work_dir}. Ending program."
+    assert not os.path.exists(os.path.join(work_dir, 'train.log')), 'Specified working directory has existing train.log. Ending program.'
     os.makedirs(work_dir, exist_ok=True)
     model_dir = utils.make_dir(os.path.join(work_dir, "model"))
 
     if args.save_video:
         video_dir = utils.make_dir(os.path.join(work_dir, "video"))
-        video = VideoRecorder(
-            video_dir if args.save_video else None, height=448, width=448
-        )
-        
+    video = VideoRecorder(video_dir if args.save_video else None, height=448, width=448)
+
     utils.write_info(args, os.path.join(work_dir, "info.log"))
     utils.dump_args_json(args=args, log_dir=work_dir, model_dir=model_dir)
 

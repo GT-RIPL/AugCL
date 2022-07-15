@@ -19,6 +19,15 @@
             "console": "integratedTerminal",
             "justMyCode": true,
             "args": ["--algorithm", "svea", "--seed", "0", "--eval_mode", "distracting_cs", "--distracting_cs_intensity", "0.5"]
+        },
+        {
+            "name": "SODA train",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/src/train.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": ["--algorithm", "soda", "--seed", "0", "--eval_mode", "distracting_cs", "--distracting_cs_intensity", "0.5"]
         }
     ]
 }

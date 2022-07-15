@@ -1,5 +1,4 @@
 import argparse
-from ast import arg
 from utils import config_json_to_args
 
 
