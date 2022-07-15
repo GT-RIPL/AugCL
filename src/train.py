@@ -80,8 +80,13 @@ def main(args):
         ), f"Files already exists in sub-directory:{dir}, of {work_dir}. Ending program."
     os.makedirs(work_dir, exist_ok=True)
     model_dir = utils.make_dir(os.path.join(work_dir, "model"))
-    video_dir = utils.make_dir(os.path.join(work_dir, "video"))
-    video = VideoRecorder(video_dir if args.save_video else None, height=448, width=448)
+
+    if args.save_video:
+        video_dir = utils.make_dir(os.path.join(work_dir, "video"))
+        video = VideoRecorder(
+            video_dir if args.save_video else None, height=448, width=448
+        )
+        
     utils.write_info(args, os.path.join(work_dir, "info.log"))
     utils.dump_args_json(args=args, log_dir=work_dir, model_dir=model_dir)
 
