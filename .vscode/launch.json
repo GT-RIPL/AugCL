@@ -18,7 +18,20 @@
             "program": "${workspaceFolder}/src/train.py",
             "console": "integratedTerminal",
             "justMyCode": true,
-            "args": ["--id", "test", "--algorithm", "svea", "--seed", "0", "--eval_mode", "distracting_cs", "--distracting_cs_intensity", "0.5", "--test_code_mode", "True"]
+            "args": [
+                "--id",
+                "test",
+                "--algorithm",
+                "svea",
+                "--seed",
+                "0",
+                "--eval_mode",
+                "distracting_cs",
+                "--distracting_cs_intensity",
+                "0.5",
+                "--test_code_mode",
+                "True"
+            ]
         },
         {
             "name": "SODA train",
@@ -27,7 +40,36 @@
             "program": "${workspaceFolder}/src/train.py",
             "console": "integratedTerminal",
             "justMyCode": true,
-            "args": ["--id", "test", "--algorithm", "soda", "--seed", "0", "--eval_mode", "distracting_cs", "--distracting_cs_intensity", "0.5", "--test_code_mode", "True", "--use_overlay", "True"]
+            "args": [
+                "--id",
+                "test",
+                "--algorithm",
+                "soda",
+                "--seed",
+                "0",
+                "--eval_mode",
+                "distracting_cs",
+                "--distracting_cs_intensity",
+                "0.5",
+                "--test_code_mode",
+                "True",
+                "--use_overlay",
+                "True"
+            ]
+        },
+        {
+            "name": "Sample From DMC",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/src/sample_frames.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": [
+                "--eval_mode",
+                "distracting_cs",
+                "--distracting_cs_intensity",
+                "0.5"
+            ]
         }
     ]
 }

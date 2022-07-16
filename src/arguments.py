@@ -2,7 +2,7 @@ import argparse
 from utils import config_json_to_args
 
 
-def parse_args():
+def add_SAC_args():
     parser = argparse.ArgumentParser()
 
     # environment
@@ -71,14 +71,16 @@ def parse_args():
 
     # misc
     parser.add_argument("--id", default=None, type=str)
-    parser.add_argument("--seed", default=None, type=int)
+    parser.add_argument("--seed", default=0, type=int)
     parser.add_argument("--log_dir", default="logs", type=str)
     parser.add_argument("--config_path", default=None, type=str)
     parser.add_argument("--save_video", default=False, action="store_true")
     parser.add_argument("--test_code_mode", default=False, type=bool)
 
-    args = parser.parse_args()
+    return parser
 
+
+def format_args(args):
     if args.config_path:
         args = config_json_to_args(args=args, config_path=args.config_path)
 
@@ -124,3 +126,9 @@ def parse_args():
         args.image_crop_size = 84
 
     return args
+
+
+def parse_args():
+    parser = add_SAC_args()
+    args = parser.parse_args()
+    return format_args(args=args)
