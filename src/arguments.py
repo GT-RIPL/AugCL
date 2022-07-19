@@ -11,7 +11,8 @@ def add_SAC_args():
     parser.add_argument("--frame_stack", default=3, type=int)
     parser.add_argument("--action_repeat", default=4, type=int)
     parser.add_argument("--episode_length", default=1000, type=int)
-    parser.add_argument("--eval_mode", default="color_hard", type=str)
+    parser.add_argument("--train_mode", default="train", type=str)
+    parser.add_argument("--train_distracting_cs_intensity", default=0.0, type=float)
 
     # agent
     parser.add_argument("--algorithm", default="sac", type=str)
@@ -67,6 +68,7 @@ def add_SAC_args():
     parser.add_argument("--eval_freq", default="10k", type=str)
     parser.add_argument("--eval_episodes", default=1, type=int)
     parser.add_argument("--eval_episodes_final_step", default=30, type=int)
+    parser.add_argument("--eval_mode", default="color_hard", type=str)
     parser.add_argument("--distracting_cs_intensity", default=0.0, type=float)
 
     # misc
@@ -94,7 +96,7 @@ def format_args(args):
         "svea",
     }, f'specified algorithm "{args.algorithm}" is not supported'
 
-    assert args.eval_mode in {
+    env_modes = {
         "train",
         "color_easy",
         "color_hard",
@@ -102,13 +104,23 @@ def format_args(args):
         "video_hard",
         "distracting_cs",
         "none",
-    }, f'specified mode "{args.eval_mode}" is not supported'
+    }
+
+    assert (
+        args.train_mode in env_modes
+    ), f'specified train mode "{args.train_mode}" is not supported'
+    assert (
+        args.eval_mode in env_modes
+    ), f'specified eval mode "{args.eval_mode}" is not supported'
     assert args.seed is not None, "must provide seed for experiment"
     assert args.log_dir is not None, "must provide a log directory for experiment"
 
     intensities = {0.0, 0.025, 0.05, 0.1, 0.15, 0.2, 0.3, 0.4, 0.5}
     assert (
         args.distracting_cs_intensity in intensities
+    ), f"distracting_cs has only been implemented for intensities: {intensities}"
+    assert (
+        args.train_distracting_cs_intensity in intensities
     ), f"distracting_cs has only been implemented for intensities: {intensities}"
 
     args.train_steps = int(args.train_steps.replace("k", "000"))

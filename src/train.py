@@ -47,7 +47,8 @@ def main(args):
         episode_length=args.episode_length,
         action_repeat=args.action_repeat,
         image_size=args.image_size,
-        mode="train",
+        mode=args.train_mode,
+        intensity=args.train_distracting_cs_intensity,
     )
     test_env = (
         make_env(
