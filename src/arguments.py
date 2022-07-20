@@ -94,6 +94,7 @@ def format_args(args):
         "soda",
         "drq",
         "svea",
+        "wsa",
     }, f'specified algorithm "{args.algorithm}" is not supported'
 
     env_modes = {

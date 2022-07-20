@@ -197,8 +197,13 @@ class Actor(nn.Module):
         )
         self.mlp.apply(weight_init)
 
-    def forward(self, x, compute_pi=True, compute_log_pi=True, detach=False):
-        x = self.encoder(x, detach)
+    def forward(
+        self, x, compute_pi=True, compute_log_pi=True, detach=False, aug_encoder=None
+    ):
+        if aug_encoder:
+            x = aug_encoder(x, detach)
+        else:
+            x = self.encoder(x, detach)
         mu, log_std = self.mlp(x).chunk(2, dim=-1)
         log_std = torch.tanh(log_std)
         log_std = self.log_std_min + 0.5 * (self.log_std_max - self.log_std_min) * (
@@ -250,6 +255,9 @@ class Critic(nn.Module):
     def forward(self, x, action, detach=False):
         x = self.encoder(x, detach)
         return self.Q1(x, action), self.Q2(x, action)
+
+    def forward_Q(self, x_encoded, action):
+        return self.Q1(x_encoded, action), self.Q2(x_encoded, action)
 
 
 class CURLHead(nn.Module):

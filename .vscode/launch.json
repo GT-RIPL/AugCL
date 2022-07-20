@@ -80,6 +80,24 @@
             ]
         },
         {
+            "name": "WSA train",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/src/train.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": [
+                "--id",
+                "test",
+                "--eval_mode",
+                "color_easy",
+                "--test_code_mode",
+                "True",
+                "--algorithm",
+                "wsa"
+            ]
+        },
+        {
             "name": "Sample From DMC",
             "type": "python",
             "request": "launch",
