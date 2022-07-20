@@ -127,6 +127,21 @@ class SODAMLP(nn.Module):
         return self.mlp(x)
 
 
+class WSAMLP(nn.Module):
+    def __init__(self, projection_dim, hidden_dim, out_dim):
+        super().__init__()
+        self.out_dim = out_dim
+        self.mlp = nn.Sequential(
+            nn.Linear(projection_dim, hidden_dim),
+            nn.ReLU(),
+            nn.Linear(hidden_dim, out_dim),
+        )
+        self.apply(weight_init)
+
+    def forward(self, x):
+        return self.mlp(x)
+
+
 class SharedCNN(nn.Module):
     def __init__(self, obs_shape, num_layers=11, num_filters=32):
         super().__init__()
@@ -198,7 +213,12 @@ class Actor(nn.Module):
         self.mlp.apply(weight_init)
 
     def forward(
-        self, x, compute_pi=True, compute_log_pi=True, detach=False, aug_encoder=None
+        self,
+        x,
+        compute_pi=True,
+        compute_log_pi=True,
+        detach=False,
+        aug_encoder=None,
     ):
         if aug_encoder:
             x = aug_encoder(x, detach)
@@ -309,3 +329,15 @@ class SODAPredictor(nn.Module):
 
     def forward(self, x):
         return self.mlp(self.encoder(x))
+
+
+class WSAPredictor(nn.Module):
+    def __init__(self, encoder: Encoder, projection: nn.Module, hidden_dim: int):
+        super().__init__()
+        self.encoder = encoder
+        self.projection = projection
+        self.predict = WSAMLP(encoder.out_dim, hidden_dim, encoder.out_dim)
+        self.apply(weight_init)
+
+    def forward(self, x):
+        return self.predict(self.projection(self.encoder(x)))

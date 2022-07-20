@@ -6,6 +6,8 @@ from algorithms.soda import SODA
 from algorithms.drq import DrQ
 from algorithms.svea import SVEA
 from algorithms.wsa import WSA
+from algorithms.sac_no_share import SAC_no_share
+from algorithms.blah import BLAH
 
 algorithm = {
     "sac": SAC,
@@ -16,6 +18,8 @@ algorithm = {
     "drq": DrQ,
     "svea": SVEA,
     "wsa": WSA,
+    "sac_no_share": SAC_no_share,
+    "blah": BLAH,
 }
 
 

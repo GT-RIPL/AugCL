@@ -80,6 +80,42 @@
             ]
         },
         {
+            "name": "SAC no share train",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/src/train.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": [
+                "--id",
+                "test",
+                "--algorithm",
+                "sac_no_share",
+                "--eval_mode",
+                "color_hard",
+                "--test_code_mode",
+                "True",
+            ]
+        },
+        {
+            "name": "Blah",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/src/train.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": [
+                "--id",
+                "test",
+                "--algorithm",
+                "blah",
+                "--eval_mode",
+                "color_hard",
+                "--test_code_mode",
+                "True",
+            ]
+        },
+        {
             "name": "WSA train",
             "type": "python",
             "request": "launch",
@@ -90,11 +126,15 @@
                 "--id",
                 "test",
                 "--eval_mode",
-                "color_easy",
+                "color_hard",
                 "--test_code_mode",
                 "True",
                 "--algorithm",
-                "wsa"
+                "wsa",
+                "--eval_freq",
+                "1k",
+                "--aux_update_freq",
+                "1"
             ]
         },
         {

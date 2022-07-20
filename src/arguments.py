@@ -1,5 +1,6 @@
 import argparse
 from utils import config_json_to_args
+from algorithms.factory import algorithm
 
 
 def add_SAC_args():
@@ -86,16 +87,9 @@ def format_args(args):
     if args.config_path:
         args = config_json_to_args(args=args, config_path=args.config_path)
 
-    assert args.algorithm in {
-        "sac",
-        "rad",
-        "curl",
-        "pad",
-        "soda",
-        "drq",
-        "svea",
-        "wsa",
-    }, f'specified algorithm "{args.algorithm}" is not supported'
+    assert args.algorithm in frozenset(
+        algorithm.keys()
+    ), f'specified algorithm "{args.algorithm}" is not supported'
 
     env_modes = {
         "train",
