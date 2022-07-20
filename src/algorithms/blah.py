@@ -1,5 +1,6 @@
 import torch
 import numpy as np
+import torch.nn.functional as F
 from logger import Logger
 import utils
 import augmentations
@@ -19,7 +20,7 @@ class BLAH(SAC_no_share):
         self, obs, aug_obs, L=None, step=None, update_alpha=True
     ):
         _, pi, log_pi, log_std = self.actor(aug_obs)
-        actor_Q1, actor_Q2 = self.critic(obs, pi, detach=True)
+        actor_Q1, actor_Q2 = self.critic(obs, pi)
 
         actor_Q = torch.min(actor_Q1, actor_Q2)
         actor_loss = (self.alpha.detach() * log_pi - actor_Q).mean()
