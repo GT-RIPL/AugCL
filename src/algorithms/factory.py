@@ -8,6 +8,7 @@ from algorithms.svea import SVEA
 from algorithms.wsa import WSA
 from algorithms.sac_no_share import SAC_no_share
 from algorithms.blah import BLAH
+from algorithms.FTL import FTL
 
 algorithm = {
     "sac": SAC,
@@ -20,6 +21,7 @@ algorithm = {
     "wsa": WSA,
     "sac_no_share": SAC_no_share,
     "blah": BLAH,
+    "ftl": FTL,
 }
 
 
