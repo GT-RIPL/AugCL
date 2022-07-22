@@ -66,7 +66,7 @@ def add_SAC_args():
 
     # DrQ
     parser.add_argument("--drq_k", default=1, type=int)
-    parser.add_argument("--dr_m", default=1, type=int)
+    parser.add_argument("--drq_m", default=1, type=int)
 
     # eval
     parser.add_argument("--save_freq", default="100k", type=str)
