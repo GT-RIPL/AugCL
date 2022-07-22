@@ -23,12 +23,15 @@ class DArQ(SAC):
         critic_loss = 0
 
         for _ in range(self.k):
-            p = (self.num_train_steps - step) / (2 * self.num_train_steps)
-            x_encoded = F.dropout(
-                self.critic.encoder(augmentations.random_shift(obs)), p=p
+            p_dropout = (self.num_train_steps - step) / (3 * self.num_train_steps)
+            x_shared = F.dropout2d(
+                self.critic.encoder.shared_cnn(augmentations.random_shift(obs)),
+                p=p_dropout,
             )
-            current_Q1 = self.critic.Q1(x_encoded, action)
-            current_Q2 = self.critic.Q2(x_encoded, action)
+            x_head = self.critic.encoder.head_cnn(x_shared)
+            x_proj = self.critic.encoder.projection(x_head)
+            current_Q1 = self.critic.Q1(x_proj, action)
+            current_Q2 = self.critic.Q2(x_proj, action)
             critic_loss += F.mse_loss(current_Q1, target_Q) + F.mse_loss(
                 current_Q2, target_Q
             )

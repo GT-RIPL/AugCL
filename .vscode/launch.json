@@ -178,6 +178,28 @@
             ]
         },
         {
+            "name": "DArQ train",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/src/train.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": [
+                "--id",
+                "test",
+                "--eval_mode",
+                "color_hard",
+                "--test_code_mode",
+                "True",
+                "--algorithm",
+                "darq",
+                "--drq_k",
+                "2",
+                "--drq_m",
+                "2"
+            ]
+        },
+        {
             "name": "DrQ RAD train",
             "type": "python",
             "request": "launch",
