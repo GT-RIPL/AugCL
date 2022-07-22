@@ -6,6 +6,7 @@ import torch
 from termcolor import colored
 from torch.utils.tensorboard import SummaryWriter
 
+test_env_reward_key = "episode_reward_"
 FORMAT_CONFIG = {
     "rl": {
         "train": [
@@ -20,7 +21,7 @@ FORMAT_CONFIG = {
         "eval": [
             ("step", "S", "int"),
             ("episode_reward", "ER", "float"),
-            ("episode_reward_test_env", "ERTEST", "float"),
+            (test_env_reward_key, "ERTEST", "float"),
         ],
     }
 }
@@ -79,6 +80,12 @@ class MetersGroup(object):
         prefix = colored(prefix, "yellow" if prefix == "train" else "green")
         pieces = ["{:5}".format(prefix)]
         for key, disp_key, ty in self._formating:
+            if key == test_env_reward_key:
+                for key_data in data.keys():
+                    if key_data.startswith(key):
+                        key = key_data
+                        break
+
             value = data.get(key, 0)
             pieces.append(self._format(disp_key, value, ty))
         print("| %s" % (" | ".join(pieces)))

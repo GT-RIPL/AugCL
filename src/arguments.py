@@ -53,16 +53,20 @@ def add_SAC_args():
     parser.add_argument("--aux_beta", default=0.9, type=float)
     parser.add_argument("--aux_update_freq", default=2, type=int)
 
-    # soda
+    # SODA
     parser.add_argument("--soda_batch_size", default=256, type=int)
     parser.add_argument("--soda_tau", default=0.005, type=float)
 
-    # svea
+    # SVEA
     parser.add_argument("--svea_alpha", default=0.5, type=float)
     parser.add_argument("--svea_beta", default=0.5, type=float)
 
-    # svea and soda
+    # SVEA and SODA
     parser.add_argument("--use_overlay", default=False, type=bool)
+
+    # DrQ
+    parser.add_argument("--drq_k", default=1, type=int)
+    parser.add_argument("--dr_m", default=1, type=int)
 
     # eval
     parser.add_argument("--save_freq", default="100k", type=str)

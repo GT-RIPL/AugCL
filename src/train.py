@@ -11,7 +11,7 @@ from logger import Logger
 from video import VideoRecorder
 
 
-def evaluate(env, agent, video, num_episodes, L, step, test_env=False):
+def evaluate(env, agent, video, num_episodes, L, step, args, test_env=False):
     episode_rewards = []
     for i in range(num_episodes):
         obs = env.reset()
@@ -26,7 +26,15 @@ def evaluate(env, agent, video, num_episodes, L, step, test_env=False):
             episode_reward += reward
 
         if L is not None:
-            _test_env = "_test_env" if test_env else ""
+            if test_env:
+                _test_env = "_" + args.eval_mode
+                _test_env = (
+                    _test_env + "_" + str(args.distracting_cs_intensity)
+                    if args.distracting_cs_intensity
+                    else _test_env
+                )
+            else:
+                _test_env = ""
             video.save(f"{step}{_test_env}.mp4")
             L.log(f"eval/episode_reward{_test_env}", episode_reward, step)
         episode_rewards.append(episode_reward)
@@ -128,7 +136,7 @@ def main(args):
                 )
                 print("Evaluating:", work_dir)
                 L.log("eval/episode", episode, step)
-                evaluate(env, agent, video, num_episodes, L, step)
+                evaluate(env, agent, video, num_episodes, L, step, args=args)
                 if test_env is not None:
                     evaluate(
                         test_env,
@@ -138,6 +146,7 @@ def main(args):
                         L,
                         step,
                         test_env=True,
+                        args=args,
                     )
                 L.dump(step)
 

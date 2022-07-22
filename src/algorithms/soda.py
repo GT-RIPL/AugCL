@@ -48,7 +48,7 @@ class SODA(SAC):
         return F.mse_loss(h0, h1)
 
     def update_soda(self, replay_buffer, L=None, step=None):
-        x = replay_buffer.sample_soda(self.soda_batch_size)
+        x = replay_buffer.sample_obs(self.soda_batch_size)
         assert x.size(-1) == 100
 
         aug_x = x.clone()

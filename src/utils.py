@@ -132,6 +132,16 @@ class ReplayBuffer(object):
         self.idx = 0
         self.full = False
 
+    def tensor_buffer_samples(self, idxs):
+        obs, next_obs = self._encode_obses(idxs)
+        obs = torch.as_tensor(obs).cuda().float()
+        next_obs = torch.as_tensor(next_obs).cuda().float()
+        actions = torch.as_tensor(self.actions[idxs]).cuda()
+        rewards = torch.as_tensor(self.rewards[idxs]).cuda()
+        not_dones = torch.as_tensor(self.not_dones[idxs]).cuda()
+
+        return obs, next_obs, actions, rewards, not_dones
+
     def add(self, obs, action, reward, next_obs, done):
         obses = (obs, next_obs)
         if self.idx >= len(self._obses):
@@ -158,7 +168,7 @@ class ReplayBuffer(object):
             next_obses.append(np.array(next_obs, copy=False))
         return np.array(obses), np.array(next_obses)
 
-    def sample_soda(self, n=None):
+    def sample_obs(self, n=None):
         idxs = self._get_idxs(n)
         obs, _ = self._encode_obses(idxs)
         return torch.as_tensor(obs).cuda().float()
@@ -166,12 +176,9 @@ class ReplayBuffer(object):
     def sample_curl(self, n=None):
         idxs = self._get_idxs(n)
 
-        obs, next_obs = self._encode_obses(idxs)
-        obs = torch.as_tensor(obs).cuda().float()
-        next_obs = torch.as_tensor(next_obs).cuda().float()
-        actions = torch.as_tensor(self.actions[idxs]).cuda()
-        rewards = torch.as_tensor(self.rewards[idxs]).cuda()
-        not_dones = torch.as_tensor(self.not_dones[idxs]).cuda()
+        (obs, next_obs, actions, rewards, not_dones) = self.tensor_buffer_samples(
+            idxs=idxs
+        )
 
         pos = augmentations.random_crop(obs.clone())
         obs = augmentations.random_crop(obs)
@@ -182,27 +189,33 @@ class ReplayBuffer(object):
     def sample_drq(self, n=None, pad=4):
         idxs = self._get_idxs(n)
 
-        obs, next_obs = self._encode_obses(idxs)
-        obs = torch.as_tensor(obs).cuda().float()
-        next_obs = torch.as_tensor(next_obs).cuda().float()
-        actions = torch.as_tensor(self.actions[idxs]).cuda()
-        rewards = torch.as_tensor(self.rewards[idxs]).cuda()
-        not_dones = torch.as_tensor(self.not_dones[idxs]).cuda()
+        (obs, next_obs, actions, rewards, not_dones) = self.tensor_buffer_samples(
+            idxs=idxs
+        )
 
         obs = augmentations.random_shift(obs, pad)
         next_obs = augmentations.random_shift(next_obs, pad)
 
         return obs, actions, rewards, next_obs, not_dones
 
+    def sample_drq_with_k_and_m(self, k, m, n=None, pad=4):
+        idxs = self._get_idxs(n)
+
+        (obs, next_obs, actions, rewards, not_dones) = self.tensor_buffer_samples(
+            idxs=idxs
+        )
+
+        obs_list = [augmentations.random_shift(obs, pad) for _ in range(k)]
+        next_obs_list = [augmentations.random_shift(next_obs, pad) for _ in range(m)]
+
+        return obs_list, actions, rewards, next_obs_list, not_dones
+
     def sample(self, n=None):
         idxs = self._get_idxs(n)
 
-        obs, next_obs = self._encode_obses(idxs)
-        obs = torch.as_tensor(obs).cuda().float()
-        next_obs = torch.as_tensor(next_obs).cuda().float()
-        actions = torch.as_tensor(self.actions[idxs]).cuda()
-        rewards = torch.as_tensor(self.rewards[idxs]).cuda()
-        not_dones = torch.as_tensor(self.not_dones[idxs]).cuda()
+        (obs, next_obs, actions, rewards, not_dones) = self.tensor_buffer_samples(
+            idxs=idxs
+        )
 
         obs = augmentations.random_crop(obs)
         next_obs = augmentations.random_crop(next_obs)
