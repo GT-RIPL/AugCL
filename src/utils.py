@@ -198,18 +198,6 @@ class ReplayBuffer(object):
 
         return obs, actions, rewards, next_obs, not_dones
 
-    def sample_drq_with_k_and_m(self, k, m, n=None, pad=4):
-        idxs = self._get_idxs(n)
-
-        (obs, next_obs, actions, rewards, not_dones) = self.tensor_buffer_samples(
-            idxs=idxs
-        )
-
-        obs_list = [augmentations.random_shift(obs, pad) for _ in range(k)]
-        next_obs_list = [augmentations.random_shift(next_obs, pad) for _ in range(m)]
-
-        return obs_list, actions, rewards, next_obs_list, not_dones
-
     def sample(self, n=None):
         idxs = self._get_idxs(n)
 

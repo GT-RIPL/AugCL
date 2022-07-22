@@ -1,3 +1,4 @@
+from algorithms.drq_rad import DrQRAD
 from algorithms.sac import SAC
 from algorithms.rad import RAD
 from algorithms.curl import CURL
@@ -9,6 +10,7 @@ from algorithms.wsa import WSA
 from algorithms.sac_no_share import SAC_no_share
 from algorithms.blah import BLAH
 from algorithms.FTL import FTL
+from algorithms.drq_rad import DrQRAD
 
 algorithm = {
     "sac": SAC,
@@ -22,6 +24,7 @@ algorithm = {
     "sac_no_share": SAC_no_share,
     "blah": BLAH,
     "ftl": FTL,
+    "drqrad": DrQRAD,
 }
 
 

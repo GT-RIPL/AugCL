@@ -68,6 +68,9 @@ def add_SAC_args():
     parser.add_argument("--drq_k", default=1, type=int)
     parser.add_argument("--drq_m", default=1, type=int)
 
+    # Data Augmentation
+    parser.add_argument("--data_aug", default="identity", type=str)
+
     # eval
     parser.add_argument("--save_freq", default="100k", type=str)
     parser.add_argument("--eval_freq", default="10k", type=str)

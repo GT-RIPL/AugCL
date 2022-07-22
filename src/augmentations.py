@@ -82,6 +82,151 @@ def _get_data_batch(batch_size):
     return imgs.cuda()
 
 
+def grayscale(imgs):
+    # imgs: b x c x h x w
+    device = imgs.device
+    b, c, h, w = imgs.shape
+    frames = c // 3
+
+    imgs = imgs.view([b, frames, 3, h, w])
+    imgs = (
+        imgs[:, :, 0, ...] * 0.2989
+        + imgs[:, :, 1, ...] * 0.587
+        + imgs[:, :, 2, ...] * 0.114
+    )
+
+    imgs = imgs.type(torch.uint8).float()
+    # assert len(imgs.shape) == 3, imgs.shape
+    imgs = imgs[:, :, None, :, :]
+    imgs = imgs * torch.ones([1, 1, 3, 1, 1], dtype=imgs.dtype).float().to(
+        device
+    )  # broadcast tiling
+    return imgs
+
+
+def random_grayscale(images, p=0.3):
+    """
+    args:
+    imgs: torch.tensor shape (B,C,H,W)
+    device: cpu or cuda
+    returns torch.tensor
+    """
+    device = images.device
+    in_type = images.type()
+    images = images * 255.0
+    images = images.type(torch.uint8)
+    # images: [B, C, H, W]
+    bs, channels, h, w = images.shape
+    images = images.to(device)
+    gray_images = grayscale(images)
+    rnd = np.random.uniform(0.0, 1.0, size=(images.shape[0],))
+    mask = rnd <= p
+    mask = torch.from_numpy(mask)
+    frames = images.shape[1] // 3
+    images = images.view(*gray_images.shape)
+    mask = mask[:, None] * torch.ones([1, frames]).type(mask.dtype)
+    mask = mask.type(images.dtype).to(device)
+    mask = mask[:, :, None, None, None]
+    out = mask * gray_images + (1 - mask) * images
+    out = out.view([bs, -1, h, w]).type(in_type) / 255.0
+    return out
+
+
+def random_flip(images, p=0.2):
+    """
+    args:
+    imgs: torch.tensor shape (B,C,H,W)
+    device: cpu or gpu,
+    p: prob of applying aug,
+    returns torch.tensor
+    """
+    # images: [B, C, H, W]
+    device = images.device
+    bs, channels, h, w = images.shape
+
+    images = images.to(device)
+
+    flipped_images = images.flip([3])
+
+    rnd = np.random.uniform(0.0, 1.0, size=(images.shape[0],))
+    mask = rnd <= p
+    mask = torch.from_numpy(mask)
+    frames = images.shape[1]  # // 3
+    images = images.view(*flipped_images.shape)
+    mask = mask[:, None] * torch.ones([1, frames]).type(mask.dtype)
+
+    mask = mask.type(images.dtype).to(device)
+    mask = mask[:, :, None, None]
+
+    out = mask * flipped_images + (1 - mask) * images
+
+    out = out.view([bs, -1, h, w])
+    return out
+
+
+def random_rotation(images, p=0.3):
+    """
+    args:
+    imgs: torch.tensor shape (B,C,H,W)
+    device: str, cpu or gpu,
+    p: float, prob of applying aug,
+    returns torch.tensor
+    """
+    device = images.device
+    # images: [B, C, H, W]
+    bs, channels, h, w = images.shape
+
+    images = images.to(device)
+
+    rot90_images = images.rot90(1, [2, 3])
+    rot180_images = images.rot90(2, [2, 3])
+    rot270_images = images.rot90(3, [2, 3])
+
+    rnd = np.random.uniform(0.0, 1.0, size=(images.shape[0],))
+    rnd_rot = np.random.randint(1, 4, size=(images.shape[0],))
+    mask = rnd <= p
+    mask = rnd_rot * mask
+    mask = torch.from_numpy(mask).to(device)
+
+    frames = images.shape[1]
+    masks = [torch.zeros_like(mask) for _ in range(4)]
+    for i, m in enumerate(masks):
+        m[torch.where(mask == i)] = 1
+        m = m[:, None] * torch.ones([1, frames]).type(mask.dtype).type(images.dtype).to(
+            device
+        )
+        m = m[:, :, None, None]
+        masks[i] = m
+
+    out = (
+        masks[0] * images
+        + masks[1] * rot90_images
+        + masks[2] * rot180_images
+        + masks[3] * rot270_images
+    )
+
+    out = out.view([bs, -1, h, w])
+    return out
+
+
+def kornia_color_jitter(imgs, bright=0.4, contrast=0.4, satur=0.4, hue=0.49, p=1):
+    """
+    inputs np array outputs tensor
+    """
+    b, c, h, w = imgs.shape
+    num_frames = int(c / 3)
+    num_samples = int(p * b * num_frames)
+
+    sampled_idxs = torch.from_numpy(np.random.randint(0, b, num_samples))
+    imgs = imgs.view(-1, 3, h, w)
+    model = kornia.augmentation.ColorJitter(
+        brightness=bright, contrast=contrast, saturation=satur, hue=hue
+    )
+    sampled_imgs = imgs[sampled_idxs]
+    imgs[sampled_idxs] = model(sampled_imgs)
+    return imgs.view(b, c, h, w)
+
+
 def random_overlay(x, dataset="coco"):
     """Randomly overlay an image from Places or COCO"""
     global data_iter
@@ -196,3 +341,15 @@ def view_as_windows_cuda(x, window_shape):
     strides = tuple(list(x[slices].stride()) + list(x.stride()))
 
     return x.as_strided(new_shape, strides)
+
+
+aug_to_func = {
+    "grayscale": random_grayscale,
+    "flip": random_flip,
+    "rotate": random_rotation,
+    "rand_conv": random_conv,
+    "shift": random_shift,
+    "color_jitter": kornia_color_jitter,
+    "identity": identity,
+    "overlay": random_overlay,
+}

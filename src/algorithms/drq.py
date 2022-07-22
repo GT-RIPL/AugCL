@@ -1,5 +1,6 @@
 import torch
 import numpy as np
+import augmentations
 from algorithms.sac import SAC
 import torch.nn.functional as F
 from utils import ReplayBuffer
@@ -64,18 +65,9 @@ class DrQ(SAC):  # [K=1, M=1]
         self.critic_optimizer.step()
 
     def update(self, replay_buffer: ReplayBuffer, L, step):
-        if self.k == 1 and self.m == 1:
-            obs, action, reward, next_obs, not_done = replay_buffer.sample_drq()
-            obs_list = [obs]
-            next_obs_list = [next_obs]
-        else:
-            (
-                obs_list,
-                action,
-                reward,
-                next_obs_list,
-                not_done,
-            ) = replay_buffer.sample_drq_with_k_and_m(k=self.k, m=self.m)
+        obs, action, reward, next_obs, not_done = replay_buffer.sample()
+        obs_list = [augmentations.random_shift(obs, 4) for _ in range(self.k)]
+        next_obs_list = [augmentations.random_shift(next_obs, 4) for _ in range(self.m)]
 
         self.update_critic(
             obs_list=obs_list,
