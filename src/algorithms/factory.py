@@ -1,5 +1,6 @@
 from algorithms.darq import DArQ
 from algorithms.drq2 import DrQ2
+from algorithms.drq_mix import DrQMix
 from algorithms.drq_rad import DrQRAD
 from algorithms.sac import SAC
 from algorithms.rad import RAD
@@ -32,6 +33,7 @@ algorithm = {
     "darq": DArQ,
     "transfer": Transfer,
     "drq2": DrQ2,
+    "drq_mix": DrQMix,
 }
 
 
