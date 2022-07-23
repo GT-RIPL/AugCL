@@ -7,10 +7,11 @@ from algorithms.pad import PAD
 from algorithms.soda import SODA
 from algorithms.drq import DrQ
 from algorithms.svea import SVEA
+from algorithms.transfer import Transfer
 from algorithms.wsa import WSA
 from algorithms.sac_no_share import SAC_no_share
 from algorithms.blah import BLAH
-from algorithms.FTL import FTL
+from algorithms.ftl import FTL
 from algorithms.drq_rad import DrQRAD
 from algorithms.darq import DArQ
 
@@ -28,6 +29,7 @@ algorithm = {
     "ftl": FTL,
     "drqrad": DrQRAD,
     "darq": DArQ,
+    "transfer": Transfer,
 }
 
 

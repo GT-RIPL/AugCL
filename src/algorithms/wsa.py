@@ -3,6 +3,7 @@ import torch.nn.functional as F
 from copy import deepcopy
 from algorithms.sac import SAC
 import augmentations
+import utils
 
 
 class WSA(SAC):
@@ -72,3 +73,6 @@ class WSA(SAC):
 
         if step % self.aux_update_freq == 0:
             self.update_wsa(obs=obs, L=L, step=step)
+            utils.soft_update_params(
+                self.critic.encoder, self.wsa_encoder, 0.5
+            )
