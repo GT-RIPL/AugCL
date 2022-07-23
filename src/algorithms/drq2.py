@@ -20,7 +20,8 @@ class DrQ2(SAC):  # [K=1, M=1]
         Q1_list = list()
         Q2_list = list()
         with torch.no_grad():
-            for next_obs in next_obs_list:
+            for i in range(self.m):
+                next_obs = next_obs_list[i]
                 _, policy_action, log_pi, _ = self.actor(next_obs)
                 target_Q1, target_Q2 = self.critic_target(next_obs, policy_action)
                 target_V = (
@@ -32,7 +33,8 @@ class DrQ2(SAC):  # [K=1, M=1]
         target_Q /= self.m
         critic_loss = 0
 
-        for obs in obs_list:
+        for j in range(self.k):
+            obs = obs_list[j]
             curr_Q1, curr_Q2 = self.critic(obs, action)
             critic_loss += F.mse_loss(curr_Q1, target_Q) + F.mse_loss(curr_Q2, target_Q)
             Q1_list.append(curr_Q1.detach().cpu().numpy())
@@ -77,7 +79,11 @@ class DrQ2(SAC):  # [K=1, M=1]
                 (
                     0.5 * log_std.shape[1] * (1.0 + np.log(2 * np.pi))
                     + log_std.sum(dim=-1)
-                ).mean().detach().cpu().numpy()
+                )
+                .mean()
+                .detach()
+                .cpu()
+                .numpy()
             )
 
         if L is not None:
