@@ -267,7 +267,7 @@ class DistractingBackgroundEnv(control.Environment):
             else:
                 # Randomly pick a video and load all images.
                 video_path = self._random_state.choice(self._video_paths)
-                file_names = utils.listdir(video_path)
+                file_names = os.listdir(str(video_path))
                 if not self._dynamic:
                     # Randomly pick a single static frame.
                     file_names = [self._random_state.choice(file_names)]
