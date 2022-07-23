@@ -24,9 +24,7 @@ class DrQMix(SAC):  # [K=1, M=1]
                 next_obs = next_obs_list[i]
 
                 if i > 1:
-                    next_obs = 0.5 * next_obs + 0.5 * augmentations.random_conv(
-                        next_obs
-                    )
+                    next_obs = augmentations.random_conv(next_obs)
 
                 _, policy_action, log_pi, _ = self.actor(next_obs)
                 target_Q1, target_Q2 = self.critic_target(next_obs, policy_action)
