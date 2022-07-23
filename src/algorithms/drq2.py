@@ -77,7 +77,7 @@ class DrQ2(SAC):  # [K=1, M=1]
                 (
                     0.5 * log_std.shape[1] * (1.0 + np.log(2 * np.pi))
                     + log_std.sum(dim=-1)
-                ).mean()
+                ).mean().detach().cpu().numpy()
             )
 
         if L is not None:
