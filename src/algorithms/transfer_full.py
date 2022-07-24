@@ -6,7 +6,7 @@ import torch.nn.functional as F
 from utils import ReplayBuffer
 
 
-class Transfer(SAC):  # [K=1, M=1]
+class TransferFull(SAC):  # [K=1, M=1]
     def __init__(self, obs_shape, action_shape, args):
         super().__init__(obs_shape, action_shape, args)
         self.k = args.drq_k
@@ -22,11 +22,7 @@ class Transfer(SAC):  # [K=1, M=1]
         with torch.no_grad():
             for _ in range(self.m):
                 next_obs_aug = self.aug_func(next_obs)
-                next_obs_target = (
-                    next_obs_aug
-                    if step < self.switch_step
-                    else augmentations.random_shift(next_obs)
-                )
+                next_obs_target = next_obs_aug
                 _, policy_action, log_pi, _ = self.actor(next_obs_aug)
                 target_Q1, target_Q2 = self.critic_target(
                     next_obs_target, policy_action
@@ -91,5 +87,5 @@ class Transfer(SAC):  # [K=1, M=1]
         if step % self.actor_update_freq == 0:
             self.update_actor_and_alpha(obs, L, step)
 
-        if step % self.critic_target_update_freq == 0 and step < self.switch_step:
+        if step % self.critic_target_update_freq == 0:
             self.soft_update_critic_target()

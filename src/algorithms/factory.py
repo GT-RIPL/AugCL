@@ -12,6 +12,7 @@ from algorithms.soda import SODA
 from algorithms.drq import DrQ
 from algorithms.svea import SVEA
 from algorithms.transfer import Transfer
+from algorithms.transfer_full import TransferFull
 from algorithms.wsa import WSA
 from algorithms.sac_no_share import SAC_no_share
 from algorithms.blah import BLAH
@@ -38,6 +39,7 @@ algorithm = {
     "drq_mix": DrQMix,
     "darq_middle": DArQMiddle,
     "darq_head": DArQ_head,
+    "transfer_full": TransferFull,
 }
 
 
