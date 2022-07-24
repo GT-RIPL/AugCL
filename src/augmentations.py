@@ -371,5 +371,5 @@ aug_to_func = {
     "color_jitter": kornia_color_jitter,
     "identity": identity,
     "overlay": random_overlay,
-    "weighted_overlay": thresholded_overlay,
+    "thresholded_overlay": thresholded_overlay,
 }
