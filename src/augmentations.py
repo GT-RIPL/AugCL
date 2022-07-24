@@ -264,16 +264,16 @@ def random_conv(x):
     return total_out.reshape(n, c, h, w)
 
 
-def thresholded_overlay(x):
+def thresholded_overlay(x, R_threshold=0.4, G_threshold=1, B_threshold=1):
     global data_iter
     load_dataloader(batch_size=x.size(0), image_size=x.size(-1))
     overlay = _get_data_batch(x.size(0)).repeat(x.size(1) // 3, 1, 1, 1)
     n, c, h, w = x.shape
     x_rgb = x.reshape(-1, 3, h, w) / 255.0
     weight = torch.ones(x_rgb.shape)
-    weight[:, 0] = weight[:, 0] * 0.25
-    weight[:, 1] = weight[:, 0] * 1
-    weight[:, 2] = weight[:, 0] * 0.5
+    weight[:, 0] = weight[:, 0] * R_threshold
+    weight[:, 1] = weight[:, 0] * G_threshold
+    weight[:, 2] = weight[:, 0] * B_threshold
     mask = x_rgb > weight.to(x.get_device())
     out = (mask * x_rgb + (~mask) * overlay) * 255.0
     return out.reshape(n, c, h, w)
