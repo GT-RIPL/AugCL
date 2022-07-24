@@ -4,6 +4,7 @@ import shutil
 import os
 import torch
 from termcolor import colored
+import pandas as pd
 from torch.utils.tensorboard import SummaryWriter
 
 test_env_reward_key = "episode_reward_"
@@ -45,6 +46,7 @@ class MetersGroup(object):
         self._file_name = file_name
         self._formating = formating
         self._meters = defaultdict(AverageMeter)
+        self.dict_list = list()
 
     def log(self, key, value, n=1):
         self._meters[key].update(value, n)
@@ -63,6 +65,8 @@ class MetersGroup(object):
     def _dump_to_file(self, data):
         with open(self._file_name, "a") as f:
             f.write(json.dumps(data) + "\n")
+        self.dict_list.append(data)
+        pd.DataFrame(self.dict_list).to_csv(self._file_name[:-4] + ".csv")
 
     def _format(self, key, value, ty):
         template = "%s: "
