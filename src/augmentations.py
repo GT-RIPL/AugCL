@@ -227,21 +227,25 @@ def kornia_color_jitter(imgs, bright=0.4, contrast=0.4, satur=0.4, hue=0.49, p=1
     return imgs.view(b, c, h, w)
 
 
+def load_dataloader(batch_size, image_size, dataset="coco"):
+    if dataset == "places365_standard":
+        if dataloader is None:
+            _load_places(batch_size=batch_size, image_size=image_size)
+    elif dataset == "coco":
+        if dataloader is None:
+            _load_coco(batch_size=batch_size, image_size=image_size)
+    else:
+        raise NotImplementedError(
+            f'overlay has not been implemented for dataset "{dataset}"'
+        )
+
+
 def random_overlay(x, dataset="coco"):
     """Randomly overlay an image from Places or COCO"""
     global data_iter
     alpha = 0.5
 
-    if dataset == "places365_standard":
-        if dataloader is None:
-            _load_places(batch_size=x.size(0), image_size=x.size(-1))
-    elif dataset == "coco":
-        if dataloader is None:
-            _load_coco(batch_size=x.size(0), image_size=x.size(-1))
-    else:
-        raise NotImplementedError(
-            f'overlay has not been implemented for dataset "{dataset}"'
-        )
+    load_dataloader(batch_size=x.size(0), image_size=x.size(-1), dataset=dataset)
 
     imgs = _get_data_batch(batch_size=x.size(0)).repeat(1, x.size(1) // 3, 1, 1)
 
@@ -258,6 +262,21 @@ def random_conv(x):
         out = torch.sigmoid(F.conv2d(temp_x, weights)) * 255.0
         total_out = out if i == 0 else torch.cat([total_out, out], axis=0)
     return total_out.reshape(n, c, h, w)
+
+
+def thresholded_overlay(x):
+    global data_iter
+    load_dataloader(batch_size=x.size(0), image_size=x.size(-1))
+    overlay = _get_data_batch(x.size(0)).repeat(x.size(1) // 3, 1, 1, 1)
+    n, c, h, w = x.shape
+    x_rgb = x.reshape(-1, 3, h, w) / 255.0
+    weight = torch.ones(x_rgb.shape)
+    weight[:, 0] = weight[:, 0] * 0.25
+    weight[:, 1] = weight[:, 0] * 1
+    weight[:, 2] = weight[:, 0] * 0.5
+    mask = x_rgb > weight.to(x.get_device())
+    out = (mask * x_rgb + (~mask) * overlay) * 255.0
+    return out.reshape(n, c, h, w)
 
 
 def batch_from_obs(obs, batch_size=32):
@@ -352,4 +371,5 @@ aug_to_func = {
     "color_jitter": kornia_color_jitter,
     "identity": identity,
     "overlay": random_overlay,
+    "weighted_overlay": thresholded_overlay,
 }

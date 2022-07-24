@@ -15,10 +15,12 @@ def parse_args():
     parser = argparse.ArgumentParser()
 
     # environment
-    parser.add_argument("--aug_key", default="identity", type=str)
+    parser.add_argument("--aug_key", default="weighted_overlay", type=str)
     parser.add_argument("--save_file_name", default="aug_test.png", type=str)
     parser.add_argument(
-        "--sample_png_folder", default="./samples/distracting_cs/0.1", type=str
+        "--sample_png_folder",
+        default="samples/walker/walk/distracting_cs/0.1",
+        type=str,
     )
 
     return parser.parse_args()
@@ -63,13 +65,11 @@ def main(args):
     for fp in sample_imgs_files:
         img = Image.open(fp=fp)
         img_tnsr = transforms.ToTensor()(img)
-        img_np = img_tnsr.numpy()
-        img_np = np.transpose(img_np, (1, 2, 0))
         tnsr_list.append(img_tnsr)
 
-    cat_tnsrs = torch.unsqueeze(torch.cat(tnsr_list, dim=0), dim=0)
-    aug_tnsrs = augmentations.aug_to_func[args.aug_key](cat_tnsrs.to("cuda"))
-    show_stacked_imgs(aug_tnsrs.cpu().numpy())
+    imgs_tnsr = torch.unsqueeze(torch.cat(tnsr_list, dim=0), dim=0) * 255
+    augs_tnsr = augmentations.aug_to_func[args.aug_key](imgs_tnsr.to("cuda")) / 255.0
+    show_stacked_imgs(augs_tnsr.cpu().numpy())
     plt.savefig(args.save_file_name)
 
 
