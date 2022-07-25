@@ -279,6 +279,27 @@ def thresholded_overlay(x, R_threshold=0.4, G_threshold=1, B_threshold=1):
     return out.reshape(n, c, h, w)
 
 
+def thresholded_overlay_color(x, R_threshold=0.4, G_threshold=1, B_threshold=1):
+    global data_iter
+    load_dataloader(batch_size=x.size(0), image_size=x.size(-1))
+    overlay = _get_data_batch(x.size(0)).repeat(x.size(1) // 3, 1, 1, 1)
+    n, c, h, w = x.shape
+    x_rgb = x.reshape(-1, 3, h, w) / 255.0
+    weight = torch.ones(x_rgb.shape)
+    weight[:, 0] = weight[:, 0] * R_threshold
+    weight[:, 1] = weight[:, 0] * G_threshold
+    weight[:, 2] = weight[:, 0] * B_threshold
+    mask = x_rgb > weight.to(x.get_device())
+    for i in range(n):
+        weights = torch.randn(3, 3, 3, 3).to(x.device)
+        temp_x = x[i : i + 1].reshape(-1, 3, h, w) / 255.0
+        temp_x = F.pad(temp_x, pad=[1] * 4, mode="replicate")
+        out = torch.sigmoid(F.conv2d(temp_x, weights))
+        conv_out = out if i == 0 else torch.cat([conv_out, out], axis=0)
+    out = (mask * conv_out + (~mask) * overlay) * 255.0
+    return out.reshape(n, c, h, w)
+
+
 def batch_from_obs(obs, batch_size=32):
     """Copy a single observation along the batch dimension"""
     if isinstance(obs, torch.Tensor):
@@ -372,4 +393,5 @@ aug_to_func = {
     "identity": identity,
     "overlay": random_overlay,
     "thresholded_overlay": thresholded_overlay,
+    "thresholded_overlay_color": thresholded_overlay_color,
 }
