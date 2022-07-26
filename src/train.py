@@ -78,11 +78,11 @@ def main(args):
         args.log_dir,
         args.domain_name + "_" + args.task_name,
         args.algorithm,
-        "seed_" + str(args.seed),
-        args.id if args.id else "",
-        time.strftime("%m-%d", time.gmtime()),
+        args.id if args.id else "no_id",
+        "seed_" + str(args.seed)
     )
     print("Working directory:", work_dir)
+    args.__dict__["train_date"] = time.strftime("%m-%d-%y", time.gmtime())
 
     if not args.test_code_mode:
         assert not os.path.exists(
