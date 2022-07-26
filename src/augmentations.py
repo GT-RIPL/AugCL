@@ -279,7 +279,7 @@ def thresholded_overlay(x, R_threshold=0.5, G_threshold=0.4, B_threshold=1):
     return out.reshape(n, c, h, w)
 
 
-def thresholded_overlay_color(x, R_threshold=0.5, G_threshold=0.4, B_threshold=1):
+def thresholded_overlay_color(x, R_threshold=0.5, G_threshold=0.5, B_threshold=1):
     global data_iter
     load_dataloader(batch_size=x.size(0), image_size=x.size(-1))
     overlay = _get_data_batch(x.size(0)).repeat(x.size(1) // 3, 1, 1, 1)
