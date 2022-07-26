@@ -4,6 +4,7 @@ from algorithms.darq_middle import DArQMiddle
 from algorithms.drq2 import DrQ2
 from algorithms.drq_mix import DrQMix
 from algorithms.drq_rad import DrQRAD
+from algorithms.drq_resample import DrQ_Resample
 from algorithms.sac import SAC
 from algorithms.rad import RAD
 from algorithms.curl import CURL
@@ -40,6 +41,7 @@ algorithm = {
     "darq_middle": DArQMiddle,
     "darq_head": DArQ_head,
     "transfer_full": TransferFull,
+    "drq_resample": DrQ_Resample,
 }
 
 
