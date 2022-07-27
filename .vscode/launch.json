@@ -58,24 +58,6 @@
             ]
         },
         {
-            "name": "FTL train",
-            "type": "python",
-            "request": "launch",
-            "program": "${workspaceFolder}/src/train.py",
-            "console": "integratedTerminal",
-            "justMyCode": true,
-            "args": [
-                "--id",
-                "test",
-                "--algorithm",
-                "ftl",
-                "--eval_mode",
-                "color_hard",
-                "--test_code_mode",
-                "True"
-            ]
-        },
-        {
             "name": "SAC train",
             "type": "python",
             "request": "launch",
@@ -98,65 +80,7 @@
             ]
         },
         {
-            "name": "SAC no share train",
-            "type": "python",
-            "request": "launch",
-            "program": "${workspaceFolder}/src/train.py",
-            "console": "integratedTerminal",
-            "justMyCode": true,
-            "args": [
-                "--id",
-                "test",
-                "--algorithm",
-                "sac_no_share",
-                "--eval_mode",
-                "color_hard",
-                "--test_code_mode",
-                "True",
-            ]
-        },
-        {
-            "name": "Blah",
-            "type": "python",
-            "request": "launch",
-            "program": "${workspaceFolder}/src/train.py",
-            "console": "integratedTerminal",
-            "justMyCode": true,
-            "args": [
-                "--id",
-                "test",
-                "--algorithm",
-                "blah",
-                "--eval_mode",
-                "color_hard",
-                "--test_code_mode",
-                "True",
-            ]
-        },
-        {
-            "name": "WSA train",
-            "type": "python",
-            "request": "launch",
-            "program": "${workspaceFolder}/src/train.py",
-            "console": "integratedTerminal",
-            "justMyCode": true,
-            "args": [
-                "--id",
-                "test",
-                "--eval_mode",
-                "color_hard",
-                "--test_code_mode",
-                "True",
-                "--algorithm",
-                "wsa",
-                "--eval_freq",
-                "1k",
-                "--aux_update_freq",
-                "1"
-            ]
-        },
-        {
-            "name": "DrQ train",
+            "name": "DrQ 2k2m train",
             "type": "python",
             "request": "launch",
             "program": "${workspaceFolder}/src/train.py",
@@ -175,74 +99,6 @@
                 "2",
                 "--drq_m",
                 "2"
-            ]
-        },
-        {
-            "name": "DrQ Resample train",
-            "type": "python",
-            "request": "launch",
-            "program": "${workspaceFolder}/src/train.py",
-            "console": "integratedTerminal",
-            "justMyCode": true,
-            "args": [
-                "--id",
-                "test",
-                "--eval_mode",
-                "color_hard",
-                "--test_code_mode",
-                "True",
-                "--algorithm",
-                "drq_resample",
-                "--drq_k",
-                "2",
-                "--drq_m",
-                "2"
-            ]
-        },
-        {
-            "name": "DArQ train",
-            "type": "python",
-            "request": "launch",
-            "program": "${workspaceFolder}/src/train.py",
-            "console": "integratedTerminal",
-            "justMyCode": true,
-            "args": [
-                "--id",
-                "test",
-                "--eval_mode",
-                "color_hard",
-                "--test_code_mode",
-                "True",
-                "--algorithm",
-                "darq",
-                "--drq_k",
-                "2",
-                "--drq_m",
-                "2"
-            ]
-        },
-        {
-            "name": "DrQ RAD train",
-            "type": "python",
-            "request": "launch",
-            "program": "${workspaceFolder}/src/train.py",
-            "console": "integratedTerminal",
-            "justMyCode": true,
-            "args": [
-                "--id",
-                "test",
-                "--eval_mode",
-                "color_hard",
-                "--test_code_mode",
-                "True",
-                "--algorithm",
-                "drqrad",
-                "--drq_k",
-                "2",
-                "--drq_m",
-                "2",
-                "--data_aug",
-                "rand_conv"
             ]
         },
         {

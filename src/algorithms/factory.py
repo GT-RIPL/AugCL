@@ -6,6 +6,7 @@ from algorithms.soda import SODA
 from algorithms.drq import DrQ
 from algorithms.svea import SVEA
 from algorithms.transfer import Transfer
+from algorithms.drq_rad import DrQ_RAD
 
 algorithm = {
     "sac": SAC,
@@ -16,6 +17,7 @@ algorithm = {
     "drq": DrQ,
     "svea": SVEA,
     "transfer": Transfer,
+    "drq_rad": DrQ_RAD,
 }
 
 
