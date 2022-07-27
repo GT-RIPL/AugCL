@@ -258,6 +258,18 @@
                 "--distracting_cs_intensity",
                 "0.5"
             ]
+        },
+        {
+            "name": "Evaluate",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/src/evaluate.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": [
+                "--dir_path",
+                "./logs/walker_walk/drq/test/seed_0"
+            ]
         }
     ]
 }

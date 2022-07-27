@@ -76,6 +76,7 @@ class Transfer(SAC):  # [K=1, M=1]
     def update(self, replay_buffer: ReplayBuffer, L, step):
         if step > self.switch_step:
             self.aug_func = augmentations.random_conv
+            self.k = 1
         obs, action, reward, next_obs, not_done = replay_buffer.sample()
 
         self.update_critic(

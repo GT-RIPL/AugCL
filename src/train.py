@@ -78,8 +78,8 @@ def main(args):
         args.log_dir,
         args.domain_name + "_" + args.task_name,
         args.algorithm,
-        args.id if args.id else "no_id",
-        "seed_" + str(args.seed)
+        args.id,
+        "seed_" + str(args.seed),
     )
     print("Working directory:", work_dir)
     args.__dict__["train_date"] = time.strftime("%m-%d-%y", time.gmtime())
@@ -151,7 +151,11 @@ def main(args):
                 L.dump(step)
 
             # Save agent periodically
-            if step > start_step and step % args.save_freq == 0:
+            if (
+                step > start_step
+                and step % args.save_freq == 0
+                or step == args.train_steps - 1
+            ):
                 torch.save(agent, os.path.join(model_dir, f"{step}.pt"))
 
             L.log("train/episode_reward", episode_reward, step)

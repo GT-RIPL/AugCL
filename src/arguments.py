@@ -1,3 +1,4 @@
+import os
 import argparse
 from utils import config_json_to_args
 from algorithms.factory import algorithm
@@ -80,7 +81,7 @@ def add_SAC_args():
     parser.add_argument("--distracting_cs_intensity", default=0.0, type=float)
 
     # misc
-    parser.add_argument("--id", default=None, type=str)
+    parser.add_argument("--id", default="no_id", type=str)
     parser.add_argument("--seed", default=0, type=int)
     parser.add_argument("--log_dir", default="logs", type=str)
     parser.add_argument("--config_path", default=None, type=str)
@@ -90,14 +91,14 @@ def add_SAC_args():
     return parser
 
 
-def format_args(args):
-    if args.config_path:
-        args = config_json_to_args(args=args, config_path=args.config_path)
+def assert_distracting_cs_intensity_valid(intensity: float):
+    intensities = {0.0, 0.025, 0.05, 0.1, 0.15, 0.2, 0.3, 0.4, 0.5}
+    assert (
+        intensity in intensities
+    ), f"distracting_cs has only been implemented for intensities: {intensities}"
 
-    assert args.algorithm in frozenset(
-        algorithm.keys()
-    ), f'specified algorithm "{args.algorithm}" is not supported'
 
+def assert_env_mode_valid(eval_mode: str):
     env_modes = {
         "train",
         "color_easy",
@@ -109,21 +110,23 @@ def format_args(args):
     }
 
     assert (
-        args.train_mode in env_modes
-    ), f'specified train mode "{args.train_mode}" is not supported'
-    assert (
-        args.eval_mode in env_modes
-    ), f'specified eval mode "{args.eval_mode}" is not supported'
-    assert args.seed is not None, "must provide seed for experiment"
-    assert args.log_dir is not None, "must provide a log directory for experiment"
+        eval_mode in env_modes
+    ), f'specified train mode "{eval_mode}" is not supported'
 
-    intensities = {0.0, 0.025, 0.05, 0.1, 0.15, 0.2, 0.3, 0.4, 0.5}
-    assert (
-        args.distracting_cs_intensity in intensities
-    ), f"distracting_cs has only been implemented for intensities: {intensities}"
-    assert (
-        args.train_distracting_cs_intensity in intensities
-    ), f"distracting_cs has only been implemented for intensities: {intensities}"
+
+def format_args(args):
+    if args.config_path:
+        args = config_json_to_args(args=args, config_path=args.config_path)
+
+    assert args.algorithm in frozenset(
+        algorithm.keys()
+    ), f'specified algorithm "{args.algorithm}" is not supported'
+
+    assert_env_mode_valid(args.train_mode)
+    assert_env_mode_valid(args.eval_mode)
+
+    assert_distracting_cs_intensity_valid(intensity=args.distracting_cs_intensity)
+    assert_distracting_cs_intensity_valid(intensity=args.train_distracting_cs_intensity)
 
     args.train_steps = int(args.train_steps.replace("k", "000"))
     args.save_freq = int(args.save_freq.replace("k", "000"))
@@ -146,3 +149,22 @@ def parse_args():
     parser = add_SAC_args()
     args = parser.parse_args()
     return format_args(args=args)
+
+
+def parse_eval_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--dir_path", required=True)
+    parser.add_argument("--env_mode", default="color_hard", type=str)
+    parser.add_argument("--distracting_cs_intensity", default=0.0, type=float)
+    parser.add_argument("--num_episodes", default=30, type=int)
+
+    args = parser.parse_args()
+    eval_mode = args.eval_mode
+    distracting_cs_intensity = args.distracting_cs_intensity
+    assert_distracting_cs_intensity_valid(intensity=distracting_cs_intensity)
+    assert_env_mode_valid(eval_mode=eval_mode)
+    assert os.path.exists(
+        os.path.join(args.dir_path, "args.json")
+    ), f"{args.args_file_path} isn't a valid args.json path"
+
+    return args

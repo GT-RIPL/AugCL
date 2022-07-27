@@ -1,3 +1,4 @@
+import argparse
 from PIL import Image
 import torch
 import numpy as np
@@ -8,6 +9,14 @@ import random
 import augmentations
 import subprocess
 from datetime import datetime
+
+
+class dotdict(dict):
+    """dot.notation access to dictionary attributes"""
+
+    __getattr__ = dict.get
+    __setattr__ = dict.__setitem__
+    __delattr__ = dict.__delitem__
 
 
 def numpy2pil(np_array: np.ndarray) -> Image:
@@ -34,6 +43,11 @@ def dump_args_json(args: dict, log_dir: str, model_dir: str):
         json_dict = vars(args)
         json_dict["checkpoint_dir"] = model_dir
         json.dump(json_dict, f, sort_keys=True, indent=4)
+
+
+def args_json_to_dot_dict(args_file_path: str):
+    config_dict = json.load(open(args_file_path))
+    return dotdict(config_dict)
 
 
 def config_json_to_args(args, config_path):
