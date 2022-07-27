@@ -6,8 +6,6 @@ from utils import ReplayBuffer
 class DrQ_RAD(DrQ):
     def __init__(self, obs_shape, action_shape, args):
         super().__init__(obs_shape, action_shape, args)
-        self.k = args.drq_k
-        self.m = args.drq_m
         self.aug_func = augmentations.aug_to_func[args.data_aug]
 
     def update(self, replay_buffer: ReplayBuffer, L, step):
