@@ -64,6 +64,9 @@ def main(args):
         ), "Specified working directory has existing train.log. Ending program."
     os.makedirs(work_dir, exist_ok=True)
     model_dir = utils.make_dir(os.path.join(work_dir, "model"))
+    checkpt_path = os.path.join(
+        train_dot_dict.checkpoint_dir, str(train_dot_dict.train_steps) + ".pt"
+    )
 
     if train_dot_dict.save_video:
         video_dir = utils.make_dir(os.path.join(work_dir, "video"))
@@ -94,6 +97,7 @@ def main(args):
         action_shape=env.action_space.shape,
         args=train_dot_dict,
     )
+    pretrained_agent = torch.load(checkpt_path)
     agent_args = copy.deepcopy(train_dot_dict)
     agent_args.algorithm = args.algorithm
     agent = make_agent(
@@ -106,20 +110,24 @@ def main(args):
     utils.soft_update_params(pretrained_agent.critic, agent.critic, 1)
     utils.soft_update_params(pretrained_agent.critic_target, agent.critic_target, 1)
 
+    utils.assert_params_matching(pretrained_agent.actor, agent.actor)
+    utils.assert_params_matching(pretrained_agent.critic, agent.critic)
+    utils.assert_params_matching(pretrained_agent.critic_target, agent.critic_targer)
+
     start_step, episode, episode_reward, done = 0, 0, 0, True
+    total_train_steps = args.train_steps + train_dot_dict.train_steps
     L = Logger(work_dir)
     start_time = time.time()
-    for step in range(
-        train_dot_dict.train_steps, args.train_steps + train_dot_dict.train_steps + 1
-    ):
+    for step in range(total_train_steps + 1):
+        is_past_buffer_refill = step > train_dot_dict.train_steps - 1
         if done:
-            if step > start_step:
+            if is_past_buffer_refill:
                 L.log("train/duration", time.time() - start_time, step)
                 start_time = time.time()
                 L.dump(step)
 
             # Evaluate agent periodically
-            if step % train_dot_dict.eval_freq == 0:
+            if step % train_dot_dict.eval_freq == 0 and is_past_buffer_refill:
                 num_episodes = (
                     train_dot_dict.eval_episodes_final_step
                     if step == train_dot_dict.train_steps
@@ -151,9 +159,9 @@ def main(args):
 
             # Save agent periodically
             if (
-                step > start_step
+                is_past_buffer_refill
                 and step % train_dot_dict.save_freq == 0
-                or step == train_dot_dict.train_steps - 1
+                or step == total_train_steps
             ):
                 torch.save(agent, os.path.join(model_dir, f"{step}.pt"))
 
@@ -175,12 +183,8 @@ def main(args):
                 action = agent.sample_action(obs)
 
         # Run training update
-        if step >= train_dot_dict.init_steps:
-            num_updates = (
-                train_dot_dict.init_steps if step == train_dot_dict.init_steps else 1
-            )
-            for _ in range(num_updates):
-                agent.update(replay_buffer, L, step)
+        if is_past_buffer_refill:
+            agent.update(replay_buffer, L, step)
 
         # Take step
         next_obs, reward, done, _ = env.step(action)

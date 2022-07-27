@@ -79,6 +79,11 @@ def soft_update_params(net, target_net, tau):
         target_param.data.copy_(tau * param.data + (1 - tau) * target_param.data)
 
 
+def assert_params_matching(net, net_2):
+    for param, param_2 in zip(net.parameters(), net_2.parameters()):
+        assert torch.all(param.data == param_2.data)
+
+
 def cat(x, y, axis=0):
     return torch.cat([x, y], axis=0)
 

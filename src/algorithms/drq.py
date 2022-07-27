@@ -6,7 +6,7 @@ import torch.nn.functional as F
 from utils import ReplayBuffer
 
 
-class DrQ(SAC):  # [K=1, M=1]
+class DrQ(SAC):
     def __init__(self, obs_shape, action_shape, args):
         super().__init__(obs_shape, action_shape, args)
         self.k = args.drq_k
@@ -66,8 +66,8 @@ class DrQ(SAC):  # [K=1, M=1]
 
     def update(self, replay_buffer: ReplayBuffer, L, step):
         obs, action, reward, next_obs, not_done = replay_buffer.sample()
-        obs_list = [augmentations.random_shift(obs, 4) for _ in range(self.k)]
-        next_obs_list = [augmentations.random_shift(next_obs, 4) for _ in range(self.m)]
+        obs_list = [augmentations.random_shift(obs) for _ in range(self.k)]
+        next_obs_list = [augmentations.random_shift(next_obs) for _ in range(self.m)]
 
         self.update_critic(
             obs_list=obs_list,

@@ -65,9 +65,11 @@ def confirm_model_matches_latest_eval_results(work_dir: str, train_dot_dict, age
     df = pd.read_csv(os.path.join(work_dir, "eval.csv"))
     last_update_reward_mu = df["episode_reward"].iloc[-1]
 
+    reward_diff = mean_ep_reward - last_update_reward_mu
+    allowed_diff = -50
     assert (
-        abs(mean_ep_reward - last_update_reward_mu) < 50
-    ), "Difference between current eval and last known eval is greater than 50"
+        reward_diff > allowed_diff
+    ), f"Difference between current eval and last known eval is less than {allowed_diff}: {reward_diff}"
 
 
 def main(args):
@@ -92,13 +94,13 @@ def main(args):
 
     # Set working directory
     work_dir = args.dir_path
-    pt_path = os.path.join(
+    checkpt_path = os.path.join(
         train_dot_dict.checkpoint_dir, str(train_dot_dict.train_steps) + ".pt"
     )
     print("Working directory:", work_dir)
 
     assert os.path.exists(
-        pt_path
+        checkpt_path
     ), f"Checkpoint {str(train_dot_dict.train_steps)}.pt does not exists"
     assert os.path.exists(work_dir), "specified working directory does not exist"
     assert os.path.exists(
@@ -126,7 +128,7 @@ def main(args):
         args=train_dot_dict,
     )
 
-    agent = torch.load(pt_path)
+    agent = torch.load(checkpt_path)
     agent.train(False)
 
     confirm_model_matches_latest_eval_results(
@@ -168,6 +170,7 @@ def main(args):
             args.distracting_cs_intensity,
             args.num_episodes,
             reward,
+            train_dot_dict.train_steps,
             adapt_reward,
         ]
     ]
@@ -179,7 +182,7 @@ def main(args):
             "distracting intensity",
             "num episodes",
             "reward",
-            "adapt reward",
+            "train_steps" "adapt reward",
         ],
     )
     if os.path.exists(results_fp):
