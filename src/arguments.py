@@ -138,6 +138,9 @@ def format_args(args):
     if args.algorithm in {"rad", "curl", "pad", "soda"}:
         args.image_size = 100
         args.image_crop_size = 84
+
+        if args.algorithm == "rad" and "crop" not in args.data_aug:
+            args.image_size = 84
     else:
         args.image_size = 84
         args.image_crop_size = 84

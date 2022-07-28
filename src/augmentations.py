@@ -394,4 +394,5 @@ aug_to_func = {
     "overlay": random_overlay,
     "splice": splice,
     "splice_color": splice_color,
+    "crop": random_crop,
 }
