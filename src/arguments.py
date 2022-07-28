@@ -168,6 +168,6 @@ def parse_eval_args():
     assert_env_mode_valid(eval_mode=env_mode)
     assert os.path.exists(
         os.path.join(args.dir_path, "args.json")
-    ), f"{args.args_file_path} isn't a valid args.json path"
+    ), f"{os.path.join(args.dir_path, 'args.json')} isn't a valid args.json path"
 
     return args
