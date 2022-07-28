@@ -1,3 +1,4 @@
+import numpy as np
 import torch
 import augmentations
 import time
@@ -8,6 +9,10 @@ for key, value in augmentations.aug_to_func.items():
     print(key)
     if "overlay" in key or "splice" in key:
         value(input)
-    start_time = time.time()
-    value(input)
-    print(f"Time: {time.time() - start_time}")
+    time_list = list()
+    for i in range(10):
+        start_time = time.time()
+        value(input)
+        time_list.append(time.time() - start_time)
+
+    print(f"{key}. Mean: {np.mean(time_list)}, STD: {np.std(time_list)}")

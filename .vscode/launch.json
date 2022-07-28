@@ -102,6 +102,28 @@
             ]
         },
         {
+            "name": "DrQ Resample 2k2m train",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/src/train.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": [
+                "--id",
+                "test",
+                "--eval_mode",
+                "color_hard",
+                "--test_code_mode",
+                "True",
+                "--algorithm",
+                "drq_resample",
+                "--drq_k",
+                "2",
+                "--drq_m",
+                "2"
+            ]
+        },
+        {
             "name": "Rad Shift train",
             "type": "python",
             "request": "launch",

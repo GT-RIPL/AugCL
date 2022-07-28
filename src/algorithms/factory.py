@@ -1,4 +1,5 @@
 from algorithms.drq_no_next_obs import DrQ_No_Next_Obs
+from algorithms.drq_resample import DrQ_Resample
 from algorithms.sac import SAC
 from algorithms.rad import RAD
 from algorithms.curl import CURL
@@ -20,6 +21,7 @@ algorithm = {
     "transfer": Transfer,
     "drq_rad": DrQ_RAD,
     "drq_no_next_obs": DrQ_No_Next_Obs,
+    "drq_resample": DrQ_Resample
 }
 
 transfer_algorithm = {}
