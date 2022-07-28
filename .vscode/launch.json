@@ -102,6 +102,28 @@
             ]
         },
         {
+            "name": "Rad Shift train",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/src/train.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": [
+                "--id",
+                "test",
+                "--eval_mode",
+                "color_hard",
+                "--test_code_mode",
+                "True",
+                "--algorithm",
+                "rad",
+                "--data_aug",
+                "shift",
+                "--save_freq",
+                "5k"
+            ]
+        },
+        {
             "name": "Sample From DMC",
             "type": "python",
             "request": "launch",
@@ -124,7 +146,7 @@
             "justMyCode": true,
             "args": [
                 "--dir_path",
-                "./logs/walker_walk/drq/test/seed_0"
+                "./logs/walker_walk/rad/test/seed_0"
             ]
         }
     ]

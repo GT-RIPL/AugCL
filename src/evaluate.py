@@ -182,11 +182,64 @@ def main(args):
             "distracting intensity",
             "num episodes",
             "reward",
-            "train_steps" "adapt reward",
+            "train_steps",
+            "adapt reward",
         ],
     )
     if os.path.exists(results_fp):
         df = pd.read_csv(results_fp).append(df)
+    else:
+        try:
+            eval_last_row = (
+                pd.read_csv(os.path.join(work_dir, "eval.csv"))
+                .iloc[-1]
+                .filter(regex="episode_reward")
+            )
+            eval_keys = eval_last_row.keys()
+            train_reward = eval_last_row["episode_reward"]
+            eval_reward = eval_last_row[eval_keys[1]]
+            test_env_name = eval_keys[1].replace("episode_reward_", "")
+            intensity = 0.0
+
+            if "distracting_cs" in test_env_name:
+                intensity = test_env_name.replace("distracting_cs_", "")
+                test_env_name = "distracting_cs"
+
+            eval_df = pd.DataFrame(
+                [
+                    [
+                        None,
+                        "train",
+                        0.0,
+                        train_dot_dict.eval_episodes_final_step,
+                        train_reward,
+                        train_dot_dict.train_steps,
+                        None,
+                    ],
+                    [
+                        None,
+                        test_env_name,
+                        intensity,
+                        train_dot_dict.eval_episodes_final_step,
+                        eval_reward,
+                        train_dot_dict.train_steps,
+                        None,
+                    ],
+                ],
+                columns=[
+                    "date",
+                    "env mode",
+                    "distracting intensity",
+                    "num episodes",
+                    "reward",
+                    "train_steps",
+                    "adapt reward",
+                ],
+            )
+            df = df.append(eval_df)
+        except:
+            pass
+
     df.to_csv(results_fp)
     print("Saved results to", results_fp)
 
