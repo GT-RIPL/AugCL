@@ -79,12 +79,10 @@ class SAC(object):
         _obs = _obs.unsqueeze(0)
         return _obs
 
-    def select_action(self, obs, aug_encoder=None):
+    def select_action(self, obs):
         _obs = self._obs_to_input(obs)
         with torch.no_grad():
-            mu, _, _, _ = self.actor(
-                _obs, compute_pi=False, compute_log_pi=False, aug_encoder=aug_encoder
-            )
+            mu, _, _, _ = self.actor(_obs, compute_pi=False, compute_log_pi=False)
         return mu.cpu().data.numpy().flatten()
 
     def sample_action(self, obs):

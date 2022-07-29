@@ -218,12 +218,8 @@ class Actor(nn.Module):
         compute_pi=True,
         compute_log_pi=True,
         detach=False,
-        aug_encoder=None,
     ):
-        if aug_encoder:
-            x = aug_encoder(x, detach)
-        else:
-            x = self.encoder(x, detach)
+        x = self.encoder(x, detach)
         mu, log_std = self.mlp(x).chunk(2, dim=-1)
         log_std = torch.tanh(log_std)
         log_std = self.log_std_min + 0.5 * (self.log_std_max - self.log_std_min) * (
