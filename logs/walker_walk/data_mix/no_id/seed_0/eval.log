@@ -1,0 +1,3 @@
+{"episode": 0.0, "episode_reward": 25.114700760784373, "episode_reward_color_hard": 24.222126364546956, "step": 0}
+{"episode": 40.0, "episode_reward": 302.58844653911115, "episode_reward_color_hard": 36.86788371292737, "step": 10000}
+{"episode": 80.0, "episode_reward": 345.75297473008175, "episode_reward_color_hard": 40.712335606431054, "step": 20000}

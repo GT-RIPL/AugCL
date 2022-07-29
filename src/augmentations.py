@@ -264,7 +264,7 @@ def random_conv(x):
     return total_out.reshape(n, c, h, w)
 
 
-def splice(x, R_threshold=0.5, G_threshold=0.4, B_threshold=1):
+def splice(x, R_threshold=0.35, G_threshold=0.45, B_threshold=1):
     global data_iter
     load_dataloader(batch_size=x.size(0), image_size=x.size(-1))
     overlay = _get_data_batch(x.size(0)).repeat(x.size(1) // 3, 1, 1, 1)
@@ -279,7 +279,7 @@ def splice(x, R_threshold=0.5, G_threshold=0.4, B_threshold=1):
     return out.reshape(n, c, h, w)
 
 
-def splice_color(x, R_threshold=0.5, G_threshold=0.5, B_threshold=1):
+def splice_color(x, R_threshold=0.35, G_threshold=0.45, B_threshold=1):
     global data_iter
     load_dataloader(batch_size=x.size(0), image_size=x.size(-1))
     overlay = _get_data_batch(x.size(0)).repeat(x.size(1) // 3, 1, 1, 1)
