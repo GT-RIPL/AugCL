@@ -154,7 +154,7 @@ def main(args):
             if (
                 step > start_step
                 and step % args.save_freq == 0
-                or step == args.train_steps - 1
+                or step == args.train_steps
             ):
                 torch.save(agent, os.path.join(model_dir, f"{step}.pt"))
 
