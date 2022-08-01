@@ -171,3 +171,17 @@ def parse_eval_args():
     ), f"{os.path.join(args.dir_path, 'args.json')} isn't a valid args.json path"
 
     return args
+
+
+def parse_Q_variance_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--dir_path", required=True)
+    parser.add_argument("--num_samples", default=100, type=int)
+    parser.add_argument("--num_aug", default=10, type=int)
+
+    args = parser.parse_args()
+    assert os.path.exists(
+        os.path.join(args.dir_path, "args.json")
+    ), f"{os.path.join(args.dir_path, 'args.json')} isn't a valid args.json path"
+
+    return args

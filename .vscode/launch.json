@@ -210,6 +210,18 @@
                 "--dir_path",
                 "./logs/walker_walk/rad/test/seed_0"
             ]
+        },
+        {
+            "name": "Q var",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/src/Q-variance.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": [
+                "--dir_path",
+                "./logs/finger_spin/sac/no_id/seed_0"
+            ]
         }
     ]
 }
