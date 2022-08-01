@@ -21,8 +21,6 @@ algorithm = {
     "svea": SVEA,
     "transfer": Transfer,
     "drq_rad": DrQ_RAD,
-    "drq_no_next_obs": DrQ_No_Next_Obs,
-    "drq_resample": DrQ_Resample,
     "data_mix": DataMix,
 }
 
