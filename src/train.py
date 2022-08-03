@@ -169,7 +169,9 @@ def main(args):
                 L.dump(step)
 
             # Evaluate agent periodically
-            if step % args.eval_freq == 0:
+            if step % args.eval_freq == 0 and not (
+                args.continue_train and step == start_step
+            ):
                 num_episodes = (
                     args.eval_episodes_final_step
                     if step == args.train_steps
