@@ -183,5 +183,27 @@
                 "True"
             ]
         },
+        {
+            "name": "DrQ train with replay buffer",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/src/train.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": [
+                "--id",
+                "with_buffer",
+                "--eval_mode",
+                "color_hard",
+                "--algorithm",
+                "drq",
+                "--save_buffer",
+                "True",
+                "--save_freq",
+                "2k",
+                "--train_steps",
+                "10k"
+            ]
+        },
     ]
 }

@@ -42,22 +42,23 @@ def evaluate(env, agent, video, num_episodes, L, step, args, test_env=False):
     return np.mean(episode_rewards)
 
 
-def refill_replay_buffer(env, agent, num_steps: int, replay_buffer: utils.ReplayBuffer):
-    done = True
-    for _ in range(num_steps):
-        if done:
-            obs = env.reset()
+# def refill_replay_buffer(env, agent, num_steps: int, replay_buffer: utils.ReplayBuffer):
+#     print(f"Refilling replay buffer to size {num_steps}")
+#     done = True
+#     for _ in range(num_steps):
+#         if done:
+#             obs = env.reset()
 
-        with utils.eval_mode(agent):
-            action = agent.select_action(obs)
+#         with utils.eval_mode(agent):
+#             action = agent.select_action(obs)
 
-        next_obs, reward, done, _ = env.step(action)
-        replay_buffer.add(
-            obs=obs, action=action, reward=reward, next_obs=next_obs, done=done
-        )
-        obs = next_obs
-
-    return replay_buffer
+#         next_obs, reward, done, _ = env.step(action)
+#         replay_buffer.add(
+#             obs=obs, action=action, reward=reward, next_obs=next_obs, done=done
+#         )
+#         obs = next_obs
+#     print("Finished refilling replay buffer")
+#     return replay_buffer
 
 
 def main(args):
@@ -113,6 +114,9 @@ def main(args):
         video_dir = utils.make_dir(os.path.join(work_dir, "video"))
     video = VideoRecorder(video_dir if args.save_video else None, height=448, width=448)
 
+    if args.save_buffer:
+        buffer_dir = utils.make_dir(os.path.join(work_dir, "buffer"))
+
     utils.write_info(args, os.path.join(work_dir, "info.log"))
     utils.dump_args_json(args=args, log_dir=work_dir, model_dir=model_dir)
 
@@ -144,14 +148,15 @@ def main(args):
             if os.path.isfile(os.path.join(model_dir, f)) and f.endswith(".pt")
         ]
         assert len(ckpt_steps) > 0, f"No checkpoint files found in: {model_dir}"
+        buffer_dir = os.path.join(work_dir, "buffer")
+        assert os.path.exists(
+            buffer_dir
+        ), f"No buffer folder exists, replay buffer required in order to continue training"
         ckpt_steps.sort()
         max_ckpt_step = ckpt_steps[-1]
         start_step = max_ckpt_step
         agent = torch.load(os.path.join(model_dir, f"{str(max_ckpt_step)}.pt"))
-
-        replay_buffer = refill_replay_buffer(
-            env=env, agent=agent, num_steps=max_ckpt_step, replay_buffer=replay_buffer
-        )
+        replay_buffer.load(save_dir=buffer_dir)
 
     L = Logger(work_dir)
     start_time = time.time()
@@ -192,6 +197,9 @@ def main(args):
                 or step == args.train_steps
             ):
                 torch.save(agent, os.path.join(model_dir, f"{step}.pt"))
+
+                if args.save_buffer:
+                    replay_buffer.save(buffer_dir)
 
             L.log("train/episode_reward", episode_reward, step)
 

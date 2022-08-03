@@ -73,7 +73,8 @@ class MetersGroup(object):
             df_og = pd.read_csv(csv_fp)
             df = df_og.append(df)
 
-        df.to_csv(csv_fp)
+        df.to_csv(csv_fp, index=False)
+        self.dict_list = list()
 
     def _format(self, key, value, ty):
         template = "%s: "

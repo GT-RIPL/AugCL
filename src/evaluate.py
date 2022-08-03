@@ -44,7 +44,7 @@ def evaluate(env, agent, video, num_episodes, eval_mode, adapt=False):
     return np.mean(episode_rewards)
 
 
-def confirm_model_matches_latest_eval_results(work_dir: str, train_dot_dict, agent):
+def confirm_model_results(work_dir: str, train_dot_dict, agent):
     env = make_env(
         domain_name=train_dot_dict.domain_name,
         task_name=train_dot_dict.task_name,
@@ -134,9 +134,7 @@ def main(args):
     agent = torch.load(checkpt_path)
     agent.train(False)
 
-    confirm_model_matches_latest_eval_results(
-        work_dir=work_dir, train_dot_dict=train_dot_dict, agent=agent
-    )
+    confirm_model_results(work_dir=work_dir, train_dot_dict=train_dot_dict, agent=agent)
 
     print(
         f"\nEvaluating {work_dir} for {args.num_episodes} episodes (mode: {train_dot_dict.env_mode})"
