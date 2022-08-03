@@ -125,7 +125,7 @@ def main(args):
     replay_buffer = utils.ReplayBuffer(
         obs_shape=env.observation_space.shape,
         action_shape=env.action_space.shape,
-        capacity=args.train_steps,
+        capacity=args.train_steps + 1,
         batch_size=args.batch_size,
     )
     cropped_obs_shape = (
@@ -142,6 +142,7 @@ def main(args):
     start_step, episode, episode_reward, done = 0, 0, 0, True
 
     if args.continue_train:
+        print("'continue_train' set to true, loading model ckpt and replay buffer ckpt")
         ckpt_steps = [
             int(f[:-3])
             for f in os.listdir(model_dir)

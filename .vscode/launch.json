@@ -162,7 +162,7 @@
             ]
         },
         {
-            "name": "Continue DrQ 2k2m train",
+            "name": "Continue DrQ train",
             "type": "python",
             "request": "launch",
             "program": "${workspaceFolder}/src/train.py",
@@ -170,15 +170,11 @@
             "justMyCode": true,
             "args": [
                 "--id",
-                "no_id_copy",
+                "with_buffer_copy",
                 "--eval_mode",
                 "color_hard",
                 "--algorithm",
                 "drq",
-                "--drq_k",
-                "2",
-                "--drq_m",
-                "2",
                 "--continue_train",
                 "True"
             ]
