@@ -170,7 +170,7 @@
             "justMyCode": true,
             "args": [
                 "--id",
-                "with_buffer_copy",
+                "save_buffer_copy",
                 "--eval_mode",
                 "color_hard",
                 "--algorithm",
