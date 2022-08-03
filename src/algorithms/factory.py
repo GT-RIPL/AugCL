@@ -7,7 +7,6 @@ from algorithms.drq import DrQ
 from algorithms.svea import SVEA
 from algorithms.transfer import Transfer
 from algorithms.drq_rad import DrQ_RAD
-from algorithms.data_mix import DataMix
 
 algorithm = {
     "sac": SAC,
@@ -19,7 +18,6 @@ algorithm = {
     "svea": SVEA,
     "transfer": Transfer,
     "drq_rad": DrQ_RAD,
-    "data_mix": DataMix,
 }
 
 transfer_algorithm = {}

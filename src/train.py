@@ -42,6 +42,24 @@ def evaluate(env, agent, video, num_episodes, L, step, args, test_env=False):
     return np.mean(episode_rewards)
 
 
+def refill_replay_buffer(env, agent, num_steps: int, replay_buffer: utils.ReplayBuffer):
+    done = True
+    for _ in range(num_steps):
+        if done:
+            obs = env.reset()
+
+        with utils.eval_mode(agent):
+            action = agent.select_action(obs)
+
+        next_obs, reward, done, _ = env.step(action)
+        replay_buffer.add(
+            obs=obs, action=action, reward=reward, next_obs=next_obs, done=done
+        )
+        obs = next_obs
+
+    return replay_buffer
+
+
 def main(args):
     # Set seed
     utils.set_seed_everywhere(args.seed)
@@ -85,7 +103,7 @@ def main(args):
     args.__dict__["train_date"] = time.strftime("%m-%d-%y", time.gmtime())
 
     if not args.test_code_mode:
-        assert not os.path.exists(
+        assert args.continue_train or not os.path.exists(
             os.path.join(work_dir, "train.log")
         ), "Specified working directory has existing train.log. Ending program."
     os.makedirs(work_dir, exist_ok=True)
@@ -118,6 +136,23 @@ def main(args):
     )
 
     start_step, episode, episode_reward, done = 0, 0, 0, True
+
+    if args.continue_train:
+        ckpt_steps = [
+            int(f[:-3])
+            for f in os.listdir(model_dir)
+            if os.path.isfile(os.path.join(model_dir, f)) and f.endswith(".pt")
+        ]
+        assert len(ckpt_steps) > 0, f"No checkpoint files found in: {model_dir}"
+        ckpt_steps.sort()
+        max_ckpt_step = ckpt_steps[-1]
+        start_step = max_ckpt_step
+        agent = torch.load(os.path.join(model_dir, f"{str(max_ckpt_step)}.pt"))
+
+        replay_buffer = refill_replay_buffer(
+            env=env, agent=agent, num_steps=max_ckpt_step, replay_buffer=replay_buffer
+        )
+
     L = Logger(work_dir)
     start_time = time.time()
     for step in range(start_step, args.train_steps + 1):

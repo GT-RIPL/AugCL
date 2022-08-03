@@ -66,7 +66,14 @@ class MetersGroup(object):
         with open(self._file_name, "a") as f:
             f.write(json.dumps(data) + "\n")
         self.dict_list.append(data)
-        pd.DataFrame(self.dict_list).to_csv(self._file_name[:-4] + ".csv")
+        csv_fp = self._file_name[:-4] + ".csv"
+
+        df = pd.DataFrame(self.dict_list)
+        if os.path.exists(csv_fp):
+            df_og = pd.read_csv(csv_fp)
+            df = df_og.append(df)
+
+        df.to_csv(csv_fp)
 
     def _format(self, key, value, ty):
         template = "%s: "

@@ -86,6 +86,7 @@ def add_SAC_args():
     parser.add_argument("--log_dir", default="logs", type=str)
     parser.add_argument("--config_path", default=None, type=str)
     parser.add_argument("--save_video", default=False, action="store_true")
+    parser.add_argument("--continue_train", default=False, type=bool)
     parser.add_argument("--test_code_mode", default=False, type=bool)
 
     return parser

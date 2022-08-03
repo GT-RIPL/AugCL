@@ -102,28 +102,6 @@
             ]
         },
         {
-            "name": "DrQ Resample 2k2m train",
-            "type": "python",
-            "request": "launch",
-            "program": "${workspaceFolder}/src/train.py",
-            "console": "integratedTerminal",
-            "justMyCode": true,
-            "args": [
-                "--id",
-                "test",
-                "--eval_mode",
-                "color_hard",
-                "--test_code_mode",
-                "True",
-                "--algorithm",
-                "drq_resample",
-                "--drq_k",
-                "2",
-                "--drq_m",
-                "2"
-            ]
-        },
-        {
             "name": "Rad Shift train",
             "type": "python",
             "request": "launch",
@@ -143,46 +121,6 @@
                 "shift",
                 "--save_freq",
                 "5k"
-            ]
-        },
-        {
-            "name": "DrQ no next obs train",
-            "type": "python",
-            "request": "launch",
-            "program": "${workspaceFolder}/src/train.py",
-            "console": "integratedTerminal",
-            "justMyCode": true,
-            "args": [
-                "--id",
-                "test",
-                "--eval_mode",
-                "color_hard",
-                "--test_code_mode",
-                "True",
-                "--algorithm",
-                "drq_no_next_obs",
-                "--drq_k",
-                "2",
-                "--drq_m",
-                "1"
-            ]
-        },
-        {
-            "name": "Data Mix",
-            "type": "python",
-            "request": "launch",
-            "program": "${workspaceFolder}/src/train.py",
-            "console": "integratedTerminal",
-            "justMyCode": true,
-            "args": [
-                "--id",
-                "test",
-                "--eval_mode",
-                "color_hard",
-                "--test_code_mode",
-                "True",
-                "--algorithm",
-                "data_mix"
             ]
         },
         {
@@ -222,6 +160,28 @@
                 "--dir_path",
                 "./logs/finger_spin/sac/no_id/seed_0"
             ]
-        }
+        },
+        {
+            "name": "Continue DrQ 2k2m train",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/src/train.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": [
+                "--id",
+                "no_id_copy",
+                "--eval_mode",
+                "color_hard",
+                "--algorithm",
+                "drq",
+                "--drq_k",
+                "2",
+                "--drq_m",
+                "2",
+                "--continue_train",
+                "True"
+            ]
+        },
     ]
 }
