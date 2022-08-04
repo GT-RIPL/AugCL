@@ -252,9 +252,6 @@ class ReplayBuffer(object):
             idxs=idxs
         )
 
-        obs = augmentations.random_crop(obs)
-        next_obs = augmentations.random_crop(next_obs)
-
         return obs, actions, rewards, next_obs, not_dones
 
 
