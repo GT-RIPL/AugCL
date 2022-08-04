@@ -7,7 +7,7 @@ from tqdm import tqdm
 from src.arguments import parse_Q_variance_args
 from env.wrappers import make_env
 from algorithms.factory import make_agent
-from src.evaluate import confirm_model_matches_latest_eval_results
+from src.evaluate import confirm_model_results
 import src.augmentations as augmentations
 
 
@@ -79,9 +79,7 @@ def main(args):
     agent = torch.load(checkpt_path)
     agent.train(False)
 
-    confirm_model_matches_latest_eval_results(
-        work_dir=work_dir, train_dot_dict=train_dot_dict, agent=agent
-    )
+    confirm_model_results(work_dir=work_dir, train_dot_dict=train_dot_dict, agent=agent)
     q_var_dict = create_aug_var_dict()
 
     done = True
