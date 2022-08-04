@@ -15,7 +15,7 @@ def parse_args():
     parser = argparse.ArgumentParser()
 
     # environment
-    parser.add_argument("--aug_key", default="splice", type=str)
+    parser.add_argument("--aug_key", default="splice_color", type=str)
     parser.add_argument("--save_file_name", default="aug_test.png", type=str)
     parser.add_argument(
         "--sample_png_folder",

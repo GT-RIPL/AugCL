@@ -264,32 +264,62 @@ def random_conv(x):
     return total_out.reshape(n, c, h, w)
 
 
-def splice(x, R_threshold=0.35, G_threshold=0.45, B_threshold=1):
+def create_hsv_mask(x_rgb, hue_thres, sat_thres, val_thres):
+    x_hsv = kornia.color.rgb_to_hsv(x_rgb)
+    weight = torch.ones(x_rgb.shape)
+    weight[:, 0] = weight[:, 0] * hue_thres
+    weight[:, 1] = weight[:, 1] * sat_thres
+    weight[:, 2] = weight[:, 2] * val_thres
+    mask = x_hsv > weight.to(x_rgb.get_device())
+    mask = torch.all(mask, dim=1)
+    return mask.unsqueeze(1).repeat(1, x_rgb.shape[1], 1, 1)
+
+
+def create_rgb_mask(x_rgb, R_thres, G_thres, B_thres):
+    weight = torch.ones(x_rgb.shape)
+    weight[:, 0] = weight[:, 0] * R_thres
+    weight[:, 1] = weight[:, 1] * G_thres
+    weight[:, 2] = weight[:, 2] * B_thres
+    return x_rgb > weight.to(x_rgb.get_device())
+
+
+def splice_overlay(x, hue_thres=0.1, sat_thres=0.15, val_thres=0.675):
     global data_iter
     load_dataloader(batch_size=x.size(0), image_size=x.size(-1))
     overlay = _get_data_batch(x.size(0)).repeat(x.size(1) // 3, 1, 1, 1)
     n, c, h, w = x.shape
     x_rgb = x.reshape(-1, 3, h, w) / 255.0
-    weight = torch.ones(x_rgb.shape)
-    weight[:, 0] = weight[:, 0] * R_threshold
-    weight[:, 1] = weight[:, 1] * G_threshold
-    weight[:, 2] = weight[:, 2] * B_threshold
-    mask = x_rgb > weight.to(x.get_device())
+    mask = create_hsv_mask(
+        x_rgb=x_rgb, hue_thres=hue_thres, sat_thres=sat_thres, val_thres=val_thres
+    )
     out = (mask * x_rgb + (~mask) * overlay) * 255.0
     return out.reshape(n, c, h, w)
 
 
-def splice_color(x, R_threshold=0.35, G_threshold=0.45, B_threshold=1):
+def splice_color(x, hue_thres=0.1, sat_thres=0.15, val_thres=0.675):
+    n, c, h, w = x.shape
+    x_rgb = x.reshape(-1, 3, h, w) / 255.0
+    mask = create_hsv_mask(
+        x_rgb=x_rgb, hue_thres=hue_thres, sat_thres=sat_thres, val_thres=val_thres
+    )
+    color = torch.from_numpy(np.random.randint(0, 255, size=(n, 3)) / 255.0).to(
+        device=x.get_device()
+    )
+    color = color.repeat(1, int(c / 3)).reshape(x_rgb.shape[0], x_rgb.shape[1])
+    color = color.unsqueeze(2).unsqueeze(3).repeat(1, 1, h, w)
+    out = (mask * x_rgb + (~mask) * color) * 255.0
+    return out.reshape(n, c, h, w).float()
+
+
+def splice_color_overlay(x, hue_thres=0.1, sat_thres=0.15, val_thres=0.675):
     global data_iter
     load_dataloader(batch_size=x.size(0), image_size=x.size(-1))
     overlay = _get_data_batch(x.size(0)).repeat(x.size(1) // 3, 1, 1, 1)
     n, c, h, w = x.shape
     x_rgb = x.reshape(-1, 3, h, w) / 255.0
-    weight = torch.ones(x_rgb.shape)
-    weight[:, 0] = weight[:, 0] * R_threshold
-    weight[:, 1] = weight[:, 1] * G_threshold
-    weight[:, 2] = weight[:, 2] * B_threshold
-    mask = x_rgb > weight.to(x.get_device())
+    mask = create_hsv_mask(
+        x_rgb=x_rgb, hue_thres=hue_thres, sat_thres=sat_thres, val_thres=val_thres
+    )
     for i in range(n):
         weights = torch.randn(3, 3, 3, 3).to(x.device)
         temp_x = x[i : i + 1].reshape(-1, 3, h, w) / 255.0
@@ -298,6 +328,32 @@ def splice_color(x, R_threshold=0.35, G_threshold=0.45, B_threshold=1):
         conv_out = out if i == 0 else torch.cat([conv_out, out], axis=0)
     out = (mask * conv_out + (~mask) * overlay) * 255.0
     return out.reshape(n, c, h, w)
+
+
+def random_cutout_color(imgs, min_cut=10, max_cut=30):
+    """
+    args:
+    imgs: shape (B,C,H,W)
+    out: output size (e.g. 84)
+    """
+    imgs = imgs.detach().cpu().numpy()
+    n, c, h, w = imgs.shape
+    w1 = np.random.randint(min_cut, max_cut, n)
+    h1 = np.random.randint(min_cut, max_cut, n)
+
+    cutouts = np.empty((n, c, h, w), dtype=imgs.dtype)
+    rand_box = np.random.randint(0, 255, size=(n, c)) / 255.0
+    for i, (img, w11, h11) in enumerate(zip(imgs, w1, h1)):
+        cut_img = img.copy()
+
+        # add random box
+        cut_img[:, h11 : h11 + h11, w11 : w11 + w11] = np.tile(
+            rand_box[i].reshape(-1, 1, 1),
+            (1,) + cut_img[:, h11 : h11 + h11, w11 : w11 + w11].shape[1:],
+        )
+
+        cutouts[i] = cut_img
+    return torch.from_numpy(cutouts)
 
 
 def batch_from_obs(obs, batch_size=32):
@@ -363,6 +419,12 @@ def random_crop(x, size=84, w1=None, h1=None, return_w1_h1=False):
     return cropped
 
 
+def DrAC_crop(x, size: int = 84, pad: int = 16):
+    return torch.nn.Sequential(
+        torch.nn.ReplicationPad2d(pad), kornia.augmentation.RandomCrop((size, size))
+    )(x)
+
+
 def view_as_windows_cuda(x, window_shape):
     """PyTorch CUDA-enabled implementation of view_as_windows"""
     assert isinstance(window_shape, tuple) and len(window_shape) == len(
@@ -392,7 +454,10 @@ aug_to_func = {
     "color_jitter": kornia_color_jitter,
     "identity": identity,
     "overlay": random_overlay,
-    "splice": splice,
-    "splice_color": splice_color,
+    "splice_overlay": splice_overlay,
+    "splice_color_overlay": splice_color_overlay,
     "crop": random_crop,
+    "drac_crop": DrAC_crop,
+    "cutout_color": random_cutout_color,
+    "splice_color": splice_color,
 }
