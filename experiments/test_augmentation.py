@@ -1,11 +1,7 @@
 import argparse
 import src.augmentations as augmentations
 import torch
-import os
-from os import listdir
-from os.path import isfile, join
-from torchvision import transforms
-from PIL import Image
+import torchvision.datasets as datasets
 import matplotlib.pyplot as plt
 from torchvision.utils import make_grid
 
@@ -54,20 +50,16 @@ def show_stacked_imgs(x, max_display=12):
 
 
 def main(args):
-    tnsr_list = list()
-    sample_imgs_files = [
-        os.path.join(args.sample_png_folder, f)
-        for f in listdir(args.sample_png_folder)
-        if isfile(join(args.sample_png_folder, f))
-    ]
-
-    for fp in sample_imgs_files:
-        img = Image.open(fp=fp)
-        img_tnsr = transforms.ToTensor()(img)
-        tnsr_list.append(img_tnsr)
-
-    imgs_tnsr = torch.unsqueeze(torch.cat(tnsr_list, dim=0), dim=0) * 255
-    augs_tnsr = augmentations.aug_to_func[args.aug_key](imgs_tnsr.to("cuda")) / 255.0
+    dataloader = torch.utils.data.DataLoader(
+        datasets.ImageFolder(args.sample_png_folder),
+        batch_size=3,
+        shuffle=True,
+        num_workers=16,
+        pin_memory=True,
+    )
+    data_iter = iter(dataloader)
+    x = data_iter.next()
+    augs_tnsr = augmentations.aug_to_func[args.aug_key](x) / 255.0
     show_stacked_imgs(augs_tnsr.cpu().numpy())
     plt.savefig(args.save_file_name)
 
