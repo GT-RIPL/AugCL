@@ -2,12 +2,12 @@ import pandas as pd
 import torch
 import os
 import gym
-import utils
+import src.utils as utils
 from tqdm import tqdm
-from arguments import parse_Q_variance_args
+from src.arguments import parse_Q_variance_args
 from env.wrappers import make_env
 from algorithms.factory import make_agent
-from evaluate import confirm_model_matches_latest_eval_results
+from src.evaluate import confirm_model_matches_latest_eval_results
 import src.augmentations as augmentations
 
 
