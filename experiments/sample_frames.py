@@ -2,7 +2,7 @@ import os
 import utils
 import numpy as np
 from env.wrappers import make_env
-from arguments import add_SAC_args, format_args
+from src.arguments import add_SAC_args, format_args
 
 
 def main(args):

@@ -1,6 +1,5 @@
 import argparse
-import numpy as np
-import augmentations
+import src.augmentations as augmentations
 import torch
 import os
 from os import listdir

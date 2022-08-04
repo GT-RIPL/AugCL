@@ -8,7 +8,7 @@ from arguments import parse_Q_variance_args
 from env.wrappers import make_env
 from algorithms.factory import make_agent
 from evaluate import confirm_model_matches_latest_eval_results
-import augmentations
+import src.augmentations as augmentations
 
 
 def create_aug_var_dict():
