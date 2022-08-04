@@ -7,7 +7,6 @@ from algorithms.drq import DrQ
 from algorithms.svea import SVEA
 from algorithms.transfer import Transfer
 from algorithms.drq_rad import DrQ_RAD
-from algorithms.alix import ALIX
 
 algorithm = {
     "sac": SAC,
@@ -19,7 +18,6 @@ algorithm = {
     "svea": SVEA,
     "transfer": Transfer,
     "drq_rad": DrQ_RAD,
-    "alix": ALIX,
 }
 
 transfer_algorithm = {}
