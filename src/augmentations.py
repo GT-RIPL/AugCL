@@ -311,6 +311,17 @@ def splice_color(x, hue_thres=0.1, sat_thres=0.15, val_thres=0.675):
     return out.reshape(n, c, h, w).float()
 
 
+def splice_blackout(x, hue_thres=0.1, sat_thres=0.15, val_thres=0.675):
+    n, c, h, w = x.shape
+    x_rgb = x.reshape(-1, 3, h, w) / 255.0
+    mask = create_hsv_mask(
+        x_rgb=x_rgb, hue_thres=hue_thres, sat_thres=sat_thres, val_thres=val_thres
+    )
+    black_out = torch.zeros(x_rgb.shape).to(x.get_device())
+    out = (mask * x_rgb + (~mask) * black_out) * 255.0
+    return out.reshape(n, c, h, w).float()
+
+
 def splice_color_overlay(x, hue_thres=0.1, sat_thres=0.15, val_thres=0.675):
     global data_iter
     load_dataloader(batch_size=x.size(0), image_size=x.size(-1))
@@ -460,4 +471,5 @@ aug_to_func = {
     "drac_crop": DrAC_crop,
     "cutout_color": random_cutout_color,
     "splice_color": splice_color,
+    "splice_blackout": splice_blackout,
 }
