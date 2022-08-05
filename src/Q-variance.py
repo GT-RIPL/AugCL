@@ -2,13 +2,13 @@ import pandas as pd
 import torch
 import os
 import gym
-import src.utils as utils
+import utils as utils
 from tqdm import tqdm
-from src.arguments import parse_Q_variance_args
+from arguments import parse_Q_variance_args
 from env.wrappers import make_env
 from algorithms.factory import make_agent
-from src.evaluate import confirm_model_results
-import src.augmentations as augmentations
+from evaluate import confirm_model_results
+import augmentations as augmentations
 
 
 def create_aug_var_dict():

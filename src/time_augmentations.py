@@ -1,6 +1,6 @@
 import numpy as np
 import torch
-import src.augmentations as augmentations
+import augmentations as augmentations
 import time
 
 input = torch.rand(128, 9, 84, 84).to("cuda")

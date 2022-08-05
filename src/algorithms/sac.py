@@ -91,12 +91,19 @@ class SAC(object):
             mu, pi, _, _ = self.actor(_obs, compute_log_pi=False)
         return pi.cpu().data.numpy().flatten()
 
-    def update_critic(self, obs, action, reward, next_obs, not_done, L=None, step=None):
+    def calculate_target_Q(self, next_obs, reward, not_done):
         with torch.no_grad():
             _, policy_action, log_pi, _ = self.actor(next_obs)
             target_Q1, target_Q2 = self.critic_target(next_obs, policy_action)
             target_V = torch.min(target_Q1, target_Q2) - self.alpha.detach() * log_pi
             target_Q = reward + (not_done * self.discount * target_V)
+
+        return target_Q
+
+    def update_critic(self, obs, action, reward, next_obs, not_done, L=None, step=None):
+        target_Q = self.calculate_target_Q(
+            next_obs=next_obs, reward=reward, not_done=not_done
+        )
 
         current_Q1, current_Q2 = self.critic(obs, action)
         critic_loss = F.mse_loss(current_Q1, target_Q) + F.mse_loss(

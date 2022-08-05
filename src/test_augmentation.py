@@ -1,5 +1,5 @@
 import argparse
-import src.augmentations as augmentations
+import augmentations as augmentations
 import torch
 import torchvision.datasets as datasets
 import matplotlib.pyplot as plt

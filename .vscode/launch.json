@@ -187,5 +187,19 @@
                 "splice_overlay",
             ]
         },
+        {
+            "name": "Q value correlation",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/src/Q_correlation.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": [
+                "--train_steps",
+                "8k",
+                "--num_samples",
+                "15000"
+            ]
+        },
     ]
 }

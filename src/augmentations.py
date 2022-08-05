@@ -460,7 +460,7 @@ aug_to_func = {
     "grayscale": random_grayscale,
     "flip": random_flip,
     "rotate": random_rotation,
-    "rand_conv": random_conv,
+    "conv": random_conv,
     "shift": random_shift,
     "color_jitter": kornia_color_jitter,
     "identity": identity,

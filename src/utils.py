@@ -245,8 +245,9 @@ class ReplayBuffer(object):
 
         return obs, actions, rewards, next_obs, not_dones
 
-    def sample(self, n=None):
-        idxs = self._get_idxs(n)
+    def sample(self, n=None, idxs=None):
+        if idxs is None:
+            idxs = self._get_idxs(n)
 
         (obs, next_obs, actions, rewards, not_dones) = self.tensor_buffer_samples(
             idxs=idxs
