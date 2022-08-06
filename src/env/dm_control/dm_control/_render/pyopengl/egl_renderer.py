@@ -49,7 +49,7 @@ def create_initialized_headless_egl_display():
     devices = EGL.eglQueryDevicesEXT()
     if os.environ.get("CUDA_VISIBLE_DEVICES", None) is not None:
         device_ids = (
-            [int(id) for id in os.environ["CUDA_VISIBLE_DEVICES"].split(",")]
+            (int(id) for id in os.environ["CUDA_VISIBLE_DEVICES"].split(","))
             if "," in os.environ["CUDA_VISIBLE_DEVICES"]
             else int(os.environ["CUDA_VISIBLE_DEVICES"])
         )
