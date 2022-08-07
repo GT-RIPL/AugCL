@@ -38,7 +38,7 @@ def calculate_Q_correlation_coeff(
         calculate_MC_returns(rewards=rewards, discount=discount)
     )
 
-    return Q1, Q2, target_Q, mc_rewards
+    return Q1, Q2, target_Q, mc_rewards, episode_reward
 
 
 def roll_out_policy(agent: SAC, env):
@@ -119,27 +119,44 @@ def main(args):
     for step in range(args.train_steps):
         agent.update(replay_buffer=replay_buffer, L=None, step=step)
 
-        roll_out_replay_buffer = roll_out_policy(agent=agent, env=env)
-        Q1, Q2, target_Q, mc_returns = calculate_Q_correlation_coeff(
-            agent=agent, replay_buffer=roll_out_replay_buffer, discount=args.discount
-        )
+        if step % args.stat_freq == 0:
+            roll_out_replay_buffer = roll_out_policy(agent=agent, env=env)
+            (
+                Q1,
+                Q2,
+                target_Q,
+                mc_returns,
+                episode_reward,
+            ) = calculate_Q_correlation_coeff(
+                agent=agent,
+                replay_buffer=roll_out_replay_buffer,
+                discount=args.discount,
+            )
 
-        Q1 = Q1.squeeze().detach().cpu().numpy()
-        Q2 = Q2.squeeze().detach().cpu().numpy()
-        target_Q = target_Q.squeeze().detach().cpu().numpy()
-        mc_returns = mc_returns.detach().cpu().numpy()
-        Q1_Q_target_cc = pearsonr(Q1, target_Q)[0]
-        Q2_Q_target_cc = pearsonr(Q2, target_Q)[0]
-        Q1_MC_return_cc = pearsonr(Q1, mc_returns)[0]
-        Q2_MC_return_cc = pearsonr(Q2, mc_returns)[0]
-        data.append(
-            [step, Q1_Q_target_cc, Q2_Q_target_cc, Q1_MC_return_cc, Q2_MC_return_cc]
-        )
+            Q1 = Q1.squeeze().detach().cpu().numpy()
+            Q2 = Q2.squeeze().detach().cpu().numpy()
+            target_Q = target_Q.squeeze().detach().cpu().numpy()
+            mc_returns = mc_returns.detach().cpu().numpy()
+            Q1_Q_target_cc = pearsonr(Q1, target_Q)[0]
+            Q2_Q_target_cc = pearsonr(Q2, target_Q)[0]
+            Q1_MC_return_cc = pearsonr(Q1, mc_returns)[0]
+            Q2_MC_return_cc = pearsonr(Q2, mc_returns)[0]
+            data.append(
+                [
+                    step,
+                    episode_reward,
+                    Q1_Q_target_cc,
+                    Q2_Q_target_cc,
+                    Q1_MC_return_cc,
+                    Q2_MC_return_cc,
+                ]
+            )
 
     pd.DataFrame(
         data,
         columns=[
             "step",
+            "episode reward"
             "Q1, Q-target CC",
             "Q2, Q-target CC",
             "Q1, MC Return CC",
@@ -151,5 +168,6 @@ def main(args):
 if __name__ == "__main__":
     parser = add_SAC_args()
     parser.add_argument("--num_samples", default=15000, type=int)
+    parser.add_argument("--stat_freq", default=5000, type=int)
     args = format_args(parser.parse_args())
     main(args)
