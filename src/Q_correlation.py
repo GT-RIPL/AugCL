@@ -97,8 +97,9 @@ def main(args):
     )
     print("Observations:", env.observation_space.shape)
     print("Cropped observations:", cropped_obs_shape)
-    print(f"Number of train samples {args.num_samples}")
-    print(f"Number of train steps {args.train_steps}")
+    print(f"Number of train samples: {args.num_samples}")
+    print(f"Number of train steps: {args.train_steps}")
+    print(f"Correlation calculation frequency: {args.stat_freq}")
     agent = make_agent(
         obs_shape=cropped_obs_shape, action_shape=env.action_space.shape, args=args
     )
