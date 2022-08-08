@@ -168,11 +168,17 @@ def main(args):
             buffer_dir=os.path.join(prev_work_dir, "buffer"),
             replay_buffer=replay_buffer,
         )
-        utils.soft_update_params(net=prev_agent.actor, target_net=agent.actor, tau=1)
-        utils.soft_update_params(net=prev_agent.critic, target_net=agent.critic, tau=1)
-        utils.soft_update_params(
-            net=prev_agent.critic_target, target_net=agent.critic_target, tau=1
-        )
+
+        if args.pretrained:
+            utils.soft_update_params(
+                net=prev_agent.actor, target_net=agent.actor, tau=1
+            )
+            utils.soft_update_params(
+                net=prev_agent.critic, target_net=agent.critic, tau=1
+            )
+            utils.soft_update_params(
+                net=prev_agent.critic_target, target_net=agent.critic_target, tau=1
+            )
 
     L = Logger(work_dir)
     start_time = time.time()
