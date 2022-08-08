@@ -7,6 +7,7 @@ from algorithms.drq import DrQ
 from algorithms.svea import SVEA
 from algorithms.transfer import Transfer
 from algorithms.drq_rad import DrQ_RAD
+from algorithms.curriculum_learning.curriculum import Curriculum
 
 algorithm = {
     "sac": SAC,
@@ -18,15 +19,9 @@ algorithm = {
     "svea": SVEA,
     "transfer": Transfer,
     "drq_rad": DrQ_RAD,
+    "curriculum": Curriculum,
 }
-
-transfer_algorithm = {}
 
 
 def make_agent(obs_shape, action_shape, args):
     return algorithm[args.algorithm](obs_shape, action_shape, args)
-
-
-def make_transfer_agent(obs_shape, action_shape, args):
-    pass
-    # return transfer_algorithm[args.]

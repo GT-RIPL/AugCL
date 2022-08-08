@@ -201,5 +201,29 @@
                 "15000"
             ]
         },
+        {
+            "name": "Curriculum Learn",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/src/train.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": [
+                "--algorithm",
+                "curriculum",
+                "--train_steps",
+                "30k",
+                "--curriculum_train",
+                "True",
+                "--curriculum_step",
+                "20000",
+                "--prev_algorithm",
+                "drq",
+                "--prev_id",
+                "no_id",
+                "--data_aug",
+                "conv"
+            ]
+        },
     ]
 }
