@@ -188,6 +188,24 @@
             ]
         },
         {
+            "name": "Sample Frames",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/src/sample_frames.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": [
+                "--domain_name",
+                "finger",
+                "--task_name",
+                "spin",
+                "--eval_mode",
+                "distracting_cs",
+                "--distracting_cs_intensity",
+                "0.1"
+            ]
+        },
+        {
             "name": "Q value correlation",
             "type": "python",
             "request": "launch",
