@@ -85,10 +85,16 @@ def add_SAC_args():
     parser.add_argument("--seed", default=0, type=int)
     parser.add_argument("--log_dir", default="logs", type=str)
     parser.add_argument("--config_path", default=None, type=str)
+    parser.add_argument("--test_code_mode", default=False, type=bool)
+
+    # Save
     parser.add_argument("--save_video", default=False, action="store_true")
     parser.add_argument("--save_buffer", default=False, type=bool)
+
+    # Continual Training
     parser.add_argument("--continue_train", default=False, type=bool)
-    parser.add_argument("--test_code_mode", default=False, type=bool)
+    parser.add_argument("--curriculum_train", default=False, type=bool)
+    parser.add_argument("--curriculum_step", default=400000, type=int)
 
     return parser
 
