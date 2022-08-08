@@ -144,6 +144,7 @@ def main(args):
             data.append(
                 [
                     step,
+                    mc_returns.shape[0],
                     episode_reward,
                     Q1_Q_target_cc,
                     Q2_Q_target_cc,
@@ -155,8 +156,9 @@ def main(args):
     pd.DataFrame(
         data,
         columns=[
-            "step",
-            "episode reward"
+            "train step",
+            "roll out length",
+            "episode reward",
             "Q1, Q-target CC",
             "Q2, Q-target CC",
             "Q1, MC Return CC",
