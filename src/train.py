@@ -42,23 +42,15 @@ def evaluate(env, agent, video, num_episodes, L, step, args, test_env=False):
     return np.mean(episode_rewards)
 
 
-# def refill_replay_buffer(env, agent, num_steps: int, replay_buffer: utils.ReplayBuffer):
-#     print(f"Refilling replay buffer to size {num_steps}")
-#     done = True
-#     for _ in range(num_steps):
-#         if done:
-#             obs = env.reset()
-
-#         with utils.eval_mode(agent):
-#             action = agent.select_action(obs)
-
-#         next_obs, reward, done, _ = env.step(action)
-#         replay_buffer.add(
-#             obs=obs, action=action, reward=reward, next_obs=next_obs, done=done
-#         )
-#         obs = next_obs
-#     print("Finished refilling replay buffer")
-#     return replay_buffer
+def load_agent_and_buffer(step: int, model_dir: str, buffer_dir: str, replay_buffer):
+    assert os.path.exists(
+        buffer_dir
+    ), f"No buffer folder exists, replay buffer required in order to continue training."
+    ckpt_path = os.path.join(model_dir, f"{str(step)}.pt")
+    assert os.path.exists(ckpt_path), f"No checkpoint at :{ckpt_path} exists."
+    agent = torch.load(ckpt_path)
+    replay_buffer.load(save_dir=buffer_dir, end_step=step)
+    return agent, replay_buffer
 
 
 def main(args):
@@ -148,16 +140,39 @@ def main(args):
             for f in os.listdir(model_dir)
             if os.path.isfile(os.path.join(model_dir, f)) and f.endswith(".pt")
         ]
-        assert len(ckpt_steps) > 0, f"No checkpoint files found in: {model_dir}"
-        buffer_dir = os.path.join(work_dir, "buffer")
-        assert os.path.exists(
-            buffer_dir
-        ), f"No buffer folder exists, replay buffer required in order to continue training"
         ckpt_steps.sort()
+        assert len(ckpt_steps) > 0, f"No checkpoint files found in: {model_dir}"
         max_ckpt_step = ckpt_steps[-1]
         start_step = max_ckpt_step
-        agent = torch.load(os.path.join(model_dir, f"{str(max_ckpt_step)}.pt"))
-        replay_buffer.load(save_dir=buffer_dir)
+        agent, replay_buffer = load_agent_and_buffer(
+            step=max_ckpt_step,
+            model_dir=model_dir,
+            buffer_dir=os.path.join(work_dir, "buffer"),
+            replay_buffer=replay_buffer,
+        )
+    elif args.curriculum_train:
+        print(
+            f"'curriculum_train' set to true, loading model ckpt and replay buffer ckpt at step: {args.curriculum_step}"
+        )
+        prev_work_dir = os.path.join(
+            args.log_dir,
+            args.domain_name + "_" + args.task_name,
+            args.prev_algorithm,
+            args.prev_id,
+            "seed_" + str(args.seed),
+        )
+        start_step = args.curriculum_step
+        prev_agent, replay_buffer = load_agent_and_buffer(
+            step=args.curriculum_step,
+            model_dir=os.path.join(prev_work_dir, "model"),
+            buffer_dir=os.path.join(prev_work_dir, "buffer"),
+            replay_buffer=replay_buffer,
+        )
+        utils.soft_update_params(net=prev_agent.actor, target_net=agent.actor, tau=1)
+        utils.soft_update_params(net=prev_agent.critic, target_net=agent.critic, tau=1)
+        utils.soft_update_params(
+            net=prev_agent.critic_target, target_net=agent.critic_target, tau=1
+        )
 
     L = Logger(work_dir)
     start_time = time.time()

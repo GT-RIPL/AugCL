@@ -165,7 +165,7 @@ class ReplayBuffer(object):
         self.last_save = self.idx
         torch.save(payload, path)
 
-    def load(self, save_dir):
+    def load(self, save_dir, end_step=None):
         chunks = os.listdir(save_dir)
         chucks = sorted(chunks, key=lambda x: int(x.split("_")[0]))
         for chunk in chucks:
@@ -178,6 +178,9 @@ class ReplayBuffer(object):
             self.rewards[start:end] = payload[2]
             self.not_dones[start:end] = payload[3]
             self.idx = end
+
+            if end == end_step:
+                break
 
     def tensor_buffer_samples(self, idxs):
         obs, next_obs = self._encode_obses(idxs)
