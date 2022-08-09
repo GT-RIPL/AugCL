@@ -180,6 +180,11 @@ def main(args):
                 net=prev_agent.critic_target, target_net=agent.critic_target, tau=1
             )
 
+            if hasattr(agent, "strong_critic"):
+                utils.soft_update_params(
+                    net=prev_agent.critic, target_net=agent.strong_critic, tau=1
+                )
+
     L = Logger(work_dir)
     start_time = time.time()
     for step in range(start_step, args.train_steps + 1):

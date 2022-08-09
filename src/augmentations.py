@@ -332,8 +332,23 @@ def splice_conv(x, hue_thres=0.1, sat_thres=0.15, val_thres=0.675):
     x_background_conv = x_background_conv.reshape(-1, 3, h, w)
     x_conv = random_conv(x)
     x_conv = x_conv.reshape(-1, 3, h, w)
-    out = (mask * x_conv + (~mask) * x_background_conv)
+    out = mask * x_conv + (~mask) * x_background_conv
     return out.reshape(n, c, h, w).float()
+
+
+def splice_conv_overlay(x, hue_thres=0.1, sat_thres=0.15, val_thres=0.675):
+    global data_iter
+    load_dataloader(batch_size=x.size(0), image_size=x.size(-1))
+    overlay = _get_data_batch(x.size(0)).repeat(x.size(1) // 3, 1, 1, 1)
+    n, c, h, w = x.shape
+    x_rgb = x.reshape(-1, 3, h, w) / 255.0
+    mask = create_hsv_mask(
+        x_rgb=x_rgb, hue_thres=hue_thres, sat_thres=sat_thres, val_thres=val_thres
+    )
+    conv_out = random_conv(x)
+    conv_out = conv_out.reshape(-1, 3, h, w)
+    out = mask * conv_out + ((~mask) * overlay * 255.0)
+    return out.reshape(n, c, h, w)
 
 
 def splice_color_overlay(x, hue_thres=0.1, sat_thres=0.15, val_thres=0.675):
@@ -345,13 +360,12 @@ def splice_color_overlay(x, hue_thres=0.1, sat_thres=0.15, val_thres=0.675):
     mask = create_hsv_mask(
         x_rgb=x_rgb, hue_thres=hue_thres, sat_thres=sat_thres, val_thres=val_thres
     )
-    for i in range(n):
-        weights = torch.randn(3, 3, 3, 3).to(x.device)
-        temp_x = x[i : i + 1].reshape(-1, 3, h, w) / 255.0
-        temp_x = F.pad(temp_x, pad=[1] * 4, mode="replicate")
-        out = torch.sigmoid(F.conv2d(temp_x, weights))
-        conv_out = out if i == 0 else torch.cat([conv_out, out], axis=0)
-    out = (mask * conv_out + (~mask) * overlay) * 255.0
+    color = torch.from_numpy(np.random.randint(0, 255, size=(n, 3)) / 255.0).to(
+        device=x.get_device()
+    )
+    color = color.repeat(1, int(c / 3)).reshape(x_rgb.shape[0], x_rgb.shape[1])
+    color = color.unsqueeze(2).unsqueeze(3).repeat(1, 1, h, w)
+    out = (mask * color + ~mask * overlay) * 255.0
     return out.reshape(n, c, h, w)
 
 
@@ -480,11 +494,12 @@ aug_to_func = {
     "identity": identity,
     "overlay": random_overlay,
     "splice_overlay": splice_overlay,
-    "splice_color_overlay": splice_color_overlay,
+    "splice_conv_overlay": splice_conv_overlay,
     "crop": random_crop,
     "drac_crop": DrAC_crop,
     "cutout_color": random_cutout_color,
     "splice_color": splice_color,
     "splice_blackout": splice_blackout,
     "splice_conv": splice_conv,
+    "splice_color_overlay": splice_color_overlay,
 }
