@@ -142,10 +142,9 @@ def main(args):
         ]
         ckpt_steps.sort()
         assert len(ckpt_steps) > 0, f"No checkpoint files found in: {model_dir}"
-        max_ckpt_step = ckpt_steps[-1]
-        start_step = max_ckpt_step
+        start_step = ckpt_steps[-1]
         agent, replay_buffer = load_agent_and_buffer(
-            step=max_ckpt_step,
+            step=start_step,
             model_dir=model_dir,
             buffer_dir=os.path.join(work_dir, "buffer"),
             replay_buffer=replay_buffer,
@@ -163,27 +162,22 @@ def main(args):
         )
         start_step = args.curriculum_step
         prev_agent, replay_buffer = load_agent_and_buffer(
-            step=args.curriculum_step,
+            step=start_step,
             model_dir=os.path.join(prev_work_dir, "model"),
             buffer_dir=os.path.join(prev_work_dir, "buffer"),
             replay_buffer=replay_buffer,
         )
 
-        if args.pretrained:
-            utils.soft_update_params(
-                net=prev_agent.actor, target_net=agent.actor, tau=1
-            )
-            utils.soft_update_params(
-                net=prev_agent.critic, target_net=agent.critic, tau=1
-            )
-            utils.soft_update_params(
-                net=prev_agent.critic_target, target_net=agent.critic_target, tau=1
-            )
+        utils.soft_update_params(net=prev_agent.actor, target_net=agent.actor, tau=1)
+        utils.soft_update_params(net=prev_agent.critic, target_net=agent.critic, tau=1)
+        utils.soft_update_params(
+            net=prev_agent.critic_target, target_net=agent.critic_target, tau=1
+        )
 
-            if hasattr(agent, "strong_critic"):
-                utils.soft_update_params(
-                    net=prev_agent.critic, target_net=agent.strong_critic, tau=1
-                )
+        if hasattr(agent, "strong_critic"):
+            utils.soft_update_params(
+                net=prev_agent.critic, target_net=agent.strong_critic, tau=1
+            )
 
     L = Logger(work_dir)
     start_time = time.time()
