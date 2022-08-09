@@ -68,6 +68,7 @@ def add_SAC_args():
     # DrQ and DrQ inspired
     parser.add_argument("--drq_k", default=1, type=int)
     parser.add_argument("--drq_m", default=1, type=int)
+    parser.add_argument("--next_obs_data_aug", default="identity", type=str)
 
     # Data Augmentation
     parser.add_argument("--data_aug", default="identity", type=str)

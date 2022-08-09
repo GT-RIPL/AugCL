@@ -6,7 +6,7 @@ from algorithms.soda import SODA
 from algorithms.drq import DrQ
 from algorithms.svea import SVEA
 from algorithms.transfer import Transfer
-from algorithms.drq_rad import DrQ_RAD
+from algorithms.drq_aug import DrQ_Aug
 from algorithms.curriculum_learning.curriculum import Curriculum
 from algorithms.non_naive_rad import NonNaiveRAD
 
@@ -19,7 +19,7 @@ algorithm = {
     "drq": DrQ,
     "svea": SVEA,
     "transfer": Transfer,
-    "drq_rad": DrQ_RAD,
+    "drq_aug": DrQ_Aug,
     "curriculum": Curriculum,
     "non_naive_rad": NonNaiveRAD,
 }

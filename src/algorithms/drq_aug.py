@@ -3,15 +3,16 @@ from algorithms.drq import DrQ
 from utils import ReplayBuffer
 
 
-class DrQ_RAD(DrQ):
+class DrQ_Aug(DrQ):
     def __init__(self, obs_shape, action_shape, args):
         super().__init__(obs_shape, action_shape, args)
         self.aug_func = augmentations.aug_to_func[args.data_aug]
+        self.next_obs_aug_func = augmentations.aug_to_func[args.next_obs_data_aug]
 
     def update(self, replay_buffer: ReplayBuffer, L, step):
         obs, action, reward, next_obs, not_done = replay_buffer.sample()
         obs_list = [self.aug_func(obs) for _ in range(self.k)]
-        next_obs_list = [self.aug_func(next_obs) for _ in range(self.m)]
+        next_obs_list = [self.next_obs_aug_func(next_obs) for _ in range(self.m)]
 
         self.update_critic(
             obs_list=obs_list,

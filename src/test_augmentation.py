@@ -1,4 +1,5 @@
 import argparse
+import torchvision
 import augmentations as augmentations
 import torch
 import torchvision.datasets as datasets
@@ -14,7 +15,7 @@ def parse_args():
     parser.add_argument("--save_file_name", default="aug_test.png", type=str)
     parser.add_argument(
         "--sample_png_folder",
-        default="samples/walker/walk/distracting_cs/0.1",
+        default="./samples/walker/walk/distracting_cs/",
         type=str,
     )
 
@@ -51,14 +52,11 @@ def show_stacked_imgs(x, max_display=12):
 
 def main(args):
     dataloader = torch.utils.data.DataLoader(
-        datasets.ImageFolder(args.sample_png_folder),
-        batch_size=3,
-        shuffle=True,
-        num_workers=16,
-        pin_memory=True,
+        datasets.ImageFolder(args.sample_png_folder, torchvision.transforms.ToTensor()), 4
     )
     data_iter = iter(dataloader)
-    x = data_iter.next()
+    x, _ = data_iter.next()
+    x = x.cuda()
     augs_tnsr = augmentations.aug_to_func[args.aug_key](x) / 255.0
     show_stacked_imgs(augs_tnsr.cpu().numpy())
     plt.savefig(args.save_file_name)
