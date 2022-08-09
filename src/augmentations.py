@@ -328,8 +328,11 @@ def splice_conv(x, hue_thres=0.1, sat_thres=0.15, val_thres=0.675):
     mask = create_hsv_mask(
         x_rgb=x_rgb, hue_thres=hue_thres, sat_thres=sat_thres, val_thres=val_thres
     )
-    x_conv = random_conv(x_rgb)
-    out = (mask * x_rgb + (~mask) * x_conv) * 255.0
+    x_background_conv = random_conv(x)
+    x_background_conv = x_background_conv.reshape(-1, 3, h, w)
+    x_conv = random_conv(x)
+    x_conv = x_conv.reshape(-1, 3, h, w)
+    out = (mask * x_conv + (~mask) * x_background_conv)
     return out.reshape(n, c, h, w).float()
 
 
