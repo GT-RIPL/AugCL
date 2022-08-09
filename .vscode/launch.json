@@ -243,31 +243,5 @@
                 "conv"
             ]
         },
-        {
-            "name": "WSC Curriculum Learn",
-            "type": "python",
-            "request": "launch",
-            "program": "${workspaceFolder}/src/train.py",
-            "console": "integratedTerminal",
-            "justMyCode": true,
-            "args": [
-                "--algorithm",
-                "WSC",
-                "--train_steps",
-                "40k",
-                "--curriculum_train",
-                "True",
-                "--curriculum_step",
-                "20000",
-                "--prev_algorithm",
-                "drq",
-                "--prev_id",
-                "no_id",
-                "--data_aug",
-                "splice_color_overlay",
-                "--eval_mode",
-                "color_hard"
-            ]
-        },
     ]
 }
