@@ -11,7 +11,6 @@ class Curriculum(SAC):
     def update(self, replay_buffer: ReplayBuffer, L, step):
         obs, action, reward, next_obs, not_done = replay_buffer.sample()
         obs = self.aug_func(obs)
-        next_obs = augmentations.random_shift(next_obs)
 
         self.update_critic(
             obs=obs,
