@@ -1,8 +1,12 @@
 import argparse
-import torchvision
-import augmentations as augmentations
+import numpy as np
+import augmentations
 import torch
-import torchvision.datasets as datasets
+import os
+from os import listdir
+from os.path import isfile, join
+from torchvision import transforms
+from PIL import Image
 import matplotlib.pyplot as plt
 from torchvision.utils import make_grid
 
@@ -11,11 +15,11 @@ def parse_args():
     parser = argparse.ArgumentParser()
 
     # environment
-    parser.add_argument("--aug_key", default="splice_color", type=str)
+    parser.add_argument("--aug_key", default="thresholded_overlay_color", type=str)
     parser.add_argument("--save_file_name", default="aug_test.png", type=str)
     parser.add_argument(
         "--sample_png_folder",
-        default="./samples/walker/walk/distracting_cs/",
+        default="samples/walker/walk/distracting_cs/0.1",
         type=str,
     )
 
@@ -51,13 +55,20 @@ def show_stacked_imgs(x, max_display=12):
 
 
 def main(args):
-    dataloader = torch.utils.data.DataLoader(
-        datasets.ImageFolder(args.sample_png_folder, torchvision.transforms.ToTensor()), 4
-    )
-    data_iter = iter(dataloader)
-    x, _ = data_iter.next()
-    x = x.cuda()
-    augs_tnsr = augmentations.aug_to_func[args.aug_key](x) / 255.0
+    tnsr_list = list()
+    sample_imgs_files = [
+        os.path.join(args.sample_png_folder, f)
+        for f in listdir(args.sample_png_folder)
+        if isfile(join(args.sample_png_folder, f))
+    ]
+
+    for fp in sample_imgs_files:
+        img = Image.open(fp=fp)
+        img_tnsr = transforms.ToTensor()(img)
+        tnsr_list.append(img_tnsr)
+
+    imgs_tnsr = torch.unsqueeze(torch.cat(tnsr_list, dim=0), dim=0) * 255
+    augs_tnsr = augmentations.aug_to_func[args.aug_key](imgs_tnsr.to("cuda")) / 255.0
     show_stacked_imgs(augs_tnsr.cpu().numpy())
     plt.savefig(args.save_file_name)
 
