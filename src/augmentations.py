@@ -366,7 +366,7 @@ def splice_color_overlay(x, hue_thres=0.1, sat_thres=0.15, val_thres=0.675):
     color = color.repeat(1, int(c / 3)).reshape(x_rgb.shape[0], x_rgb.shape[1])
     color = color.unsqueeze(2).unsqueeze(3).repeat(1, 1, h, w)
     out = (mask * color + ~mask * overlay) * 255.0
-    return out.reshape(n, c, h, w)
+    return out.reshape(n, c, h, w).float()
 
 
 def random_cutout_color(imgs, min_cut=10, max_cut=30):
