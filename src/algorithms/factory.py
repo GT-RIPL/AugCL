@@ -10,6 +10,7 @@ from algorithms.drq_aug import DrQ_Aug
 from algorithms.curriculum_learning.curriculum import Curriculum
 from algorithms.non_naive_rad import NonNaiveRAD
 from algorithms.curriculum_learning.WSC import WSC
+from algorithms.non_naive_drq import NonNaiveDrQ
 
 algorithm = {
     "sac": SAC,
@@ -23,6 +24,7 @@ algorithm = {
     "drq_aug": DrQ_Aug,
     "curriculum": Curriculum,
     "non_naive_rad": NonNaiveRAD,
+    "non_naive_drq": NonNaiveDrQ,
     "WSC": WSC,
 }
 
