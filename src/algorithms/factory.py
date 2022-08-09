@@ -9,7 +9,7 @@ from algorithms.transfer import Transfer
 from algorithms.drq_aug import DrQ_Aug
 from algorithms.curriculum_learning.curriculum import Curriculum
 from algorithms.non_naive_rad import NonNaiveRAD
-from algorithms.curriculum_learning.WSDE import WSDE
+from algorithms.curriculum_learning.WSC import WSC
 
 algorithm = {
     "sac": SAC,
@@ -23,7 +23,7 @@ algorithm = {
     "drq_aug": DrQ_Aug,
     "curriculum": Curriculum,
     "non_naive_rad": NonNaiveRAD,
-    "WSDE": WSDE,
+    "WSC": WSC,
 }
 
 
