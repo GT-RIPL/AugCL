@@ -241,7 +241,7 @@ def main(args):
         except:
             pass
 
-    df.to_csv(results_fp)
+    df.to_csv(results_fp, index=False)
     print("Saved results to", results_fp)
 
 
