@@ -94,8 +94,7 @@ def add_SAC_args():
 
     # Continual Training
     parser.add_argument("--continue_train", default=False, type=bool)
-    parser.add_argument("--curriculum_train", default=False, type=bool)
-    parser.add_argument("--curriculum_step", default=400000, type=int)
+    parser.add_argument("--curriculum_step", default=None, type=int)
     parser.add_argument("--prev_algorithm", default=None, type=str)
     parser.add_argument("--prev_id", default=None, type=str)
 

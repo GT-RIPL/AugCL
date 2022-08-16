@@ -149,7 +149,7 @@ def main(args):
             buffer_dir=os.path.join(work_dir, "buffer"),
             replay_buffer=replay_buffer,
         )
-    elif args.curriculum_train:
+    elif args.curriculum_step is not None:
         print(
             f"'curriculum_train' set to true, loading model ckpt and replay buffer ckpt at step: {args.curriculum_step}"
         )
