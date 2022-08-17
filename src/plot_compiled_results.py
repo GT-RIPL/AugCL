@@ -79,7 +79,7 @@ def line_plot(
     y_name: str,
     avg_key: str,
     group_key: str,
-    smooth_factor: Union[Dict[str, float], float] = 0.5,
+    smooth_factor: Union[Dict[str, float], float] = 1.0,
     ax: Optional[matplotlib.axes.Axes] = None,
     y_bounds: Optional[Tuple[float, float]] = None,
     y_disp_bounds: Optional[Tuple[float, float]] = None,
