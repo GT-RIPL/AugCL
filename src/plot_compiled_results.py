@@ -208,11 +208,11 @@ def line_plot(
             int(x)
             for x in np.linspace(0, len(x_vals) - 1, num=num_marker_points.get(name, 8))
         ]
-        midx = method_idxs[name] % len(MARKER_ORDER)
+        # midx = method_idxs[name] % len(MARKER_ORDER)
         ladd = ax.plot(
             x_vals[sel_vals],
             y_vals[sel_vals],
-            MARKER_ORDER[midx],
+            # MARKER_ORDER[midx],
             label=rename_map.get(name, name),
             color=group_colors[name],
             markersize=8,
