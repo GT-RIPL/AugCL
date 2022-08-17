@@ -21,6 +21,8 @@ def main(args):
             else:
                 compiled_df = compiled_df.append(subset_df)
 
+    if not os.path.exists("./compiled_CSV"):
+        os.makedirs("./compiled_CSV", exist_ok=True)
     compiled_df.to_csv(f"./compiled_CSV/{args.csv_name}.csv", index=False)
 
 
