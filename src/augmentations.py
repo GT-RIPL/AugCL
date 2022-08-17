@@ -296,7 +296,7 @@ def splice_overlay(x, hue_thres=0, sat_thres=0, val_thres=0.63):
     return out.reshape(n, c, h, w)
 
 
-def splice_color(x, hue_thres=0.1, sat_thres=0.15, val_thres=0.675):
+def splice_color(x, hue_thres=0, sat_thres=0, val_thres=0.63):
     n, c, h, w = x.shape
     x_rgb = x.reshape(-1, 3, h, w) / 255.0
     mask = create_hsv_mask(
@@ -322,7 +322,7 @@ def splice_blackout(x, hue_thres=0.1, sat_thres=0.15, val_thres=0.675):
     return out.reshape(n, c, h, w).float()
 
 
-def splice_conv(x, hue_thres=0.1, sat_thres=0.15, val_thres=0.675):
+def splice_conv(x, hue_thres=0, sat_thres=0, val_thres=0.63):
     n, c, h, w = x.shape
     x_rgb = x.reshape(-1, 3, h, w) / 255.0
     mask = create_hsv_mask(
