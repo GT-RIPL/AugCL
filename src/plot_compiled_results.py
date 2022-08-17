@@ -265,11 +265,12 @@ if __name__ == "__main__":
     parser.add_argument("--compiled_csv_path", type=str, required=True)
     parser.add_argument("--y_axis_title", type=str, required=True)
     parser.add_argument("--fig_save_name", type=str, default="no_name")
+    parser.add_argument("--smooth_factor", type=float, default=0.0)
     parser.add_argument("--legend", default=True, type=bool)
     args = parser.parse_args()
 
     df = pd.read_csv(args.compiled_csv_path)
     fig = line_plot(
-        df, "step", args.y_axis_title, "seed", "method_name", legend=args.legend
+        df, "step", args.y_axis_title, "seed", "method_name", legend=args.legend, smooth_factor=args.smooth_factor
     )
     fig_save("./", args.fig_save_name, fig)
