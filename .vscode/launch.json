@@ -243,5 +243,32 @@
                 "conv"
             ]
         },
+        {
+            "name": "Compile CSV",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/src/compile_csv.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": [
+                "--alg_dirs",
+                "./logs/cartpole_swingup/drq/no_id",
+                "./logs/cartpole_swingup/drq_copy/no_id"
+            ]
+        },
+        {
+            "name": "Plot Compiled Results",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/src/plot_compiled_results.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": [
+                "--compiled_csv_path",
+                "compiled_CSV/No_name.csv",
+                "--y_axis_title",
+                "episode_reward"
+            ]
+        },
     ]
 }

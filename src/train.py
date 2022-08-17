@@ -140,15 +140,17 @@ def main(args):
             for f in os.listdir(model_dir)
             if os.path.isfile(os.path.join(model_dir, f)) and f.endswith(".pt")
         ]
-        ckpt_steps.sort()
-        assert len(ckpt_steps) > 0, f"No checkpoint files found in: {model_dir}"
-        start_step = ckpt_steps[-1]
-        agent, replay_buffer = load_agent_and_buffer(
-            step=start_step,
-            model_dir=model_dir,
-            buffer_dir=os.path.join(work_dir, "buffer"),
-            replay_buffer=replay_buffer,
-        )
+        if ckpt_steps:
+            ckpt_steps.sort()
+            start_step = ckpt_steps[-1]
+            agent, replay_buffer = load_agent_and_buffer(
+                step=start_step,
+                model_dir=model_dir,
+                buffer_dir=os.path.join(work_dir, "buffer"),
+                replay_buffer=replay_buffer,
+            )
+        else:
+            print(f"No weights found in {model_dir}. Starting from scratch.")
     elif args.curriculum_step is not None:
         print(
             f"'curriculum_train' set to true, loading model ckpt and replay buffer ckpt at step: {args.curriculum_step}"
