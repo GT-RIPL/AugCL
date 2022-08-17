@@ -15,11 +15,11 @@ def parse_args():
     parser = argparse.ArgumentParser()
 
     # environment
-    parser.add_argument("--aug_key", default="thresholded_overlay_color", type=str)
+    parser.add_argument("--aug_key", default="splice_overlay", type=str)
     parser.add_argument("--save_file_name", default="aug_test.png", type=str)
     parser.add_argument(
         "--sample_png_folder",
-        default="samples/walker/walk/distracting_cs/0.1",
+        default="samples/finger/spin/train",
         type=str,
     )
 

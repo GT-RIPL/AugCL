@@ -196,13 +196,11 @@
             "justMyCode": true,
             "args": [
                 "--domain_name",
-                "finger",
+                "walker",
                 "--task_name",
-                "spin",
+                "walk",
                 "--eval_mode",
-                "distracting_cs",
-                "--distracting_cs_intensity",
-                "0.1"
+                "train"
             ]
         },
         {

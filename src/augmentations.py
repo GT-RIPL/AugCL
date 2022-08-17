@@ -283,7 +283,7 @@ def create_rgb_mask(x_rgb, R_thres, G_thres, B_thres):
     return x_rgb > weight.to(x_rgb.get_device())
 
 
-def splice_overlay(x, hue_thres=0.1, sat_thres=0.15, val_thres=0.675):
+def splice_overlay(x, hue_thres=0, sat_thres=0, val_thres=0.63):
     global data_iter
     load_dataloader(batch_size=x.size(0), image_size=x.size(-1))
     overlay = _get_data_batch(x.size(0)).repeat(x.size(1) // 3, 1, 1, 1)
