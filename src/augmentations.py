@@ -283,7 +283,7 @@ def create_rgb_mask(x_rgb, R_thres, G_thres, B_thres):
     return x_rgb > weight.to(x_rgb.get_device())
 
 
-def splice_overlay(x, hue_thres=0, sat_thres=0, val_thres=0.4):
+def splice(x, hue_thres=0, sat_thres=0, val_thres=0.4):
     # 0.63 val for video_hard
     global data_iter
     load_dataloader(batch_size=x.size(0), image_size=x.size(-1))
@@ -298,21 +298,6 @@ def splice_overlay(x, hue_thres=0, sat_thres=0, val_thres=0.4):
 
 
 def splice_color(x, hue_thres=0, sat_thres=0, val_thres=0.63):
-    n, c, h, w = x.shape
-    x_rgb = x.reshape(-1, 3, h, w) / 255.0
-    mask = create_hsv_mask(
-        x_rgb=x_rgb, hue_thres=hue_thres, sat_thres=sat_thres, val_thres=val_thres
-    )
-    color = torch.from_numpy(np.random.randint(0, 255, size=(n, 3)) / 255.0).to(
-        device=x.get_device()
-    )
-    color = color.repeat(1, int(c / 3)).reshape(x_rgb.shape[0], x_rgb.shape[1])
-    color = color.unsqueeze(2).unsqueeze(3).repeat(1, 1, h, w)
-    out = (mask * x_rgb + (~mask) * color) * 255.0
-    return out.reshape(n, c, h, w).float()
-
-
-def splice_color_overlay(x, hue_thres=0, sat_thres=0, val_thres=0.63):
     global data_iter
     load_dataloader(batch_size=x.size(0), image_size=x.size(-1))
     overlay = _get_data_batch(x.size(0)).repeat(x.size(1) // 3, 1, 1, 1)
@@ -330,7 +315,7 @@ def splice_color_overlay(x, hue_thres=0, sat_thres=0, val_thres=0.63):
     return out.reshape(n, c, h, w).float()
 
 
-def splice_conv_overlay(x, hue_thres=0, sat_thres=0, val_thres=0.63):
+def splice_conv(x, hue_thres=0, sat_thres=0, val_thres=0.63):
     global data_iter
     load_dataloader(batch_size=x.size(0), image_size=x.size(-1))
     overlay = _get_data_batch(x.size(0)).repeat(x.size(1) // 3, 1, 1, 1)
@@ -469,11 +454,10 @@ aug_to_func = {
     "color_jitter": kornia_color_jitter,
     "identity": identity,
     "overlay": random_overlay,
-    "splice_overlay": splice_overlay,
+    "splice": splice,
     "crop": random_crop,
     "drac_crop": DrAC_crop,
     "cutout_color": random_cutout_color,
     "splice_color": splice_color,
-    "splice_color_overlay": splice_color_overlay,
-    "splice_conv_overlay": splice_conv_overlay,
+    "splice_conv": splice_conv,
 }
