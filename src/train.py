@@ -42,6 +42,15 @@ def evaluate(env, agent, video, num_episodes, L, step, args, test_env=False):
     return np.mean(episode_rewards)
 
 
+def get_ckpt_file_paths(model_dir: str):
+    ckpt_steps = [
+        int(f[:-3])
+        for f in os.listdir(model_dir)
+        if os.path.isfile(os.path.join(model_dir, f)) and f.endswith(".pt")
+    ]
+    return ckpt_steps
+
+
 def load_agent_and_buffer(step: int, model_dir: str, buffer_dir: str, replay_buffer):
     assert os.path.exists(
         buffer_dir
@@ -96,8 +105,10 @@ def main(args):
     args.__dict__["train_date"] = time.strftime("%m-%d-%y", time.gmtime())
 
     if not args.test_code_mode:
-        assert args.continue_train or not os.path.exists(
-            os.path.join(work_dir, "train.log")
+        assert (
+            args.continue_train
+            or args.curriculum_step is not None
+            or not os.path.exists(os.path.join(work_dir, "train.log"))
         ), "Specified working directory has existing train.log. Ending program."
     os.makedirs(work_dir, exist_ok=True)
     model_dir = utils.make_dir(os.path.join(work_dir, "model"))
@@ -135,11 +146,7 @@ def main(args):
 
     if args.continue_train:
         print("'continue_train' set to true, loading model ckpt and replay buffer ckpt")
-        ckpt_steps = [
-            int(f[:-3])
-            for f in os.listdir(model_dir)
-            if os.path.isfile(os.path.join(model_dir, f)) and f.endswith(".pt")
-        ]
+        ckpt_steps = get_ckpt_file_paths(model_dir=model_dir)
         if ckpt_steps:
             ckpt_steps.sort()
             start_step = ckpt_steps[-1]
@@ -155,30 +162,44 @@ def main(args):
         print(
             f"'curriculum_train' set to true, loading model ckpt and replay buffer ckpt at step: {args.curriculum_step}"
         )
-        prev_work_dir = os.path.join(
-            args.log_dir,
-            args.domain_name + "_" + args.task_name,
-            args.prev_algorithm,
-            args.prev_id,
-            "seed_" + str(args.seed),
-        )
-        start_step = args.curriculum_step
-        prev_agent, replay_buffer = load_agent_and_buffer(
-            step=start_step,
-            model_dir=os.path.join(prev_work_dir, "model"),
-            buffer_dir=os.path.join(prev_work_dir, "buffer"),
-            replay_buffer=replay_buffer,
-        )
+        ckpt_steps = get_ckpt_file_paths(model_dir=model_dir)
+        if ckpt_steps:
+            ckpt_steps.sort()
+            start_step = ckpt_steps[-1]
+            print(
+                f"Checkpoint exists for current curriculum train. Continuing training. Old start step is: {args.curriculum_step} is now {start_step}"
+            )
+            agent, replay_buffer = load_agent_and_buffer(
+                step=start_step,
+                model_dir=os.path.join(work_dir, "model"),
+                buffer_dir=os.path.join(work_dir, "buffer"),
+                replay_buffer=replay_buffer,
+            )
+        else:
+            start_step = args.curriculum_step
+            prev_work_dir = os.path.join(
+                args.log_dir,
+                args.domain_name + "_" + args.task_name,
+                args.prev_algorithm,
+                args.prev_id,
+                "seed_" + str(args.seed),
+            )
 
-        utils.soft_update_params(net=prev_agent.actor, target_net=agent.actor, tau=1)
-        utils.soft_update_params(net=prev_agent.critic, target_net=agent.critic, tau=1)
-        utils.soft_update_params(
-            net=prev_agent.critic_target, target_net=agent.critic_target, tau=1
-        )
+            prev_agent, replay_buffer = load_agent_and_buffer(
+                step=start_step,
+                model_dir=os.path.join(prev_work_dir, "model"),
+                buffer_dir=os.path.join(prev_work_dir, "buffer"),
+                replay_buffer=replay_buffer,
+            )
 
-        if hasattr(agent, "strong_critic"):
             utils.soft_update_params(
-                net=prev_agent.critic, target_net=agent.strong_critic, tau=1
+                net=prev_agent.actor, target_net=agent.actor, tau=1
+            )
+            utils.soft_update_params(
+                net=prev_agent.critic, target_net=agent.critic, tau=1
+            )
+            utils.soft_update_params(
+                net=prev_agent.critic_target, target_net=agent.critic_target, tau=1
             )
 
     L = Logger(work_dir)
