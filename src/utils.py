@@ -153,34 +153,44 @@ class ReplayBuffer(object):
         self.full = False
 
     def save(self, save_dir):
-        if self.idx == self.last_save:
-            return
-        path = os.path.join(save_dir, "%d_%d.pt" % (self.last_save, self.idx))
-        payload = [
-            self._obses[self.last_save : self.idx],
-            self.actions[self.last_save : self.idx],
-            self.rewards[self.last_save : self.idx],
-            self.not_dones[self.last_save : self.idx],
-        ]
-        self.last_save = self.idx
+        # if self.idx == self.last_save:
+        #     return
+        # path = os.path.join(save_dir, "%d_%d.pt" % (self.last_save, self.idx))
+        # payload = [
+        #     self._obses[self.last_save : self.idx],
+        #     self.actions[self.last_save : self.idx],
+        #     self.rewards[self.last_save : self.idx],
+        #     self.not_dones[self.last_save : self.idx],
+        # ]
+        # self.last_save = self.idx
+        # torch.save(payload, path)
+
+        path = os.path.join(save_dir, "buffer.pt")
+        payload = [self._obses, self.actions, self.rewards, self.not_dones, self.idx]
         torch.save(payload, path)
 
     def load(self, save_dir, end_step=None):
-        chunks = os.listdir(save_dir)
-        chucks = sorted(chunks, key=lambda x: int(x.split("_")[0]))
-        for chunk in chucks:
-            start, end = [int(x) for x in chunk.split(".")[0].split("_")]
-            path = os.path.join(save_dir, chunk)
-            payload = torch.load(path)
-            assert self.idx == start
-            self._obses[start:end] = payload[0]
-            self.actions[start:end] = payload[1]
-            self.rewards[start:end] = payload[2]
-            self.not_dones[start:end] = payload[3]
-            self.idx = end
+        # chunks = os.listdir(save_dir)
+        # chucks = sorted(chunks, key=lambda x: int(x.split("_")[0]))
+        # for chunk in chucks:
+        #     start, end = [int(x) for x in chunk.split(".")[0].split("_")]
+        #     path = os.path.join(save_dir, chunk)
+        #     payload = torch.load(path)
+        #     assert self.idx == start
+        #     self._obses[start:end] = payload[0]
+        #     self.actions[start:end] = payload[1]
+        #     self.rewards[start:end] = payload[2]
+        #     self.not_dones[start:end] = payload[3]
+        #     self.idx = end
 
-            if end == end_step:
-                break
+        #     if end == end_step:
+        #         break
+        payload = torch.load(os.path.join(save_dir, "buffer.pt"))
+        self._obses = payload[0]
+        self.actions = payload[1]
+        self.rewards = payload[2]
+        self.not_dones = payload[3]
+        self.idx = payload[4]
 
     def tensor_buffer_samples(self, idxs):
         obs, next_obs = self._encode_obses(idxs)

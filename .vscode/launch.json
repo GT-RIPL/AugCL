@@ -136,25 +136,7 @@
             ]
         },
         {
-            "name": "Continue DrQ train",
-            "type": "python",
-            "request": "launch",
-            "program": "${workspaceFolder}/src/train.py",
-            "console": "integratedTerminal",
-            "justMyCode": true,
-            "args": [
-                "--id",
-                "save_buffer_copy",
-                "--eval_mode",
-                "color_hard",
-                "--algorithm",
-                "drq",
-                "--continue_train",
-                "True"
-            ]
-        },
-        {
-            "name": "DrQ train with replay buffer",
+            "name": "Continue SAC train",
             "type": "python",
             "request": "launch",
             "program": "${workspaceFolder}/src/train.py",
@@ -165,12 +147,26 @@
                 "with_buffer",
                 "--eval_mode",
                 "color_hard",
-                "--algorithm",
-                "drq",
+                "--continue_train",
+                "True"
+            ]
+        },
+        {
+            "name": "SAC train with replay buffer",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/src/train.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": [
+                "--id",
+                "with_buffer",
+                "--eval_mode",
+                "color_hard",
                 "--save_buffer",
                 "True",
                 "--save_freq",
-                "2k",
+                "1k",
                 "--train_steps",
                 "10k"
             ]
