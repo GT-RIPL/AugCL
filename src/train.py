@@ -58,7 +58,7 @@ def load_agent_and_buffer(step: int, model_dir: str, buffer_dir: str, replay_buf
     ckpt_path = os.path.join(model_dir, f"{str(step)}.pt")
     assert os.path.exists(ckpt_path), f"No checkpoint at :{ckpt_path} exists."
     agent = torch.load(ckpt_path)
-    replay_buffer.load(save_dir=buffer_dir, end_step=step)
+    replay_buffer.load(save_dir=buffer_dir, end_step=step + 1)
     return agent, replay_buffer
 
 
