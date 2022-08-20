@@ -192,7 +192,7 @@ class ReplayBuffer(object):
             self.actions = payload[1]
             self.rewards = payload[2]
             self.not_dones = payload[3]
-            self.idx = end_step
+            self.idx = end_step if end_step else payload[4]
 
     def tensor_buffer_samples(self, idxs):
         obs, next_obs = self._encode_obses(idxs)
