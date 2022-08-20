@@ -186,7 +186,7 @@ class ReplayBuffer(object):
 
                 if end == end_step:
                     break
-        except AssertionError:
+        except:
             payload = torch.load(os.path.join(save_dir, "buffer.pt"))
             self._obses = payload[0]
             self.actions = payload[1]
