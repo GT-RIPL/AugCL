@@ -100,6 +100,7 @@ def line_plot(
     nlegend_cols=1,
     fetch_std=False,
     ax_dims: Tuple[int, int] = (5, 4),
+    line_width: int = 1,
 ):
     """
     :param avg_key: This is typically the seed.
@@ -220,7 +221,7 @@ def line_plot(
 
         lines.append((ladd[0], line_to_add[0]))
 
-        plt.setp(line_to_add, linewidth=2, color=group_colors[name])
+        plt.setp(line_to_add, linewidth=line_width, color=group_colors[name])
         min_y_fill = y_vals - y_std
         max_y_fill = y_vals + y_std
 
@@ -265,13 +266,22 @@ if __name__ == "__main__":
     parser.add_argument("--compiled_csv_path", type=str, required=True)
     parser.add_argument("--y_axis_title", type=str, required=True)
     parser.add_argument("--fig_save_name", type=str, default="no_name")
-    parser.add_argument("--smooth_factor", type=float, default=0.0)
+    parser.add_argument("--smooth_factor", type=float, default=0.5)
     parser.add_argument("--legend", default=True, type=bool)
     parser.add_argument("--title", default=None, type=str)
+    parser.add_argument("--line_width", default=1, type=int)
     args = parser.parse_args()
 
     df = pd.read_csv(args.compiled_csv_path)
     fig = line_plot(
-        df, "step", args.y_axis_title, "seed", "method_name", legend=args.legend, smooth_factor=args.smooth_factor, title=args.title
+        df,
+        "step",
+        args.y_axis_title,
+        "seed",
+        "method_name",
+        legend=args.legend,
+        smooth_factor=args.smooth_factor,
+        title=args.title,
+        line_width=args.line_width
     )
     fig_save("./", args.fig_save_name, fig)
