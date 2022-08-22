@@ -1,5 +1,4 @@
 import argparse
-import numpy as np
 import augmentations
 import torch
 import os
@@ -9,17 +8,17 @@ from torchvision import transforms
 from PIL import Image
 import matplotlib.pyplot as plt
 from torchvision.utils import make_grid
-
+from torchvision.utils import save_image
 
 def parse_args():
     parser = argparse.ArgumentParser()
 
     # environment
-    parser.add_argument("--aug_key", default="splice_overlay", type=str)
+    parser.add_argument("--aug_key", default="splice", type=str)
     parser.add_argument("--save_file_name", default="aug_test.png", type=str)
     parser.add_argument(
         "--sample_png_folder",
-        default="samples/finger/spin/train",
+        default="samples/walker/walk/train",
         type=str,
     )
 
@@ -71,6 +70,7 @@ def main(args):
     augs_tnsr = augmentations.aug_to_func[args.aug_key](imgs_tnsr.to("cuda")) / 255.0
     show_stacked_imgs(augs_tnsr.cpu().numpy())
     plt.savefig(args.save_file_name)
+    save_image(augs_tnsr[0,:3], "test_img.png")
 
 
 if __name__ == "__main__":

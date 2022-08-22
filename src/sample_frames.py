@@ -13,7 +13,7 @@ def main(args):
             seed=args.seed + 42,
             episode_length=args.episode_length,
             action_repeat=args.action_repeat,
-            image_size=150,
+            image_size=400,
             mode=args.eval_mode,
             intensity=args.distracting_cs_intensity,
             frame_stack=1,

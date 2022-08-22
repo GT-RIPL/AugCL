@@ -182,10 +182,10 @@ class ReplayBuffer(object):
                 self.actions[start:end] = payload[1]
                 self.rewards[start:end] = payload[2]
                 self.not_dones[start:end] = payload[3]
-
+                self.idx = end
+                
                 if end == end_step:
                     break
-            self.idx = end
         except:
             payload = torch.load(os.path.join(save_dir, "buffer.pt"))
             self._obses = payload[0]
