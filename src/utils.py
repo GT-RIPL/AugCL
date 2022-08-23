@@ -153,21 +153,21 @@ class ReplayBuffer(object):
         self.full = False
 
     def save(self, save_dir):
-        # if self.idx == self.last_save:
-        #     return
-        # path = os.path.join(save_dir, "%d_%d.pt" % (self.last_save, self.idx))
-        # payload = [
-        #     self._obses[self.last_save : self.idx],
-        #     self.actions[self.last_save : self.idx],
-        #     self.rewards[self.last_save : self.idx],
-        #     self.not_dones[self.last_save : self.idx],
-        # ]
-        # self.last_save = self.idx
-        # torch.save(payload, path)
-
-        path = os.path.join(save_dir, "buffer.pt")
-        payload = [self._obses, self.actions, self.rewards, self.not_dones, self.idx]
+        if self.idx == self.last_save:
+            return
+        path = os.path.join(save_dir, "%d_%d.pt" % (self.last_save, self.idx))
+        payload = [
+            self._obses[self.last_save : self.idx],
+            self.actions[self.last_save : self.idx],
+            self.rewards[self.last_save : self.idx],
+            self.not_dones[self.last_save : self.idx],
+        ]
+        self.last_save = self.idx
         torch.save(payload, path)
+
+        # path = os.path.join(save_dir, "buffer.pt")
+        # payload = [self._obses, self.actions, self.rewards, self.not_dones, self.idx]
+        # torch.save(payload, path)
 
     def load(self, save_dir, end_step=None):
         try:
