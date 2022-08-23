@@ -10,6 +10,7 @@ def main(args):
             alg_seed_path = os.path.join(dir_path, f"seed_{seed}")
             csv_path = os.path.join(alg_seed_path, args.csv_file_name)
             curr_df = pd.read_csv(csv_path)
+            curr_df = curr_df.loc[curr_df["step"] % args.step_interval == 0]
             subset_df = curr_df[["step", args.metric]]
             subset_df.rename(columns={args.metric: "perf"})
             subset_df["seed"] = seed
@@ -33,6 +34,7 @@ if __name__ == "__main__":
     parser.add_argument("--max_seed", default=1, type=int)
     parser.add_argument("--metric", default="episode_reward", type=str)
     parser.add_argument("--csv_file_name", default="train.csv", type=str)
+    parser.add_argument("--step_interval", default=1000, type=int)
     args = parser.parse_args()
     args.method_names = args.method_names.split("-")
     main(args)
