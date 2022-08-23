@@ -14,7 +14,7 @@ def parse_args():
     parser = argparse.ArgumentParser()
 
     # environment
-    parser.add_argument("--aug_key", default="splice", type=str)
+    parser.add_argument("--data_aug", default="splice_color", type=str)
     parser.add_argument("--save_file_name", default="aug_test.png", type=str)
     parser.add_argument(
         "--sample_png_folder",
@@ -67,7 +67,7 @@ def main(args):
         tnsr_list.append(img_tnsr)
 
     imgs_tnsr = torch.unsqueeze(torch.cat(tnsr_list, dim=0), dim=0) * 255
-    augs_tnsr = augmentations.aug_to_func[args.aug_key](imgs_tnsr.to("cuda")) / 255.0
+    augs_tnsr = augmentations.aug_to_func[args.data_aug](imgs_tnsr.to("cuda")) / 255.0
     show_stacked_imgs(augs_tnsr.cpu().numpy())
     plt.savefig(args.save_file_name)
     save_image(augs_tnsr[0,:3], "test_img.png")

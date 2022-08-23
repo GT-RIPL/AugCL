@@ -98,7 +98,7 @@ def main(args):
     # Set working directory
     work_dir = args.dir_path
     checkpt_path = os.path.join(
-        train_dot_dict.checkpoint_dir, str(train_dot_dict.train_steps) + ".pt"
+        args.dir_path, "model", str(train_dot_dict.train_steps) + ".pt"
     )
     print("Working directory:", work_dir)
 
