@@ -10,6 +10,15 @@ from algorithms.factory import make_agent
 from logger import Logger
 from video import VideoRecorder
 
+from interruptible_utils import (
+    EXIT,
+    REQUEUE,
+    get_requeue_state,
+    init_handlers,
+    save_state,
+    save_and_requeue,
+)
+
 
 def evaluate(env, agent, video, num_episodes, L, step, args, test_env=False):
     episode_rewards = []
@@ -144,7 +153,12 @@ def main(args):
 
     start_step, episode, episode_reward, done = 0, 0, 0, True
 
-    if args.continue_train:
+    requeue_state = get_requeue_state()
+    if requeue_state is not None:
+        agent = torch.load(requeue_state["agent"])
+        replay_buffer = torch.load(requeue_state["replay_buffer"])
+        start_step = requeue_state["step"]
+    elif args.continue_train:
         print("'continue_train' set to true, loading model ckpt and replay buffer ckpt")
         ckpt_steps = get_ckpt_file_paths(model_dir=model_dir)
         if ckpt_steps:
@@ -157,50 +171,29 @@ def main(args):
                 replay_buffer=replay_buffer,
             )
         else:
-            print(f"No weights found in {model_dir}. Starting from scratch.")
+            raise ValueError("No checkpoints found exiting...")
     elif args.curriculum_step is not None:
-        print(
-            f"'curriculum_train' set to true, loading model ckpt and replay buffer ckpt at step: {args.curriculum_step}"
+        start_step = args.curriculum_step
+        prev_work_dir = os.path.join(
+            args.log_dir,
+            args.domain_name + "_" + args.task_name,
+            args.prev_algorithm,
+            args.prev_id,
+            "seed_" + str(args.seed),
         )
-        ckpt_steps = get_ckpt_file_paths(model_dir=model_dir)
-        if ckpt_steps:
-            ckpt_steps.sort()
-            start_step = ckpt_steps[-1]
-            print(
-                f"Checkpoint exists for current curriculum train. Continuing training. Old start step is: {args.curriculum_step} is now {start_step}"
-            )
-            agent, replay_buffer = load_agent_and_buffer(
-                step=start_step,
-                model_dir=os.path.join(work_dir, "model"),
-                buffer_dir=os.path.join(work_dir, "buffer"),
-                replay_buffer=replay_buffer,
-            )
-        else:
-            start_step = args.curriculum_step
-            prev_work_dir = os.path.join(
-                args.log_dir,
-                args.domain_name + "_" + args.task_name,
-                args.prev_algorithm,
-                args.prev_id,
-                "seed_" + str(args.seed),
-            )
 
-            prev_agent, replay_buffer = load_agent_and_buffer(
-                step=start_step,
-                model_dir=os.path.join(prev_work_dir, "model"),
-                buffer_dir=os.path.join(prev_work_dir, "buffer"),
-                replay_buffer=replay_buffer,
-            )
+        prev_agent, replay_buffer = load_agent_and_buffer(
+            step=start_step,
+            model_dir=os.path.join(prev_work_dir, "model"),
+            buffer_dir=os.path.join(prev_work_dir, "buffer"),
+            replay_buffer=replay_buffer,
+        )
 
-            utils.soft_update_params(
-                net=prev_agent.actor, target_net=agent.actor, tau=1
-            )
-            utils.soft_update_params(
-                net=prev_agent.critic, target_net=agent.critic, tau=1
-            )
-            utils.soft_update_params(
-                net=prev_agent.critic_target, target_net=agent.critic_target, tau=1
-            )
+        utils.soft_update_params(net=prev_agent.actor, target_net=agent.actor, tau=1)
+        utils.soft_update_params(net=prev_agent.critic, target_net=agent.critic, tau=1)
+        utils.soft_update_params(
+            net=prev_agent.critic_target, target_net=agent.critic_target, tau=1
+        )
 
     L = Logger(work_dir)
     start_time = time.time()
@@ -215,6 +208,14 @@ def main(args):
             if step % args.eval_freq == 0 and not (
                 args.continue_train and step == start_step
             ):
+                if REQUEUE.is_set():
+                    save_state(
+                        dict(
+                            agent=agent,
+                            replay_buffer=replay_buffer,
+                            step=step,
+                        )
+                    )
                 num_episodes = (
                     args.eval_episodes_final_step
                     if step == args.train_steps
@@ -279,9 +280,22 @@ def main(args):
 
         episode_step += 1
 
+        if EXIT.is_set():
+            break
+
+    if REQUEUE.is_set():
+        save_and_requeue(
+            dict(
+                agent=agent,
+                replay_buffer=replay_buffer,
+                step=step,
+            )
+        )
+
     print("Completed training for", work_dir)
 
 
 if __name__ == "__main__":
     args = parse_args()
+    init_handlers()
     main(args)

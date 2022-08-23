@@ -8,12 +8,17 @@ class RAD(SAC):
         self.aug_keys = args.data_aug.split("-")
         self.aug_funcs = [augmentations.aug_to_func[key] for key in self.aug_keys]
 
+    def apply_aug(self, x):
+        for func in self.aug_funcs:
+            x = func(x)
+
+        return x
+
     def update(self, replay_buffer, L, step):
         obs, action, reward, next_obs, not_done = replay_buffer.sample()
 
-        for func in self.aug_funcs:
-            obs = func(obs)
-            next_obs = func(next_obs)
+        obs = self.apply_aug(obs)
+        next_obs = self.apply_aug(next_obs)
 
         self.update_critic(obs, action, reward, next_obs, not_done, L, step)
 

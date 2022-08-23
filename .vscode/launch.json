@@ -30,7 +30,9 @@
                 "--distracting_cs_intensity",
                 "0.5",
                 "--test_code_mode",
-                "True"
+                "True",
+                "--data_aug",
+                "overlay"
             ]
         },
         {
@@ -53,8 +55,8 @@
                 "0.5",
                 "--test_code_mode",
                 "True",
-                "--use_overlay",
-                "True"
+                "--data_aug",
+                "overlay"
             ]
         },
         {
@@ -118,7 +120,7 @@
                 "--algorithm",
                 "rad",
                 "--data_aug",
-                "splice_overlay",
+                "splice",
                 "--save_freq",
                 "5k"
             ]

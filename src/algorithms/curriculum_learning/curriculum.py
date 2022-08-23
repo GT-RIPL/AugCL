@@ -1,19 +1,14 @@
 from utils import ReplayBuffer
-from algorithms.sac import SAC
-import augmentations as augmentations
+from algorithms.rad import RAD
 
 
-class Curriculum(SAC):
+class Curriculum(RAD):
     def __init__(self, obs_shape, action_shape, args):
         super().__init__(obs_shape, action_shape, args)
-        self.aug_keys = args.data_aug.split("-")
-        self.aug_funcs = [augmentations.aug_to_func[key] for key in self.aug_keys]
 
     def update(self, replay_buffer: ReplayBuffer, L, step):
         obs, action, reward, next_obs, not_done = replay_buffer.sample()
-
-        for func in self.aug_funcs:
-            obs = func(obs)
+        obs = self.apply_aug(obs)
 
         self.update_critic(
             obs=obs,

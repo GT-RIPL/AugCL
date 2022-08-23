@@ -62,13 +62,9 @@ def add_SAC_args():
     parser.add_argument("--svea_alpha", default=0.5, type=float)
     parser.add_argument("--svea_beta", default=0.5, type=float)
 
-    # SVEA and SODA
-    parser.add_argument("--use_overlay", default=False, type=bool)
-
-    # DrQ and DrQ inspired
+    # DrQ
     parser.add_argument("--drq_k", default=1, type=int)
     parser.add_argument("--drq_m", default=1, type=int)
-    parser.add_argument("--next_obs_data_aug", default="identity", type=str)
 
     # Data Augmentation
     parser.add_argument("--data_aug", default="identity", type=str)

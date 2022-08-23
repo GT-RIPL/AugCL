@@ -1,21 +1,18 @@
-import numpy as np
 import torch
-import torch.nn as nn
 import torch.nn.functional as F
 from copy import deepcopy
 import utils
 import algorithms.modules as m
-from algorithms.sac import SAC
+from algorithms.rad import RAD
 import augmentations
 
 
-class SODA(SAC):
+class SODA(RAD):
     def __init__(self, obs_shape, action_shape, args):
         super().__init__(obs_shape, action_shape, args)
         self.aux_update_freq = args.aux_update_freq
         self.soda_batch_size = args.soda_batch_size
         self.soda_tau = args.soda_tau
-        self.aug_func = augmentations.random_overlay if args.use_overlay else augmentations.random_conv
 
         shared_cnn = self.critic.encoder.shared_cnn
         aux_cnn = self.critic.encoder.head_cnn
@@ -55,7 +52,7 @@ class SODA(SAC):
 
         x = augmentations.random_crop(x)
         aug_x = augmentations.random_crop(aug_x)
-        aug_x = self.aug_func(aug_x)
+        aug_x = self.apply_aug(aug_x)
 
         soda_loss = self.compute_soda_loss(aug_x, x)
 
