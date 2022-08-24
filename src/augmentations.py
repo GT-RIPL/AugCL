@@ -297,7 +297,7 @@ def splice(x, hue_thres=0, sat_thres=0, val_thres=0.4):
     return out.reshape(n, c, h, w)
 
 
-def splice_color(x, hue_thres=0, sat_thres=0, val_thres=0.6):
+def splice_color(x, hue_thres=0, sat_thres=0, val_thres=0.4):
     global data_iter
     load_dataloader(batch_size=x.size(0), image_size=x.size(-1))
     overlay = _get_data_batch(x.size(0)).repeat(x.size(1) // 3, 1, 1, 1)
@@ -315,7 +315,7 @@ def splice_color(x, hue_thres=0, sat_thres=0, val_thres=0.6):
     return out.reshape(n, c, h, w).float()
 
 
-def splice_conv(x, hue_thres=0, sat_thres=0, val_thres=0.6):
+def splice_conv(x, hue_thres=0, sat_thres=0, val_thres=0.4):
     global data_iter
     load_dataloader(batch_size=x.size(0), image_size=x.size(-1))
     overlay = _get_data_batch(x.size(0)).repeat(x.size(1) // 3, 1, 1, 1)
