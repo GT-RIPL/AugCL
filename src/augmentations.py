@@ -330,6 +330,24 @@ def splice_conv(x, hue_thres=0, sat_thres=0, val_thres=0.4):
     return out.reshape(n, c, h, w)
 
 
+def splice_color_conv(x, hue_thres=0, sat_thres=0, val_thres=0.7):
+    global data_iter
+    n, c, h, w = x.shape
+    x_rgb = x.reshape(-1, 3, h, w) / 255.0
+    mask = create_hsv_mask(
+        x_rgb=x_rgb, hue_thres=hue_thres, sat_thres=sat_thres, val_thres=val_thres
+    )
+    color = torch.from_numpy(np.random.randint(0, 255, size=(n, 3))).to(
+        device=x.get_device()
+    )
+    color = color.repeat(1, int(c / 3)).reshape(x_rgb.shape[0], x_rgb.shape[1])
+    color = color.unsqueeze(2).unsqueeze(3).repeat(1, 1, h, w)
+    conv_out = random_conv(x)
+    conv_out = conv_out.reshape(-1, 3, h, w)
+    out = mask * color + (~mask) * conv_out
+    return out.reshape(n, c, h, w)
+
+
 def random_cutout_color(imgs, min_cut=10, max_cut=30):
     """
     args:
@@ -460,4 +478,5 @@ aug_to_func = {
     "cutout_color": random_cutout_color,
     "splice_color": splice_color,
     "splice_conv": splice_conv,
+    "splice_color_conv": splice_color_conv
 }
