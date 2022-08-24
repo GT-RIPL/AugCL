@@ -266,5 +266,21 @@
                 "episode_reward"
             ]
         },
+        {
+            "name": "Calculate Mu and Std",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/src/calculate_mu_and_std.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": [
+                "--dir_path",
+                "./test",
+                "--column_value",
+                "100",
+                "--row_value",
+                "step"
+            ]
+        },
     ]
 }
