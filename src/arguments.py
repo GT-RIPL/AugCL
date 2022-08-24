@@ -68,6 +68,12 @@ def add_SAC_args():
 
     # Data Augmentation
     parser.add_argument("--data_aug", default="identity", type=str)
+    parser.add_argument(
+        "--aug_params",
+        default=None,
+        type=str,
+        help="Should be in dictionary form: {\"data_aug\":{\"param1\":value,\"param2\":value}}",
+    )
 
     # eval
     parser.add_argument("--save_freq", default="100k", type=str)
