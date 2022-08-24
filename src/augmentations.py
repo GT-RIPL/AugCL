@@ -348,6 +348,21 @@ def splice_color_conv(x, hue_thres=0, sat_thres=0, val_thres=0.7):
     return out.reshape(n, c, h, w)
 
 
+def splice_conv_conv(x, hue_thres=0, sat_thres=0, val_thres=0.7):
+    global data_iter
+    n, c, h, w = x.shape
+    x_rgb = x.reshape(-1, 3, h, w) / 255.0
+    mask = create_hsv_mask(
+        x_rgb=x_rgb, hue_thres=hue_thres, sat_thres=sat_thres, val_thres=val_thres
+    )
+    conv_out = random_conv(x)
+    conv_out = conv_out.reshape(-1, 3, h, w)
+    conv_out_2 = random_conv(x)
+    conv_out_2 = conv_out_2.reshape(-1, 3, h, w)
+    out = mask * conv_out_2 + (~mask) * conv_out
+    return out.reshape(n, c, h, w)
+
+
 def random_cutout_color(imgs, min_cut=10, max_cut=30):
     """
     args:
@@ -478,5 +493,6 @@ aug_to_func = {
     "cutout_color": random_cutout_color,
     "splice_color": splice_color,
     "splice_conv": splice_conv,
-    "splice_color_conv": splice_color_conv
+    "splice_color_conv": splice_color_conv,
+    "splice_conv_conv": splice_conv_conv,
 }
