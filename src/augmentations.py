@@ -283,7 +283,7 @@ def create_rgb_mask(x_rgb, R_thres, G_thres, B_thres):
 
 
 def splice(x, hue_thres=0, sat_thres=0, val_thres=0.4):
-    # 0.55 val for video_hard, 0.4 for video_easy
+    # 0.6 val for video_hard, 0.4 for video_easy
     global data_iter
     load_dataloader(batch_size=x.size(0), image_size=x.size(-1))
     overlay = _get_data_batch(x.size(0)).repeat(x.size(1) // 3, 1, 1, 1)
@@ -343,7 +343,7 @@ def splice_hue_hue(x, hue_thres=0, sat_thres=0, val_thres=0.65):
     return x_rgb.reshape(n, c, h, w) * 255.0
 
 
-def splice_conv_conv(x, hue_thres=0, sat_thres=0, val_thres=0.7):
+def splice_conv_conv(x, hue_thres=0, sat_thres=0, val_thres=0.6):
     global data_iter
     n, c, h, w = x.shape
     x_rgb = x.reshape(-1, 3, h, w) / 255.0
