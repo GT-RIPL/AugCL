@@ -181,8 +181,8 @@
             "console": "integratedTerminal",
             "justMyCode": true,
             "args": [
-                "--aug_key",
-                "splice_overlay",
+                "--data_aug",
+                "cs_splice",
             ]
         },
         {

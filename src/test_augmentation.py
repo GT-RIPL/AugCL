@@ -18,7 +18,7 @@ def parse_args():
     parser.add_argument("--save_file_name", default="aug_test.png", type=str)
     parser.add_argument(
         "--sample_png_folder",
-        default="samples/cartpole/swingup/train",
+        default="samples/walker/walk/train",
         type=str,
     )
 
