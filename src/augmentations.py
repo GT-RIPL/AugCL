@@ -293,26 +293,8 @@ def splice(x, hue_thres=0, sat_thres=0, val_thres=0.4):
     mask = create_hsv_mask(
         x_rgb=x_rgb, hue_thres=hue_thres, sat_thres=sat_thres, val_thres=val_thres
     )
-    out = (mask * x_rgb + (~mask) * overlay) * 255.0
-    return out.reshape(n, c, h, w)
-
-
-def splice_color(x, hue_thres=0, sat_thres=0, val_thres=0.4):
-    global data_iter
-    load_dataloader(batch_size=x.size(0), image_size=x.size(-1))
-    overlay = _get_data_batch(x.size(0)).repeat(x.size(1) // 3, 1, 1, 1)
-    n, c, h, w = x.shape
-    x_rgb = x.reshape(-1, 3, h, w) / 255.0
-    mask = create_hsv_mask(
-        x_rgb=x_rgb, hue_thres=hue_thres, sat_thres=sat_thres, val_thres=val_thres
-    )
-    color = torch.from_numpy(np.random.randint(0, 255, size=(n, 3)) / 255.0).to(
-        device=x.get_device()
-    )
-    color = color.repeat(1, int(c / 3)).reshape(x_rgb.shape[0], x_rgb.shape[1])
-    color = color.unsqueeze(2).unsqueeze(3).repeat(1, 1, h, w)
-    out = (mask * color + ~mask * overlay) * 255.0
-    return out.reshape(n, c, h, w).float()
+    x_rgb[~mask] = overlay[~mask]
+    return x_rgb.reshape(n, c, h, w) * 255.0
 
 
 def splice_conv(x, hue_thres=0, sat_thres=0, val_thres=0.4):
@@ -326,26 +308,40 @@ def splice_conv(x, hue_thres=0, sat_thres=0, val_thres=0.4):
     )
     conv_out = random_conv(x)
     conv_out = conv_out.reshape(-1, 3, h, w)
-    out = mask * conv_out + ((~mask) * overlay * 255.0)
-    return out.reshape(n, c, h, w)
+    x_rgb[mask] = conv_out[mask]
+    x_rgb[~mask] = overlay[~mask] * 255.0
+    return x_rgb.reshape(n, c, h, w)
 
 
-def splice_color_conv(x, hue_thres=0, sat_thres=0, val_thres=0.7):
+def splice_jitter(x, hue_thres=0, sat_thres=0, val_thres=0.4):
     global data_iter
+    load_dataloader(batch_size=x.size(0), image_size=x.size(-1))
+    overlay = _get_data_batch(x.size(0)).repeat(x.size(1) // 3, 1, 1, 1)
     n, c, h, w = x.shape
     x_rgb = x.reshape(-1, 3, h, w) / 255.0
     mask = create_hsv_mask(
         x_rgb=x_rgb, hue_thres=hue_thres, sat_thres=sat_thres, val_thres=val_thres
     )
-    color = torch.from_numpy(np.random.randint(0, 255, size=(n, 3))).to(
-        device=x.get_device()
+    model = TF.ColorJitter(0, 0, 0, 0.5)
+    x_jitter = model(x_rgb)
+    x_rgb[mask] = x_jitter[mask]
+    x_rgb[~mask] = overlay[~mask]
+    return x_rgb.reshape(n, c, h, w) * 255.0
+
+
+def splice_hue_hue(x, hue_thres=0, sat_thres=0, val_thres=0.65):
+    n, c, h, w = x.shape
+    x_rgb = x.reshape(-1, 3, h, w) / 255.0
+    mask = create_hsv_mask(
+        x_rgb=x_rgb, hue_thres=hue_thres, sat_thres=sat_thres, val_thres=val_thres
     )
-    color = color.repeat(1, int(c / 3)).reshape(x_rgb.shape[0], x_rgb.shape[1])
-    color = color.unsqueeze(2).unsqueeze(3).repeat(1, 1, h, w)
-    conv_out = random_conv(x)
-    conv_out = conv_out.reshape(-1, 3, h, w)
-    out = mask * color + (~mask) * conv_out
-    return out.reshape(n, c, h, w)
+    model = TF.ColorJitter(0, 0, 0, 0.5)
+    model2 = TF.ColorJitter(0, 0, 0, 0.5)
+    x_jitter_1 = model(x_rgb)
+    x_jitter_2 = model2(x_rgb)
+    x_rgb[mask] = x_jitter_1[mask]
+    x_rgb[~mask] = x_jitter_2[~mask]
+    return x_rgb.reshape(n, c, h, w) * 255.0
 
 
 def splice_conv_conv(x, hue_thres=0, sat_thres=0, val_thres=0.7):
@@ -359,8 +355,9 @@ def splice_conv_conv(x, hue_thres=0, sat_thres=0, val_thres=0.7):
     conv_out = conv_out.reshape(-1, 3, h, w)
     conv_out_2 = random_conv(x)
     conv_out_2 = conv_out_2.reshape(-1, 3, h, w)
-    out = mask * conv_out_2 + (~mask) * conv_out
-    return out.reshape(n, c, h, w)
+    x_rgb[mask] = conv_out[mask]
+    x_rgb[~mask] = conv_out_2[~mask]
+    return x_rgb.reshape(n, c, h, w)
 
 
 def random_cutout_color(imgs, min_cut=10, max_cut=30):
@@ -452,6 +449,14 @@ def random_crop(x, size=84, w1=None, h1=None, return_w1_h1=False):
     return cropped
 
 
+def random_hue(x):
+    b, c, h, w = x.shape
+    model = TF.ColorJitter(0, 0, 0, 0.5)
+    x = x.reshape(-1, 3, h, w) / 255.0
+    x = model(x)
+    return x.reshape(b, c, h, w) * 255.0
+
+
 def DrAC_crop(x, size: int = 84, pad: int = 16):
     return torch.nn.Sequential(
         torch.nn.ReplicationPad2d(pad), kornia.augmentation.RandomCrop((size, size))
@@ -491,8 +496,9 @@ aug_to_func = {
     "crop": random_crop,
     "drac_crop": DrAC_crop,
     "cutout_color": random_cutout_color,
-    "splice_color": splice_color,
     "splice_conv": splice_conv,
-    "splice_color_conv": splice_color_conv,
+    "splice_hue_hue": splice_hue_hue,
+    "splice_jitter": splice_jitter,
     "splice_conv_conv": splice_conv_conv,
+    "random_hue": random_hue,
 }
