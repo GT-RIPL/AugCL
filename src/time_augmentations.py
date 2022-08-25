@@ -3,7 +3,7 @@ import torch
 import augmentations as augmentations
 import time
 
-input = torch.rand(128, 9, 84, 84).to("cuda")
+input = torch.rand(128, 9, 84, 84).to("cuda").detach()
 
 for key, value in augmentations.aug_to_func.items():
     print(key)

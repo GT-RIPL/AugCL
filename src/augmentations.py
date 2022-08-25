@@ -266,10 +266,9 @@ def random_conv(x):
 
 def create_hsv_mask(x_rgb, hue_thres, sat_thres, val_thres):
     x_hsv = kornia.color.rgb_to_hsv(x_rgb)
-    weight = torch.ones(x_rgb.shape)
-    weight[:, 0] = weight[:, 0] * hue_thres
-    weight[:, 1] = weight[:, 1] * sat_thres
-    weight[:, 2] = weight[:, 2] * val_thres
+    b, _, h, w = x_hsv.shape
+    weight = torch.FloatTensor([hue_thres, sat_thres, val_thres]).to(x_rgb.get_device())
+    weight = weight.view(1, -1, 1, 1).repeat(b, 1, h, w)
     mask = x_hsv > weight.to(x_rgb.get_device())
     mask = torch.all(mask, dim=1)
     return mask.unsqueeze(1).repeat(1, x_rgb.shape[1], 1, 1)
