@@ -17,6 +17,9 @@ def main(args):
             mode=args.eval_mode,
             intensity=args.distracting_cs_intensity,
             frame_stack=1,
+            background_on=not args.background_off,
+            color_on=not args.color_off,
+            camera_on=not args.camera_off,
         )
     else:
         raise ValueError(

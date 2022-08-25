@@ -72,7 +72,7 @@ def add_SAC_args():
         "--aug_params",
         default=None,
         type=str,
-        help="Should be in dictionary form: {\"data_aug\":{\"param1\":value,\"param2\":value}}",
+        help='Should be in dictionary form: {"data_aug":{"param1":value,"param2":value}}',
     )
 
     # eval
@@ -82,6 +82,10 @@ def add_SAC_args():
     parser.add_argument("--eval_episodes_final_step", default=30, type=int)
     parser.add_argument("--eval_mode", default="color_hard", type=str)
     parser.add_argument("--distracting_cs_intensity", default=0.0, type=float)
+    # Add arguments for distratingCS related to turning on and off: camera, color and background
+    parser.add_argument("--color_off", default=False, type=bool)
+    parser.add_argument("--background_off", default=False, type=bool)
+    parser.add_argument("--camera_off", default=False, type=bool)
 
     # misc
     parser.add_argument("--id", default="no_id", type=str)

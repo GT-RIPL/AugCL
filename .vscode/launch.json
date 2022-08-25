@@ -198,7 +198,11 @@
                 "--task_name",
                 "walk",
                 "--eval_mode",
-                "train"
+                "distracting_cs",
+                "--distracting_cs_intensity",
+                "0.5",
+                "--camera_off",
+                "True",
             ]
         },
         {

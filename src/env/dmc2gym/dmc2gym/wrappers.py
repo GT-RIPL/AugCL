@@ -39,6 +39,9 @@ class DMCWrapper(core.Env):
         self,
         domain_name,
         task_name,
+        background_on,
+        color_on,
+        camera_on,
         task_kwargs=None,
         visualize_reward={},
         from_pixels=False,
@@ -51,9 +54,11 @@ class DMCWrapper(core.Env):
         background_dataset_paths=None,
         environment_kwargs=None,
         setting_kwargs=None,
-        channels_first=True
+        channels_first=True,
     ):
-        assert 'random' in task_kwargs, 'please specify a seed, for deterministic behaviour'
+        assert (
+            "random" in task_kwargs
+        ), "please specify a seed, for deterministic behaviour"
         self._domain_name = domain_name
         self._task_name = task_name
         self._from_pixels = from_pixels
@@ -69,6 +74,7 @@ class DMCWrapper(core.Env):
         # create task
         if is_distracting_cs:
             from env.distracting_control import suite as dc_suite
+
             self._env = dc_suite.load(
                 domain_name,
                 task_name,
@@ -77,26 +83,27 @@ class DMCWrapper(core.Env):
                 environment_kwargs=environment_kwargs,
                 difficulty=distracting_cs_intensity,
                 dynamic=True,
-                background_dataset_paths=background_dataset_paths
+                background_dataset_paths=background_dataset_paths,
+                background_on=background_on,
+                color_on=color_on,
+                camera_on=camera_on,
             )
         else:
             from dm_control import suite as dm_suite
+
             self._env = dm_suite.load(
                 domain_name=domain_name,
                 task_name=task_name,
                 task_kwargs=task_kwargs,
                 visualize_reward=visualize_reward,
                 environment_kwargs=environment_kwargs,
-                setting_kwargs=setting_kwargs
+                setting_kwargs=setting_kwargs,
             )
 
         # true and normalized action spaces
         self._true_action_space = _spec_to_box([self._env.action_spec()])
         self._norm_action_space = spaces.Box(
-            low=-1.0,
-            high=1.0,
-            shape=self._true_action_space.shape,
-            dtype=np.float32
+            low=-1.0, high=1.0, shape=self._true_action_space.shape, dtype=np.float32
         )
 
         # create observation space
@@ -109,11 +116,11 @@ class DMCWrapper(core.Env):
             self._observation_space = _spec_to_box(
                 self._env.observation_spec().values()
             )
-        
+
         self.current_state = None
 
         # set seed
-        self.seed(seed=task_kwargs.get('random', 1))
+        self.seed(seed=task_kwargs.get("random", 1))
 
     def __getattr__(self, name):
         return getattr(self._env, name)
@@ -121,9 +128,7 @@ class DMCWrapper(core.Env):
     def _get_obs(self, time_step):
         if self._from_pixels:
             obs = self.render(
-                height=self._height,
-                width=self._width,
-                camera_id=self._camera_id
+                height=self._height, width=self._width, camera_id=self._camera_id
             )
             if self._channels_first:
                 obs = obs.transpose(2, 0, 1).copy()
@@ -158,11 +163,15 @@ class DMCWrapper(core.Env):
         self._observation_space.seed(seed)
 
     def step(self, action):
-        assert self._norm_action_space.contains(action), f'received invalid action "{action}" (in norm space)'
+        assert self._norm_action_space.contains(
+            action
+        ), f'received invalid action "{action}" (in norm space)'
         action = self._convert_action(action)
-        assert self._true_action_space.contains(action), f'received invalid action "{action}" (in true space)'
+        assert self._true_action_space.contains(
+            action
+        ), f'received invalid action "{action}" (in true space)'
         reward = 0
-        extra = {'internal_state': self._env.physics.get_state().copy()}
+        extra = {"internal_state": self._env.physics.get_state().copy()}
 
         for _ in range(self._frame_skip):
             time_step = self._env.step(action)
@@ -172,7 +181,7 @@ class DMCWrapper(core.Env):
                 break
         obs = self._get_obs(time_step)
         self.current_state = _flatten_obs(time_step.observation)
-        extra['discount'] = time_step.discount
+        extra["discount"] = time_step.discount
         return obs, reward, done, extra
 
     def reset(self):
@@ -181,11 +190,9 @@ class DMCWrapper(core.Env):
         obs = self._get_obs(time_step)
         return obs
 
-    def render(self, mode='rgb_array', height=None, width=None, camera_id=0):
-        assert mode == 'rgb_array', 'only support rgb_array mode, given %s' % mode
+    def render(self, mode="rgb_array", height=None, width=None, camera_id=0):
+        assert mode == "rgb_array", "only support rgb_array mode, given %s" % mode
         height = height or self._height
         width = width or self._width
         camera_id = camera_id or self._camera_id
-        return self._env.physics.render(
-            height=height, width=width, camera_id=camera_id
-        )
+        return self._env.physics.render(height=height, width=width, camera_id=camera_id)

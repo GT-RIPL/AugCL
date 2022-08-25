@@ -97,6 +97,9 @@ def main(args):
             image_size=args.image_size,
             mode=args.eval_mode,
             intensity=args.distracting_cs_intensity,
+            background_on=not args.background_off,
+            color_on=not args.color_off,
+            camera_on=not args.camera_off,
         )
         if args.eval_mode is not None
         else None
