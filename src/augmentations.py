@@ -354,18 +354,21 @@ def splice_conv(x, hue_thres=0, sat_thres=0, val_thres=0.4):
     return x_rgb.reshape(n, c, h, w)
 
 
-def splice_jitter(x, hue_thres=0, sat_thres=0, val_thres=0.4):
+def splice_jitter(x, hue_thres=0, sat_thres=0, val_thres=0.58):
     global data_iter
     load_dataloader(batch_size=x.size(0), image_size=x.size(-1))
     overlay = _get_data_batch(x.size(0)).repeat(x.size(1) // 3, 1, 1, 1)
     n, c, h, w = x.shape
     x_rgb = x.reshape(-1, 3, h, w) / 255.0
     mask = create_hsv_mask(
-        x_rgb=x_rgb, hue_thres=hue_thres, sat_thres=sat_thres, val_thres=val_thres
+        x_rgb, hue_thres=hue_thres, sat_thres=sat_thres, val_thres=val_thres
     )
-    model = TF.ColorJitter(0.5, 0, 0, 0.5)
-    x_jitter = model(x_rgb)
-    x_rgb[mask] = x_jitter[mask]
+    for i in range(n):
+        temp_x = x[i : i + 1].reshape(-1, 3, h, w) / 255.0
+        model = TF.ColorJitter(0, 0, 0, 0.5)
+        out = model(temp_x)
+        total_out = out if i == 0 else torch.cat([total_out, out], axis=0)
+    x_rgb[mask] = total_out[mask]
     x_rgb[~mask] = overlay[~mask]
     return x_rgb.reshape(n, c, h, w) * 255.0
 
