@@ -116,7 +116,9 @@ def main(args):
     print("Working directory:", work_dir)
     args.__dict__["train_date"] = time.strftime("%m-%d-%y", time.gmtime())
 
-    if not args.test_code_mode and not REQUEUE.is_set():
+    requeue_state = get_requeue_state()
+
+    if not args.test_code_mode and not requeue_state:
         assert (
             args.continue_train
             or args.curriculum_step is not None
@@ -156,7 +158,6 @@ def main(args):
 
     start_step, episode, episode_reward, done = 0, 0, 0, True
 
-    requeue_state = get_requeue_state()
     if requeue_state is not None:
         agent = torch.load(requeue_state["agent"])
         replay_buffer = torch.load(requeue_state["replay_buffer"])
