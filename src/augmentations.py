@@ -373,21 +373,6 @@ def splice_jitter(x, hue_thres=0, sat_thres=0, val_thres=0.58):
     return x_rgb.reshape(n, c, h, w) * 255.0
 
 
-def splice_hue_hue(x, hue_thres=0, sat_thres=0, val_thres=0.65):
-    n, c, h, w = x.shape
-    x_rgb = x.reshape(-1, 3, h, w) / 255.0
-    mask = create_hsv_mask(
-        x_rgb=x_rgb, hue_thres=hue_thres, sat_thres=sat_thres, val_thres=val_thres
-    )
-    model = TF.ColorJitter(0, 0, 0, 0.5)
-    model2 = TF.ColorJitter(0, 0, 0, 0.5)
-    x_jitter_1 = model(x_rgb)
-    x_jitter_2 = model2(x_rgb)
-    x_rgb[mask] = x_jitter_1[mask]
-    x_rgb[~mask] = x_jitter_2[~mask]
-    return x_rgb.reshape(n, c, h, w) * 255.0
-
-
 def splice_conv_conv(x, hue_thres=0, sat_thres=0, val_thres=0.6):
     global data_iter
     n, c, h, w = x.shape
@@ -575,7 +560,6 @@ aug_to_func = {
     "drac_crop": DrAC_crop,
     "cutout_color": random_cutout_color,
     "splice_conv": splice_conv,
-    "splice_hue_hue": splice_hue_hue,
     "splice_jitter": splice_jitter,
     "splice_conv_conv": splice_conv_conv,
     "random_hue": random_hue,
