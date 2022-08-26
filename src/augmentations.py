@@ -296,6 +296,19 @@ def splice(x, hue_thres=0, sat_thres=0, val_thres=0.4):
     return x_rgb.reshape(n, c, h, w) * 255.0
 
 
+def CS_splice(x, hue_thres=3.5, sat_thres=0, val_thres=0):
+    global data_iter
+    load_dataloader(batch_size=x.size(0), image_size=x.size(-1))
+    overlay = _get_data_batch(x.size(0)).repeat(x.size(1) // 3, 1, 1, 1)
+    n, c, h, w = x.shape
+    x_rgb = x.reshape(-1, 3, h, w) / 255.0
+    mask = create_hsv_mask(
+        x_rgb=x_rgb, hue_thres=hue_thres, sat_thres=sat_thres, val_thres=val_thres
+    )
+    x_rgb[mask] = overlay[mask]
+    return x_rgb.reshape(n, c, h, w) * 255.0
+
+
 def splice_conv(x, hue_thres=0, sat_thres=0, val_thres=0.4):
     global data_iter
     load_dataloader(batch_size=x.size(0), image_size=x.size(-1))
@@ -500,4 +513,5 @@ aug_to_func = {
     "splice_jitter": splice_jitter,
     "splice_conv_conv": splice_conv_conv,
     "random_hue": random_hue,
+    "CS_splice": CS_splice
 }
