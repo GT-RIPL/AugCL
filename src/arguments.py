@@ -77,7 +77,7 @@ def add_SAC_args():
 
     # eval
     parser.add_argument("--save_freq", default="100k", type=str)
-    parser.add_argument("--eval_freq", default="10k", type=str)
+    parser.add_argument("--eval_freq", default="2k", type=str)
     parser.add_argument("--eval_episodes", default=1, type=int)
     parser.add_argument("--eval_episodes_final_step", default=30, type=int)
     parser.add_argument("--eval_mode", default="color_hard", type=str)
