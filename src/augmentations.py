@@ -401,6 +401,40 @@ def splice_conv_conv(x, hue_thres=0, sat_thres=0, val_thres=0.6):
     return x_rgb.reshape(n, c, h, w)
 
 
+def stacked_splice_2x_conv(x, hue_thres=0, sat_thres=0, val_thres=0.6):
+    """Applies a random conv2d, deviates slightly from https://arxiv.org/abs/1910.05396"""
+    n, c, h, w = x.shape
+    for i in range(n):
+        weights = torch.randn(3, 3, 3, 3).to(x.device)
+        temp_x = x[i : i + 1].reshape(-1, 3, h, w) / 255.0
+        mask = create_hsv_mask(
+            temp_x, hue_thres=hue_thres, sat_thres=sat_thres, val_thres=val_thres
+        )
+        temp_x = F.pad(temp_x, pad=[1] * 4, mode="replicate")
+        out = torch.sigmoid(F.conv2d(temp_x, weights)) * 255.0
+        out2 = torch.sigmoid(F.conv2d(temp_x, weights)) * 255.0
+        out[mask] = out2[mask]
+        total_out = out if i == 0 else torch.cat([total_out, out], axis=0)
+    return total_out.reshape(n, c, h, w)
+
+
+def stacked_splice_2x_jitter(x, hue_thres=0, sat_thres=0, val_thres=0.6):
+    """Applies a random conv2d, deviates slightly from https://arxiv.org/abs/1910.05396"""
+    n, c, h, w = x.shape
+    for i in range(n):
+        temp_x = x[i : i + 1].reshape(-1, 3, h, w) / 255.0
+        mask = create_hsv_mask(
+            temp_x, hue_thres=hue_thres, sat_thres=sat_thres, val_thres=val_thres
+        )
+        model = TF.ColorJitter(0, 0, 0, 0.5)
+        model_2 = TF.ColorJitter(0, 0, 0, 0.5)
+        out = model(temp_x)
+        out_2 = model_2(temp_x)
+        out[mask] = out_2[mask]
+        total_out = out if i == 0 else torch.cat([total_out, out], axis=0)
+    return total_out.reshape(n, c, h, w) * 255.0
+
+
 def random_cutout_color(imgs, min_cut=10, max_cut=30):
     """
     args:
@@ -545,4 +579,6 @@ aug_to_func = {
     "CS_splice": CS_splice,
     "splice_mix_up": splice_mix_up,
     "splice_mix_up_conv": splice_mix_up_conv,
+    "stacked_splice_2x_conv": stacked_splice_2x_conv,
+    "stacked_splice_2x_jitter": stacked_splice_2x_jitter,
 }

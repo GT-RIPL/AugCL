@@ -14,11 +14,11 @@ def parse_args():
     parser = argparse.ArgumentParser()
 
     # environment
-    parser.add_argument("--data_aug", default="splice", type=str)
+    parser.add_argument("--data_aug", default="stacked_splice_2x_jitter", type=str)
     parser.add_argument("--save_file_name", default="aug_test.png", type=str)
     parser.add_argument(
         "--sample_png_folder",
-        default="samples/cartpole/swingup/train",
+        default="samples/walker/walk/train",
         type=str,
     )
 
