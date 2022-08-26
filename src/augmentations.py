@@ -310,7 +310,7 @@ def splice_mix_up(x, hue_thres=0, sat_thres=0, val_thres=0.6):
     return x_rgb.reshape(n, c, h, w) * 255.0
 
 
-def splice_mix_up(x, hue_thres=0, sat_thres=0, val_thres=0.6):
+def splice_mix_up_conv(x, hue_thres=0, sat_thres=0, val_thres=0.6):
     # 0.6 val for video_hard, 0.4 for video_easy
     global data_iter
     load_dataloader(batch_size=x.size(0), image_size=x.size(-1))
@@ -544,4 +544,5 @@ aug_to_func = {
     "random_hue": random_hue,
     "CS_splice": CS_splice,
     "splice_mix_up": splice_mix_up,
+    "splice_mix_up_conv": splice_mix_up_conv,
 }
