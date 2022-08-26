@@ -116,7 +116,7 @@ def main(args):
     print("Working directory:", work_dir)
     args.__dict__["train_date"] = time.strftime("%m-%d-%y", time.gmtime())
 
-    if not args.test_code_mode:
+    if not args.test_code_mode and not REQUEUE.is_set():
         assert (
             args.continue_train
             or args.curriculum_step is not None

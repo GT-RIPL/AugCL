@@ -513,5 +513,5 @@ aug_to_func = {
     "splice_jitter": splice_jitter,
     "splice_conv_conv": splice_conv_conv,
     "random_hue": random_hue,
-    "CS_splice": CS_splice
+    "CS_splice": CS_splice,
 }
