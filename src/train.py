@@ -208,18 +208,19 @@ def main(args):
                 start_time = time.time()
                 L.dump(step)
 
+            if step % args.requeue_save_freq == 0 & REQUEUE.is_set():
+                save_state(
+                    dict(
+                        agent=agent,
+                        replay_buffer=replay_buffer,
+                        step=step,
+                    )
+                )
+
             # Evaluate agent periodically
             if step % args.eval_freq == 0 and not (
                 args.continue_train and step == start_step
             ):
-                if REQUEUE.is_set():
-                    save_state(
-                        dict(
-                            agent=agent,
-                            replay_buffer=replay_buffer,
-                            step=step,
-                        )
-                    )
                 num_episodes = (
                     args.eval_episodes_final_step
                     if step == args.train_steps
