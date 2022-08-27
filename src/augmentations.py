@@ -331,6 +331,31 @@ def splice_mix_up_jitter(x, hue_thres=3.5, sat_thres=0, val_thres=0):
     return x_rgb.reshape(n, c, h, w) * 255.0
 
 
+def splice_conv_mix_up(x, hue_thres=3.5, sat_thres=0, val_thres=0):
+    global data_iter
+    load_dataloader(batch_size=x.size(0), image_size=x.size(-1))
+    n, c, h, w = x.shape
+    overlay = _get_data_batch(x.size(0)).repeat(x.size(1) // 3, 1, 1, 1)
+    x_rgb = x.reshape(-1, 3, h, w)
+    mask = create_hsv_mask(
+        x_rgb,
+        hue_thres=hue_thres,
+        sat_thres=sat_thres,
+        val_thres=val_thres,
+    )
+    for i in range(n):
+        weights = torch.randn(3, 3, 3, 3).to(x.device)
+        temp_x = x[i : i + 1].reshape(-1, 3, h, w) / 255.0
+        mask = create_hsv_mask(
+            temp_x, hue_thres=hue_thres, sat_thres=sat_thres, val_thres=val_thres
+        )
+        temp_x = F.pad(temp_x, pad=[1] * 4, mode="replicate")
+        out = torch.sigmoid(F.conv2d(temp_x, weights))
+        total_out = out if i == 0 else torch.cat([total_out, out], axis=0)
+    total_out[mask] = 0.5 * overlay[mask] + 0.5 * (x_rgb[mask] / 255.0)
+    return total_out.reshape(n, c, h, w) * 255.0
+
+
 def CS_splice(x, hue_thres=3.5, sat_thres=0, val_thres=0):
     global data_iter
     load_dataloader(batch_size=x.size(0), image_size=x.size(-1))
@@ -344,20 +369,28 @@ def CS_splice(x, hue_thres=3.5, sat_thres=0, val_thres=0):
     return x_rgb.reshape(n, c, h, w) * 255.0
 
 
-def splice_conv(x, hue_thres=0, sat_thres=0, val_thres=0.4):
+def splice_conv(x, hue_thres=3.5, sat_thres=0, val_thres=0):
     global data_iter
     load_dataloader(batch_size=x.size(0), image_size=x.size(-1))
-    overlay = _get_data_batch(x.size(0)).repeat(x.size(1) // 3, 1, 1, 1)
     n, c, h, w = x.shape
-    x_rgb = x.reshape(-1, 3, h, w) / 255.0
+    overlay = _get_data_batch(x.size(0)).repeat(x.size(1) // 3, 1, 1, 1)
     mask = create_hsv_mask(
-        x_rgb=x_rgb, hue_thres=hue_thres, sat_thres=sat_thres, val_thres=val_thres
+        x.reshape(-1, 3, h, w),
+        hue_thres=hue_thres,
+        sat_thres=sat_thres,
+        val_thres=val_thres,
     )
-    conv_out = random_conv(x)
-    conv_out = conv_out.reshape(-1, 3, h, w)
-    x_rgb[mask] = conv_out[mask]
-    x_rgb[~mask] = overlay[~mask] * 255.0
-    return x_rgb.reshape(n, c, h, w)
+    for i in range(n):
+        weights = torch.randn(3, 3, 3, 3).to(x.device)
+        temp_x = x[i : i + 1].reshape(-1, 3, h, w) / 255.0
+        mask = create_hsv_mask(
+            temp_x, hue_thres=hue_thres, sat_thres=sat_thres, val_thres=val_thres
+        )
+        temp_x = F.pad(temp_x, pad=[1] * 4, mode="replicate")
+        out = torch.sigmoid(F.conv2d(temp_x, weights))
+        total_out = out if i == 0 else torch.cat([total_out, out], axis=0)
+    total_out[mask] = overlay[mask]
+    return total_out.reshape(n, c, h, w) * 255.0
 
 
 def splice_jitter(x, hue_thres=0, sat_thres=0, val_thres=0.55):
@@ -577,8 +610,8 @@ aug_to_func = {
     "random_hue": random_hue,
     "CS_splice": CS_splice,
     "splice_mix_up": splice_mix_up,
-    "splice_mix_up_conv": splice_mix_up_conv,
     "stacked_splice_2x_conv": stacked_splice_2x_conv,
     "stacked_splice_2x_jitter": stacked_splice_2x_jitter,
     "splice_mix_up_jitter": splice_mix_up_jitter,
+    "splice_conv_mix_up": splice_conv_mix_up
 }
