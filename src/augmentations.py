@@ -331,7 +331,7 @@ def splice_mix_up_jitter(x, hue_thres=3.5, sat_thres=0, val_thres=0):
     return x_rgb.reshape(n, c, h, w) * 255.0
 
 
-def splice_conv_mix_up(x, hue_thres=3.5, sat_thres=0, val_thres=0):
+def splice_mix_up_conv(x, hue_thres=3.5, sat_thres=0, val_thres=0):
     global data_iter
     load_dataloader(batch_size=x.size(0), image_size=x.size(-1))
     n, c, h, w = x.shape
@@ -613,5 +613,5 @@ aug_to_func = {
     "stacked_splice_2x_conv": stacked_splice_2x_conv,
     "stacked_splice_2x_jitter": stacked_splice_2x_jitter,
     "splice_mix_up_jitter": splice_mix_up_jitter,
-    "splice_conv_mix_up": splice_conv_mix_up
+    "splice_mix_up_conv": splice_mix_up_conv,
 }
