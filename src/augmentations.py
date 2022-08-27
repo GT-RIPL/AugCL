@@ -310,19 +310,25 @@ def splice_mix_up(x, hue_thres=0, sat_thres=0, val_thres=0.6):
     return x_rgb.reshape(n, c, h, w) * 255.0
 
 
-def splice_mix_up_conv(x, hue_thres=0, sat_thres=0, val_thres=0.6):
-    # 0.6 val for video_hard, 0.4 for video_easy
+def splice_mix_up_jitter(x, hue_thres=3.5, sat_thres=0, val_thres=0):
     global data_iter
     load_dataloader(batch_size=x.size(0), image_size=x.size(-1))
     overlay = _get_data_batch(x.size(0)).repeat(x.size(1) // 3, 1, 1, 1)
     n, c, h, w = x.shape
     x_rgb = x.reshape(-1, 3, h, w) / 255.0
     mask = create_hsv_mask(
-        x_rgb=x_rgb, hue_thres=hue_thres, sat_thres=sat_thres, val_thres=val_thres
+        x_rgb, hue_thres=hue_thres, sat_thres=sat_thres, val_thres=val_thres
     )
-    x_conv = random_conv(x_rgb)
-    x_conv[~mask] = 0.5 * x_conv[~mask] + 0.5 * overlay[~mask]
-    return x_conv.reshape(n, c, h, w) * 255.0
+    sampled_hues = np.random.uniform(-0.5, 0.5, (n))
+    sampled_saturs = np.random.uniform(0, 2, (n))
+    for i in range(n):
+        temp_x = x[i : i + 1].reshape(-1, 3, h, w) / 255.0
+        model = TF.ColorJitter(0, 0, sampled_saturs[i], sampled_hues[i])
+        out = model(temp_x)
+        total_out = out if i == 0 else torch.cat([total_out, out], axis=0)
+    x_rgb[~mask] = total_out[~mask]
+    x_rgb[mask] = overlay[mask] * 0.5 + x_rgb[mask] * 0.5
+    return x_rgb.reshape(n, c, h, w) * 255.0
 
 
 def CS_splice(x, hue_thres=3.5, sat_thres=0, val_thres=0):
@@ -354,7 +360,7 @@ def splice_conv(x, hue_thres=0, sat_thres=0, val_thres=0.4):
     return x_rgb.reshape(n, c, h, w)
 
 
-def splice_jitter(x, hue_thres=0, sat_thres=0, val_thres=0.58):
+def splice_jitter(x, hue_thres=0, sat_thres=0, val_thres=0.55):
     global data_iter
     load_dataloader(batch_size=x.size(0), image_size=x.size(-1))
     overlay = _get_data_batch(x.size(0)).repeat(x.size(1) // 3, 1, 1, 1)
@@ -363,9 +369,11 @@ def splice_jitter(x, hue_thres=0, sat_thres=0, val_thres=0.58):
     mask = create_hsv_mask(
         x_rgb, hue_thres=hue_thres, sat_thres=sat_thres, val_thres=val_thres
     )
+    sampled_hues = np.random.uniform(-0.5, 0.5, (n))
+    sampled_saturs = np.random.uniform(0, 2, (n))
     for i in range(n):
         temp_x = x[i : i + 1].reshape(-1, 3, h, w) / 255.0
-        model = TF.ColorJitter(0, 0, 0, 0.5)
+        model = TF.ColorJitter(0, 0, sampled_saturs[i], sampled_hues[i])
         out = model(temp_x)
         total_out = out if i == 0 else torch.cat([total_out, out], axis=0)
     x_rgb[mask] = total_out[mask]
@@ -572,4 +580,5 @@ aug_to_func = {
     "splice_mix_up_conv": splice_mix_up_conv,
     "stacked_splice_2x_conv": stacked_splice_2x_conv,
     "stacked_splice_2x_jitter": stacked_splice_2x_jitter,
+    "splice_mix_up_jitter": splice_mix_up_jitter,
 }
