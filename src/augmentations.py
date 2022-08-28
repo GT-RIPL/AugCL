@@ -426,7 +426,7 @@ def splice_conv_conv(x, hue_thres=0, sat_thres=0, val_thres=0.6):
     return x_rgb.reshape(n, c, h, w)
 
 
-def stacked_splice_2x_conv(x, hue_thres=0, sat_thres=0, val_thres=0.6):
+def splice_2x_conv(x, hue_thres=0, sat_thres=0, val_thres=0.6):
     """Applies a random conv2d, deviates slightly from https://arxiv.org/abs/1910.05396"""
     n, c, h, w = x.shape
     for i in range(n):
@@ -443,7 +443,7 @@ def stacked_splice_2x_conv(x, hue_thres=0, sat_thres=0, val_thres=0.6):
     return total_out.reshape(n, c, h, w)
 
 
-def stacked_splice_2x_jitter(x, hue_thres=0, sat_thres=0, val_thres=0.6):
+def splice_2x_jitter(x, hue_thres=0, sat_thres=0, val_thres=0.6):
     """Applies a random conv2d, deviates slightly from https://arxiv.org/abs/1910.05396"""
     n, c, h, w = x.shape
     model = TF.ColorJitter(0, 0, (0, 7), (-0.5, 0.5))
@@ -592,8 +592,8 @@ aug_to_func = {
     "splice_conv_conv": splice_conv_conv,
     "CS_splice": CS_splice,
     "splice_mix_up": splice_mix_up,
-    "stacked_splice_2x_conv": stacked_splice_2x_conv,
-    "stacked_splice_2x_jitter": stacked_splice_2x_jitter,
+    "splice_2x_conv": splice_2x_conv,
+    "splice_2x_jitter": splice_2x_jitter,
     "splice_mix_up_jitter": splice_mix_up_jitter,
     "splice_mix_up_conv": splice_mix_up_conv,
 }
