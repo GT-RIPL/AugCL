@@ -450,7 +450,7 @@ def stacked_splice_2x_conv(x, hue_thres=0, sat_thres=0, val_thres=0.6):
 def stacked_splice_2x_jitter(x, hue_thres=0, sat_thres=0, val_thres=0.6):
     """Applies a random conv2d, deviates slightly from https://arxiv.org/abs/1910.05396"""
     n, c, h, w = x.shape
-    sampled_hues = np.random.uniform(-0.5, 0.5, (n, 2))
+    sampled_hues = np.random.uniform(0, 0.5, (n, 2))
     sampled_saturs = np.random.uniform(0, 2, (n, 2))
     for i in range(n):
         temp_x = x[i : i + 1].reshape(-1, 3, h, w) / 255.0
