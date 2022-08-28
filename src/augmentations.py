@@ -319,7 +319,7 @@ def splice_mix_up_jitter(x, hue_thres=3.5, sat_thres=0, val_thres=0):
     mask = create_hsv_mask(
         x_rgb, hue_thres=hue_thres, sat_thres=sat_thres, val_thres=val_thres
     )
-    sampled_hues = np.random.uniform(-0.5, 0.5, (n))
+    sampled_hues = np.random.uniform(0, 0.5, (n))
     sampled_saturs = np.random.uniform(0, 2, (n))
     for i in range(n):
         temp_x = x[i : i + 1].reshape(-1, 3, h, w) / 255.0
@@ -402,7 +402,7 @@ def splice_jitter(x, hue_thres=0, sat_thres=0, val_thres=0.55):
     mask = create_hsv_mask(
         x_rgb, hue_thres=hue_thres, sat_thres=sat_thres, val_thres=val_thres
     )
-    sampled_hues = np.random.uniform(-0.5, 0.5, (n))
+    sampled_hues = np.random.uniform(0, 0.5, (n))
     sampled_saturs = np.random.uniform(0, 2, (n))
     for i in range(n):
         temp_x = x[i : i + 1].reshape(-1, 3, h, w) / 255.0
@@ -459,10 +459,10 @@ def stacked_splice_2x_jitter(x, hue_thres=0, sat_thres=0, val_thres=0.6):
         )
         hues = sampled_hues[i]
         saturs = sampled_saturs[i]
-        out = TF.functional.adjust_hue(temp_x, hues[0])
-        out = TF.functional.adjust_saturation(out, saturs[0])
-        out_2 = TF.functional.adjust_hue(temp_x, hues[1])
-        out_2 = TF.functional.adjust_saturation(out_2, saturs[1])
+        model_1 = TF.ColorJitter(0, 0, saturs[0], hues[0])
+        model_2 = TF.ColorJitter(0, 0, saturs[1], hues[1])
+        out = model_1(temp_x)
+        out_2 = model_2(temp_x)
         out[mask] = out_2[mask]
         total_out = out if i == 0 else torch.cat([total_out, out], axis=0)
     return total_out.reshape(n, c, h, w) * 255.0
@@ -557,14 +557,6 @@ def random_crop(x, size=84, w1=None, h1=None, return_w1_h1=False):
     return cropped
 
 
-def random_hue(x):
-    b, c, h, w = x.shape
-    model = TF.ColorJitter(0, 0, 0, 0.5)
-    x = x.reshape(-1, 3, h, w) / 255.0
-    x = model(x)
-    return x.reshape(b, c, h, w) * 255.0
-
-
 def DrAC_crop(x, size: int = 84, pad: int = 16):
     return torch.nn.Sequential(
         torch.nn.ReplicationPad2d(pad), kornia.augmentation.RandomCrop((size, size))
@@ -607,7 +599,6 @@ aug_to_func = {
     "splice_conv": splice_conv,
     "splice_jitter": splice_jitter,
     "splice_conv_conv": splice_conv_conv,
-    "random_hue": random_hue,
     "CS_splice": CS_splice,
     "splice_mix_up": splice_mix_up,
     "stacked_splice_2x_conv": stacked_splice_2x_conv,
