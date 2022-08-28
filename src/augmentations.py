@@ -319,14 +319,13 @@ def splice_mix_up_jitter(x, hue_thres=3.5, sat_thres=0, val_thres=0):
     mask = create_hsv_mask(
         x_rgb, hue_thres=hue_thres, sat_thres=sat_thres, val_thres=val_thres
     )
-    model = TF.ColorJitter(0, 0, (0, 7), (-0.5, 0.5))
+    model = TF.ColorJitter(0, 0, (0, 5), (-0.5, 0.5))
     for i in range(n):
         temp_x = x[i : i + 1].reshape(-1, 3, h, w) / 255.0
         out = model(temp_x)
         total_out = out if i == 0 else torch.cat([total_out, out], axis=0)
-    x_rgb[~mask] = total_out[~mask]
-    x_rgb[mask] = overlay[mask] * 0.5 + x_rgb[mask] * 0.5
-    return x_rgb.reshape(n, c, h, w) * 255.0
+    total_out[mask] = overlay[mask] * 0.5 + x_rgb[mask] * 0.5
+    return total_out.reshape(n, c, h, w) * 255.0
 
 
 def splice_mix_up_conv(x, hue_thres=3.5, sat_thres=0, val_thres=0):
@@ -400,14 +399,13 @@ def splice_jitter(x, hue_thres=0, sat_thres=0, val_thres=0.55):
     mask = create_hsv_mask(
         x_rgb, hue_thres=hue_thres, sat_thres=sat_thres, val_thres=val_thres
     )
-    model = TF.ColorJitter(0, 0, (0, 7), (-0.5, 0.5))
+    model = TF.ColorJitter(0, 0, (0, 5), (-0.5, 0.5))
     for i in range(n):
         temp_x = x[i : i + 1].reshape(-1, 3, h, w) / 255.0
         out = model(temp_x)
         total_out = out if i == 0 else torch.cat([total_out, out], axis=0)
-    x_rgb[mask] = total_out[mask]
-    x_rgb[~mask] = overlay[~mask]
-    return x_rgb.reshape(n, c, h, w) * 255.0
+    total_out[~mask] = overlay[~mask]
+    return total_out.reshape(n, c, h, w) * 255.0
 
 
 def splice_conv_conv(x, hue_thres=0, sat_thres=0, val_thres=0.6):
@@ -446,7 +444,7 @@ def splice_2x_conv(x, hue_thres=0, sat_thres=0, val_thres=0.6):
 def splice_2x_jitter(x, hue_thres=0, sat_thres=0, val_thres=0.6):
     """Applies a random conv2d, deviates slightly from https://arxiv.org/abs/1910.05396"""
     n, c, h, w = x.shape
-    model = TF.ColorJitter(0, 0, (0, 7), (-0.5, 0.5))
+    model = TF.ColorJitter(0, 0, (0, 5), (-0.5, 0.5))
     for i in range(n):
         temp_x = x[i : i + 1].reshape(-1, 3, h, w) / 255.0
         mask = create_hsv_mask(
@@ -454,7 +452,7 @@ def splice_2x_jitter(x, hue_thres=0, sat_thres=0, val_thres=0.6):
         )
         out = model(temp_x)
         out_2 = model(temp_x)
-        out[mask] = out_2[mask]
+        out[~mask] = out_2[~mask]
         total_out = out if i == 0 else torch.cat([total_out, out], axis=0)
     return total_out.reshape(n, c, h, w) * 255.0
 
