@@ -208,7 +208,7 @@ def main(args):
                 start_time = time.time()
                 L.dump(step)
 
-            if step % args.requeue_save_freq == 0 & REQUEUE.is_set():
+            if step % args.requeue_save_freq == 0 and REQUEUE.is_set():
                 save_state(
                     dict(
                         agent=agent,
