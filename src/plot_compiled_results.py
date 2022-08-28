@@ -66,7 +66,9 @@ def smooth_arr(scalars: List[float], weight: float) -> List[float]:
     last = scalars[0]  # First value in the plot (first timestep)
     smoothed = []
     for point in scalars:
-        smoothed_val = last * weight + (1 - weight) * point  # Calculate smoothed value
+        smoothed_val = (
+            last * weight + (1 - weight) * point
+        )  # Calculate smoothed value
         smoothed.append(smoothed_val)  # Save it
         last = smoothed_val  # Anchor the last smoothed value
 
@@ -101,6 +103,7 @@ def line_plot(
     fetch_std=False,
     ax_dims: Tuple[int, int] = (5, 4),
     line_width: int = 1,
+    num_points: Optional[int] = None,
 ):
     """
     :param avg_key: This is typically the seed.
@@ -204,16 +207,27 @@ def line_plot(
         add_kwargs = {}
         if name in line_styles:
             add_kwargs["linestyle"] = line_styles[name]
+
+        if num_points is not None and len(x_vals) > num_points:
+            sub_sel = np.linspace(
+                0, len(x_vals) - 1, num=num_points, dtype=np.int
+            )
+            x_vals = x_vals[sub_sel]
+            y_vals = y_vals[sub_sel]
+            y_std = y_std[sub_sel]
+
         line_to_add = ax.plot(x_vals, y_vals, **add_kwargs)
         sel_vals = [
             int(x)
-            for x in np.linspace(0, len(x_vals) - 1, num=num_marker_points.get(name, 8))
+            for x in np.linspace(
+                0, len(x_vals) - 1, num=num_marker_points.get(name, 8)
+            )
         ]
-        # midx = method_idxs[name] % len(MARKER_ORDER)
+        midx = method_idxs[name] % len(MARKER_ORDER)
         ladd = ax.plot(
             x_vals[sel_vals],
             y_vals[sel_vals],
-            # MARKER_ORDER[midx],
+            MARKER_ORDER[midx],
             label=rename_map.get(name, name),
             color=group_colors[name],
             markersize=8,
@@ -243,7 +257,10 @@ def line_plot(
         plt.yticks(ax.get_yticks(), [ytick_fn(t) for t in ax.get_yticks()])
 
     if legend:
-        labs = [(i, line_to_add[0].get_label()) for i, line_to_add in enumerate(lines)]
+        labs = [
+            (i, line_to_add[0].get_label())
+            for i, line_to_add in enumerate(lines)
+        ]
         labs = sorted(labs, key=lambda x: method_idxs[names[x[0]]])
         plt.legend(
             [lines[i] for i, _ in labs],
@@ -282,6 +299,7 @@ if __name__ == "__main__":
         legend=args.legend,
         smooth_factor=args.smooth_factor,
         title=args.title,
-        line_width=args.line_width
+        line_width=args.line_width,
+        # num_points=100,
     )
     fig_save("./", args.fig_save_name, fig)
