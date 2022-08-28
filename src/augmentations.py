@@ -319,7 +319,7 @@ def splice_mix_up_jitter(x, hue_thres=3.5, sat_thres=0, val_thres=0):
     mask = create_hsv_mask(
         x_rgb, hue_thres=hue_thres, sat_thres=sat_thres, val_thres=val_thres
     )
-    model = TF.ColorJitter(0, 0, (0, 2), (-0.5, 0.5))
+    model = TF.ColorJitter(0, 0, (0, 7), (-0.5, 0.5))
     for i in range(n):
         temp_x = x[i : i + 1].reshape(-1, 3, h, w) / 255.0
         out = model(temp_x)
@@ -400,7 +400,7 @@ def splice_jitter(x, hue_thres=0, sat_thres=0, val_thres=0.55):
     mask = create_hsv_mask(
         x_rgb, hue_thres=hue_thres, sat_thres=sat_thres, val_thres=val_thres
     )
-    model = TF.ColorJitter(0, 0, (0, 2), (-0.5, 0.5))
+    model = TF.ColorJitter(0, 0, (0, 7), (-0.5, 0.5))
     for i in range(n):
         temp_x = x[i : i + 1].reshape(-1, 3, h, w) / 255.0
         out = model(temp_x)
@@ -446,7 +446,7 @@ def stacked_splice_2x_conv(x, hue_thres=0, sat_thres=0, val_thres=0.6):
 def stacked_splice_2x_jitter(x, hue_thres=0, sat_thres=0, val_thres=0.6):
     """Applies a random conv2d, deviates slightly from https://arxiv.org/abs/1910.05396"""
     n, c, h, w = x.shape
-    model = TF.ColorJitter(0, 0, (0, 2), (-0.5, 0.5))
+    model = TF.ColorJitter(0, 0, (0, 7), (-0.5, 0.5))
     for i in range(n):
         temp_x = x[i : i + 1].reshape(-1, 3, h, w) / 255.0
         mask = create_hsv_mask(
