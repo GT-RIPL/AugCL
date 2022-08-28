@@ -6,6 +6,7 @@ import utils
 import time
 from arguments import parse_args
 from env.wrappers import make_env
+from algorithms.curriculum_learning import curriculum
 from algorithms.factory import make_agent
 from logger import Logger
 from video import VideoRecorder
@@ -177,6 +178,9 @@ def main(args):
         else:
             raise ValueError("No checkpoints found exiting...")
     elif args.curriculum_step is not None:
+        assert issubclass(
+            agent, curriculum.Curriculum
+        ), f"agent is not a subclass of Curriculum. Aborting..."
         start_step = args.curriculum_step
         prev_work_dir = os.path.join(
             args.log_dir,
@@ -193,11 +197,7 @@ def main(args):
             replay_buffer=replay_buffer,
         )
 
-        utils.soft_update_params(net=prev_agent.actor, target_net=agent.actor, tau=1)
-        utils.soft_update_params(net=prev_agent.critic, target_net=agent.critic, tau=1)
-        utils.soft_update_params(
-            net=prev_agent.critic_target, target_net=agent.critic_target, tau=1
-        )
+        agent.load_pretrained_agent(prev_agent)
 
     L = Logger(work_dir)
     start_time = time.time()
