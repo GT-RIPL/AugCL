@@ -180,6 +180,10 @@
             "program": "${workspaceFolder}/src/test_augmentation.py",
             "console": "integratedTerminal",
             "justMyCode": true,
+            "args": [
+                "--data_aug",
+                "splice_jitter"
+            ]
         },
         {
             "name": "Sample Frames",
