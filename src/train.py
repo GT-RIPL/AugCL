@@ -202,15 +202,6 @@ def main(args):
     L = Logger(work_dir)
     start_time = time.time()
     for step in range(start_step, args.train_steps + 1):
-        # Some algorithm updates take 5+ minutes so to ensure requeue added this 1 hour prior to 2 days manual exit and requeue set
-        if os.environ["SLURM_JOB_PARTITION"] == "overcap" and time.time() - start_time > 172800:
-            EXIT.set()
-            REQUEUE.set()
-
-        if EXIT.is_set():
-            print(f"Exiting at step: {step - 1}")
-            break
-
         if done:
             if step > start_step:
                 L.log("train/duration", time.time() - start_time, step)
@@ -294,6 +285,10 @@ def main(args):
         obs = next_obs
 
         episode_step += 1
+
+        if EXIT.is_set():
+            print(f"Exiting at step: {step - 1}")
+            break
 
     if REQUEUE.is_set():
         print(f"Requeued set at step: {step - 1}")
