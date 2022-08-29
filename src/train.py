@@ -68,7 +68,7 @@ def load_agent_and_buffer(step: int, model_dir: str, buffer_dir: str, replay_buf
     ckpt_path = os.path.join(model_dir, f"{str(step)}.pt")
     assert os.path.exists(ckpt_path), f"No checkpoint at :{ckpt_path} exists."
     agent = torch.load(ckpt_path)
-    replay_buffer.load(save_dir=buffer_dir, end_step=step + 1)
+    replay_buffer.load(save_dir=buffer_dir, end_step=step)
     return agent, replay_buffer
 
 
@@ -143,7 +143,7 @@ def main(args):
     replay_buffer = utils.ReplayBuffer(
         obs_shape=env.observation_space.shape,
         action_shape=env.action_space.shape,
-        capacity=args.train_steps + 1,
+        capacity=args.train_steps,
         batch_size=args.batch_size,
     )
     cropped_obs_shape = (

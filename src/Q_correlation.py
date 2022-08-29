@@ -21,7 +21,7 @@ def calculate_MC_returns(rewards, discount):
     return mc_rewards
 
 
-def calculate_Q_correlation_coeff(
+def calculate_Q_and_mc_returns(
     agent: SAC, replay_buffer: utils.ReplayBuffer, discount
 ):
     all_idxs = list(range(replay_buffer.idx))
@@ -128,7 +128,7 @@ def main(args):
                 target_Q,
                 mc_returns,
                 episode_reward,
-            ) = calculate_Q_correlation_coeff(
+            ) = calculate_Q_and_mc_returns(
                 agent=agent,
                 replay_buffer=roll_out_replay_buffer,
                 discount=args.discount,
