@@ -9,6 +9,7 @@ from algorithms.transfer import Transfer
 from algorithms.curriculum_learning.curriculum import Curriculum
 from algorithms.curriculum_learning.curriculum_double import Curriculum_Double
 from algorithms.non_naive_rad import NonNaiveRAD
+from algorithms.sac_policy_eval import SAC_policy_eval
 
 algorithm = {
     "sac": SAC,
@@ -22,6 +23,7 @@ algorithm = {
     "curriculum": Curriculum,
     "non_naive_rad": NonNaiveRAD,
     "2x_curriculum": Curriculum_Double,
+    "sac_policy_eval": SAC_policy_eval,
 }
 
 

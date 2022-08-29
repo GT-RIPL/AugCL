@@ -93,14 +93,15 @@ def main(args):
         args.image_crop_size,
         args.image_crop_size,
     )
+    agent = make_agent(
+        obs_shape=cropped_obs_shape, action_shape=env.action_space.shape, args=args
+    )
     print("Observations:", env.observation_space.shape)
     print("Cropped observations:", cropped_obs_shape)
     print(f"Number of train samples: {args.num_samples}")
     print(f"Number of train steps: {args.train_steps}")
     print(f"Correlation calculation frequency: {args.stat_freq}")
-    agent = make_agent(
-        obs_shape=cropped_obs_shape, action_shape=env.action_space.shape, args=args
-    )
+    print(f"Agent class:{agent.__class__}")
 
     done = True
     for _ in range(args.num_samples):
