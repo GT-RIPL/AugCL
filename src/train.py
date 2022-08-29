@@ -286,7 +286,7 @@ def main(args):
 
         episode_step += 1
 
-        if EXIT.is_set():
+        if EXIT.is_set() or (REQUEUE.is_set() and time.time() - start_time > 165600):
             print(f"Exiting at step: {step}")
             break
 
