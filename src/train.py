@@ -179,7 +179,7 @@ def main(args):
             raise ValueError("No checkpoints found exiting...")
     elif args.curriculum_step is not None:
         assert issubclass(
-            agent, curriculum.Curriculum
+            agent.__class__, curriculum.Curriculum
         ), f"agent is not a subclass of Curriculum. Aborting..."
         start_step = args.curriculum_step
         prev_work_dir = os.path.join(

@@ -7,6 +7,7 @@ from algorithms.drq import DrQ
 from algorithms.svea import SVEA
 from algorithms.transfer import Transfer
 from algorithms.curriculum_learning.curriculum import Curriculum
+from algorithms.curriculum_learning.curriculum_double import Curriculum_Double
 from algorithms.non_naive_rad import NonNaiveRAD
 
 algorithm = {
@@ -20,6 +21,7 @@ algorithm = {
     "transfer": Transfer,
     "curriculum": Curriculum,
     "non_naive_rad": NonNaiveRAD,
+    "2x_curriculum": Curriculum_Double,
 }
 
 
