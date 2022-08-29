@@ -202,13 +202,17 @@ def main(args):
     L = Logger(work_dir)
     start_time = time.time()
     for step in range(start_step, args.train_steps + 1):
+        if EXIT.is_set():
+            print(f"Exiting at step: {step - 1}")
+            break
+
         if done:
             if step > start_step:
                 L.log("train/duration", time.time() - start_time, step)
                 start_time = time.time()
                 L.dump(step)
 
-            if step % args.requeue_save_freq == 0 and REQUEUE.is_set():
+            if step % args.requeue_save_freq == 0:
                 print(f"Saving for requeue at step: {step}")
                 save_state(
                     dict(
@@ -286,17 +290,13 @@ def main(args):
 
         episode_step += 1
 
-        if EXIT.is_set() or (REQUEUE.is_set() and time.time() - start_time > 165600):
-            print(f"Exiting at step: {step}")
-            break
-
     if REQUEUE.is_set():
-        print(f"Requeued set at step: {step}")
+        print(f"Requeued set at step: {step - 1}")
         save_and_requeue(
             dict(
                 agent=agent,
                 replay_buffer=replay_buffer,
-                step=step,
+                step=step - 1,
             )
         )
 
