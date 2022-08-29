@@ -115,7 +115,7 @@ def main(args):
 
     data = []
 
-    for step in range(args.train_steps):
+    for step in range(args.train_steps + 1):
         agent.update(replay_buffer=replay_buffer, L=None, step=step)
 
         if step % args.stat_freq == 0:
