@@ -202,6 +202,11 @@ def main(args):
     L = Logger(work_dir)
     start_time = time.time()
     for step in range(start_step, args.train_steps + 1):
+        # Some algorithm updates take 5+ minutes so to ensure requeue added this 1 hour prior to 2 days manual exit and requeue set
+        if os.environ["SLURM_JOB_PARTITION"] == "overcap" and time.time() - start_time > 172800:
+            EXIT.set()
+            REQUEUE.set()
+
         if EXIT.is_set():
             print(f"Exiting at step: {step - 1}")
             break
