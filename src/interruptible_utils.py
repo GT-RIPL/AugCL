@@ -7,7 +7,7 @@ import torch
 
 SLURM_JOB_ID = os.environ.get("SLURM_JOB_ID", 0)
 STATE_FILE = osp.join(
-    os.environ["HOME"], ".interrupted_states", "{}.pt".format(SLURM_JOB_ID)
+    os.environ["HOME"], ".interrupted_states", "{}.tar".format(SLURM_JOB_ID)
 )
 
 REQUEUE = threading.Event()

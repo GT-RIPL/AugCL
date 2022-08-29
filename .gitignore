@@ -11,6 +11,7 @@ __pycache__/
 
 # Checkpoints
 *.pt
+*.tar
 
 # Distribution / packaging
 .Python
