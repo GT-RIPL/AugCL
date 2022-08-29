@@ -12,6 +12,10 @@ dataloader = None
 data_iter = None
 
 
+def get_jitter_model(x):
+    return TF.ColorJitter(0, 0, (0, 3), (-0.5, 0.5)).to(x.get_device())
+
+
 def _load_data(
     sub_path: str, batch_size: int = 256, image_size: int = 84, num_workers: int = 16
 ):
@@ -219,7 +223,7 @@ def color_jitter(imgs):
 
     sampled_idxs = torch.from_numpy(np.random.randint(0, b, num_samples))
     imgs = imgs.view(-1, 3, h, w)
-    model = TF.ColorJitter(0, 0, (0, 5), (-0.5, 0.5))
+    model = get_jitter_model(x=x)
     sampled_imgs = imgs[sampled_idxs]
     imgs[sampled_idxs] = model(sampled_imgs)
     return imgs.view(b, c, h, w)
@@ -317,7 +321,7 @@ def splice_mix_up_jitter(x, hue_thres=3.5, sat_thres=0, val_thres=0):
     mask = create_hsv_mask(
         x_rgb, hue_thres=hue_thres, sat_thres=sat_thres, val_thres=val_thres
     )
-    model = TF.ColorJitter(0, 0, (0, 5), (-0.5, 0.5))
+    model = get_jitter_model(x=x)
     for i in range(n):
         temp_x = x[i : i + 1].reshape(-1, 3, h, w) / 255.0
         out = model(temp_x)
@@ -397,7 +401,7 @@ def splice_jitter(x, hue_thres=0, sat_thres=0, val_thres=0.55):
     mask = create_hsv_mask(
         x_rgb, hue_thres=hue_thres, sat_thres=sat_thres, val_thres=val_thres
     )
-    model = TF.ColorJitter(0, 0, (0, 5), (-0.5, 0.5))
+    model = get_jitter_model(x=x)
     for i in range(n):
         temp_x = x[i : i + 1].reshape(-1, 3, h, w) / 255.0
         out = model(temp_x)
@@ -442,7 +446,7 @@ def splice_2x_conv(x, hue_thres=0, sat_thres=0, val_thres=0.6):
 def splice_2x_jitter(x, hue_thres=0, sat_thres=0, val_thres=0.6):
     """Applies a random conv2d, deviates slightly from https://arxiv.org/abs/1910.05396"""
     n, c, h, w = x.shape
-    model = TF.ColorJitter(0, 0, (0, 5), (-0.5, 0.5))
+    model = get_jitter_model(x=x)
     for i in range(n):
         temp_x = x[i : i + 1].reshape(-1, 3, h, w) / 255.0
         mask = create_hsv_mask(
