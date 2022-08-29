@@ -21,9 +21,7 @@ def calculate_MC_returns(rewards, discount):
     return mc_rewards
 
 
-def calculate_Q_and_mc_returns(
-    agent: SAC, replay_buffer: utils.ReplayBuffer, discount
-):
+def calculate_Q_and_mc_returns(agent: SAC, replay_buffer: utils.ReplayBuffer, discount):
     all_idxs = list(range(replay_buffer.idx))
     obs, actions, rewards, next_obs, not_dones = replay_buffer.sample(idxs=all_idxs)
 
@@ -142,6 +140,7 @@ def main(args):
             Q2_Q_target_cc = pearsonr(Q2, target_Q)[0]
             Q1_MC_return_cc = pearsonr(Q1, mc_returns)[0]
             Q2_MC_return_cc = pearsonr(Q2, mc_returns)[0]
+            target_MC_return_cc = pearsonr(target_Q, mc_returns)[0]
             data.append(
                 [
                     step,
@@ -151,6 +150,7 @@ def main(args):
                     Q2_Q_target_cc,
                     Q1_MC_return_cc,
                     Q2_MC_return_cc,
+                    target_MC_return_cc,
                 ]
             )
 
@@ -164,6 +164,7 @@ def main(args):
             "Q2, Q-target CC",
             "Q1, MC Return CC",
             "Q2, MC Return CC",
+            "Target, MC Return CC",
         ],
     ).to_csv(f"{args.id}.csv", index=False)
 
