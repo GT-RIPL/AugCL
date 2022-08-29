@@ -160,8 +160,8 @@ def main(args):
     start_step, episode, episode_reward, done = 0, 0, 0, True
 
     if requeue_state is not None:
-        agent = torch.load(requeue_state["agent"])
-        replay_buffer = torch.load(requeue_state["replay_buffer"])
+        agent = requeue_state["agent"]
+        replay_buffer = requeue_state["replay_buffer"]
         start_step = requeue_state["step"]
     elif args.continue_train:
         print("'continue_train' set to true, loading model ckpt and replay buffer ckpt")
@@ -209,6 +209,7 @@ def main(args):
                 L.dump(step)
 
             if step % args.requeue_save_freq == 0 and REQUEUE.is_set():
+                print(f"Saving for requeue at step: {step}")
                 save_state(
                     dict(
                         agent=agent,
@@ -286,9 +287,11 @@ def main(args):
         episode_step += 1
 
         if EXIT.is_set():
+            print(f"Exiting at step: {step}")
             break
 
     if REQUEUE.is_set():
+        print(f"Requeued set at step: {step}")
         save_and_requeue(
             dict(
                 agent=agent,
