@@ -209,7 +209,7 @@ def random_rotation(images, p=0.3):
     return out
 
 
-def kornia_color_jitter(imgs, bright=0.4, contrast=0.4, satur=0.4, hue=0.49, p=1):
+def color_jitter(imgs):
     """
     inputs np array outputs tensor
     """
@@ -219,9 +219,7 @@ def kornia_color_jitter(imgs, bright=0.4, contrast=0.4, satur=0.4, hue=0.49, p=1
 
     sampled_idxs = torch.from_numpy(np.random.randint(0, b, num_samples))
     imgs = imgs.view(-1, 3, h, w)
-    model = kornia.augmentation.ColorJitter(
-        brightness=bright, contrast=contrast, saturation=satur, hue=hue
-    )
+    model = TF.ColorJitter(0, 0, (0, 5), (-0.5, 0.5))
     sampled_imgs = imgs[sampled_idxs]
     imgs[sampled_idxs] = model(sampled_imgs)
     return imgs.view(b, c, h, w)
@@ -578,7 +576,7 @@ aug_to_func = {
     "rotate": random_rotation,
     "conv": random_conv,
     "shift": random_shift,
-    "color_jitter": kornia_color_jitter,
+    "color_jitter": color_jitter,
     "identity": identity,
     "overlay": random_overlay,
     "splice": splice,
