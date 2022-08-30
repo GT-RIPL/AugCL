@@ -48,6 +48,7 @@ class MetersGroup(object):
         self._meters = defaultdict(AverageMeter)
         self.dict_list = list()
         self.continue_train = continue_train
+        self.is_first_log = True
 
     def log(self, key, value, n=1):
         self._meters[key].update(value, n)
@@ -70,9 +71,10 @@ class MetersGroup(object):
         csv_fp = self._file_name[:-4] + ".csv"
 
         df = pd.DataFrame(self.dict_list)
-        if os.path.exists(csv_fp) and self.continue_train:
+        if os.path.exists(csv_fp) and self.continue_train and self.is_first_log:
             df_og = pd.read_csv(csv_fp)
             df = df_og.append(df)
+            self.is_first_log = False
 
         df.to_csv(csv_fp, index=False)
         self.dict_list = list()
