@@ -42,11 +42,12 @@ class AverageMeter(object):
 
 
 class MetersGroup(object):
-    def __init__(self, file_name, formating):
+    def __init__(self, file_name, formating, continue_train=False):
         self._file_name = file_name
         self._formating = formating
         self._meters = defaultdict(AverageMeter)
         self.dict_list = list()
+        self.continue_train = continue_train
 
     def log(self, key, value, n=1):
         self._meters[key].update(value, n)
@@ -69,7 +70,7 @@ class MetersGroup(object):
         csv_fp = self._file_name[:-4] + ".csv"
 
         df = pd.DataFrame(self.dict_list)
-        if os.path.exists(csv_fp):
+        if os.path.exists(csv_fp) and self.continue_train:
             df_og = pd.read_csv(csv_fp)
             df = df_og.append(df)
 
@@ -113,7 +114,7 @@ class MetersGroup(object):
 
 
 class Logger(object):
-    def __init__(self, log_dir, use_tb=True, config="rl"):
+    def __init__(self, log_dir, use_tb=True, config="rl", continue_train=False):
         self._log_dir = log_dir
         if use_tb:
             tb_dir = os.path.join(log_dir, "tb")
@@ -123,10 +124,14 @@ class Logger(object):
         else:
             self._sw = None
         self._train_mg = MetersGroup(
-            os.path.join(log_dir, "train.log"), formating=FORMAT_CONFIG[config]["train"]
+            os.path.join(log_dir, "train.log"),
+            formating=FORMAT_CONFIG[config]["train"],
+            continue_train=continue_train,
         )
         self._eval_mg = MetersGroup(
-            os.path.join(log_dir, "eval.log"), formating=FORMAT_CONFIG[config]["eval"]
+            os.path.join(log_dir, "eval.log"),
+            formating=FORMAT_CONFIG[config]["eval"],
+            continue_train=continue_train,
         )
 
     def _try_sw_log(self, key, value, step):

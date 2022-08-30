@@ -200,7 +200,7 @@ def main(args):
 
         agent.load_pretrained_agent(prev_agent)
 
-    L = Logger(work_dir)
+    L = Logger(work_dir, continue_train=args.continue_train)
     start_time = time.time()
     for step in range(start_step, args.train_steps + 1):
         if done:
@@ -288,11 +288,11 @@ def main(args):
         episode_step += 1
 
         if EXIT.is_set():
-            print(f"Exiting at step: {step - 1}")
+            print(f"Exiting at step: {step}")
             break
 
     if REQUEUE.is_set():
-        print(f"Requeued set at step: {step - 1}")
+        print(f"Requeued at step: {step}")
         save_and_requeue(
             dict(
                 agent=agent,
