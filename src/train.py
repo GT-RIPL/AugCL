@@ -302,8 +302,7 @@ def main(args):
         )
     else:
         delete_state_tar()
-
-    print("Completed training for", work_dir)
+        print("Completed training for", work_dir)
 
 
 if __name__ == "__main__":
