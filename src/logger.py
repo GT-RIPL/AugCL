@@ -68,8 +68,8 @@ class MetersGroup(object):
             f.write(json.dumps(data) + "\n")
         self.dict_list.append(data)
         csv_fp = self._file_name[:-4] + ".csv"
-
         df = pd.DataFrame(self.dict_list)
+        
         if os.path.exists(csv_fp):
             df_og = pd.read_csv(csv_fp)
             df = df_og.append(df)
