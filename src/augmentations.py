@@ -224,7 +224,7 @@ def pad_to_shape(arr, out_shape):
 
 def random_rescale(imgs):
     b, c, h, w = imgs.shape
-    factors = np.random.rand(b)
+    factors = np.random.rand(b) + 1e-10
     for i in range(b):
         img_scaled = kornia.geometry.transform.rescale(imgs[i], factors[i])
         imgs[i] = pad_to_shape(img_scaled, (h, w))
