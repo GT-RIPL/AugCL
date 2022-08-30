@@ -213,7 +213,7 @@ def random_rotation(images, p=0.3):
     return out
 
 
-def color_jitter(imgs):
+def color_jitter(imgs, p):
     """
     inputs np array outputs tensor
     """
@@ -223,9 +223,27 @@ def color_jitter(imgs):
 
     sampled_idxs = torch.from_numpy(np.random.randint(0, b, num_samples))
     imgs = imgs.view(-1, 3, h, w)
-    model = get_jitter_model(x=x)
-    sampled_imgs = imgs[sampled_idxs]
-    imgs[sampled_idxs] = model(sampled_imgs)
+    model = get_jitter_model(x=imgs)
+    imgs[sampled_idxs] = model(imgs[sampled_idxs])
+    return imgs.view(b, c, h, w)
+
+
+def random_perspective(imgs, p=1):
+    """
+    inputs np array outputs tensor
+    """
+    b, c, h, w = imgs.shape
+    imgs = imgs.view(-1, 3, h, w) / 255.0
+    model = kornia.augmentation.RandomPerspective(p=p)
+    imgs = model(imgs)
+    return imgs.view(b, c, h, w) * 255.0
+
+
+def random_resize_crop(imgs, p=1):
+    b, c, h, w = imgs.shape
+    imgs = imgs.view(-1, 3, h, w)
+    model = TF.RandomResizedCrop(size=h, scale=(0.2, 1))
+    imgs = model(imgs)
     return imgs.view(b, c, h, w)
 
 
@@ -596,4 +614,6 @@ aug_to_func = {
     "splice_2x_jitter": splice_2x_jitter,
     "splice_mix_up_jitter": splice_mix_up_jitter,
     "splice_mix_up_conv": splice_mix_up_conv,
+    "random_perspective": random_perspective,
+    "random_resize_crop": random_resize_crop,
 }
