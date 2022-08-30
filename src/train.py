@@ -200,7 +200,7 @@ def main(args):
 
         agent.load_pretrained_agent(prev_agent)
 
-    L = Logger(work_dir, continue_train=args.continue_train)
+    L = Logger(work_dir)
     start_time = time.time()
     for step in range(start_step, args.train_steps + 1):
         if done:
