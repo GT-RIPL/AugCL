@@ -213,6 +213,24 @@ def random_rotation(images, p=0.3):
     return out
 
 
+def pad_to_shape(arr, out_shape):
+    c, h, w = arr.shape
+    m, n = out_shape
+    out = torch.zeros(c, m, n)
+    mx, my = (m - h) // 2, (n - w) // 2
+    out[:, mx : mx + h, my : my + w] = arr
+    return out
+
+
+def random_rescale(imgs):
+    b, c, h, w = imgs.shape
+    factors = np.random.rand(b)
+    for i in range(b):
+        img_scaled = kornia.geometry.transform.rescale(imgs[i], factors[i])
+        imgs[i] = pad_to_shape(img_scaled, (h, w))
+    return imgs
+
+
 def color_jitter(imgs, p):
     """
     inputs np array outputs tensor
@@ -616,4 +634,5 @@ aug_to_func = {
     "splice_mix_up_conv": splice_mix_up_conv,
     "random_perspective": random_perspective,
     "random_resize_crop": random_resize_crop,
+    "random_rescale": random_rescale,
 }

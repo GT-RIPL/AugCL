@@ -182,7 +182,7 @@
             "justMyCode": true,
             "args": [
                 "--data_aug",
-                "splice_jitter"
+                "random_rescale"
             ]
         },
         {
