@@ -53,3 +53,8 @@ def get_requeue_state():
         return torch.load(STATE_FILE, map_location="cpu")
     else:
         return None
+
+
+def delete_state_tar():
+    if os.path.exists(STATE_FILE):
+        os.remove(STATE_FILE)

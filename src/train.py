@@ -18,6 +18,7 @@ from interruptible_utils import (
     init_handlers,
     save_state,
     save_and_requeue,
+    delete_state_tar,
 )
 
 
@@ -299,6 +300,8 @@ def main(args):
                 step=step - 1,
             )
         )
+    else:
+        delete_state_tar()
 
     print("Completed training for", work_dir)
 
@@ -306,4 +309,8 @@ def main(args):
 if __name__ == "__main__":
     args = parse_args()
     init_handlers()
-    main(args)
+    try:
+        main(args)
+    except Exception as e:
+        delete_state_tar()
+        raise e
