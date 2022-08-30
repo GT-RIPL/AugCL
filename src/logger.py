@@ -71,7 +71,7 @@ class MetersGroup(object):
         csv_fp = self._file_name[:-4] + ".csv"
 
         df = pd.DataFrame(self.dict_list)
-        if os.path.exists(csv_fp) and self.continue_train and self.is_first_log:
+        if self.continue_train and self.is_first_log and os.path.exists(csv_fp):
             df_og = pd.read_csv(csv_fp)
             df = df_og.append(df)
             self.is_first_log = False
