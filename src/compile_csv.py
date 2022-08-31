@@ -10,6 +10,7 @@ def main(args):
             alg_seed_path = os.path.join(dir_path, f"seed_{seed}")
             csv_path = os.path.join(alg_seed_path, args.csv_file_name)
             curr_df = pd.read_csv(csv_path)
+            curr_df = curr_df.drop_duplicates(subset=["step"])
             curr_df = curr_df.loc[curr_df["step"] % args.step_interval == 0]
             subset_df = curr_df[["step", args.metric]]
             subset_df.rename(columns={args.metric: "perf"})
