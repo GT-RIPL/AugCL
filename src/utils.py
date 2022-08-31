@@ -153,39 +153,24 @@ class ReplayBuffer(object):
         self.last_requeue_save = 0
         self.full = False
 
-    def save(self, save_dir):
-        if self.idx == self.last_save:
+    def __save__(self, save_dir, last_save_idx):
+        if self.idx == last_save_idx:
             return
-        path = os.path.join(save_dir, "%d_%d.pt" % (self.last_save, self.idx))
+        path = os.path.join(save_dir, "%d_%d.pt" % (last_save_idx, self.idx))
         payload = [
-            self._obses[self.last_save : self.idx],
-            self.actions[self.last_save : self.idx],
-            self.rewards[self.last_save : self.idx],
-            self.not_dones[self.last_save : self.idx],
+            self._obses[last_save_idx : self.idx],
+            self.actions[last_save_idx : self.idx],
+            self.rewards[last_save_idx : self.idx],
+            self.not_dones[last_save_idx : self.idx],
         ]
-        self.last_save = self.idx
+        last_save_idx = self.idx
         torch.save(payload, path)
 
-        # path = os.path.join(save_dir, "buffer.pt")
-        # payload = [self._obses, self.actions, self.rewards, self.not_dones, self.idx]
-        # torch.save(payload, path)
+    def save(self, save_dir):
+        self.__save__(save_dir=save_dir, last_save_idx=self.last_save)
 
     def requeue_save(self, save_dir):
-        if self.idx == self.last_requeue_save:
-            return
-        path = os.path.join(save_dir, "%d_%d.pt" % (self.last_requeue_save, self.idx))
-        payload = [
-            self._obses[self.last_requeue_save : self.idx],
-            self.actions[self.last_requeue_save : self.idx],
-            self.rewards[self.last_requeue_save : self.idx],
-            self.not_dones[self.last_requeue_save : self.idx],
-        ]
-        self.last_requeue_save = self.idx
-        torch.save(payload, path)
-
-        # path = os.path.join(save_dir, "buffer.pt")
-        # payload = [self._obses, self.actions, self.rewards, self.not_dones, self.idx]
-        # torch.save(payload, path)
+        self.__save__(save_dir=save_dir, last_save_idx=self.last_requeue_save)
 
     def load(self, save_dir, end_step=None):
         try:
