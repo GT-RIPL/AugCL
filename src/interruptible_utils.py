@@ -2,13 +2,15 @@ import os
 import os.path as osp
 import signal
 import threading
+from algorithms.sac import SAC
+from utils import ReplayBuffer
 
 import torch
 
 SLURM_JOB_ID = os.environ.get("SLURM_JOB_ID", 0)
-STATE_FILE = osp.join(
-    os.environ["HOME"], ".interrupted_states", "{}.tar".format(SLURM_JOB_ID)
-)
+STATE_FOLDER = osp.join(os.environ["HOME"], ".interrupted_states")
+BUFFER_FOLDER = osp.join(STATE_FOLDER, SLURM_JOB_ID)
+STATE_FILE = osp.join(STATE_FOLDER, "{}.tar".format(SLURM_JOB_ID))
 
 REQUEUE = threading.Event()
 REQUEUE.clear()
@@ -38,23 +40,30 @@ def init_handlers():
     signal.signal(signal.SIGUSR2, _clean_exit_handler)
 
 
-def save_state(state_dict):
-    torch.save(state_dict, STATE_FILE)
+def save_state(agent: SAC, replay_buffer: ReplayBuffer, step: int):
+    torch.save({"step": step, "agent": agent}, STATE_FILE)
+    os.makedirs(BUFFER_FOLDER, exist_ok=True)
+    replay_buffer.requeue_save(BUFFER_FOLDER)
 
 
-def save_and_requeue(state_dict):
-    torch.save(state_dict, STATE_FILE)
+def save_and_requeue(agent: SAC, replay_buffer: ReplayBuffer, step: int):
+    save_state(agent=agent, replay_buffer=replay_buffer, step=step)
     print("requeuing job " + os.environ["SLURM_JOB_ID"])
     os.system("scontrol requeue " + os.environ["SLURM_JOB_ID"])
 
 
-def get_requeue_state():
-    if osp.exists(STATE_FILE):
-        return torch.load(STATE_FILE, map_location="cpu")
-    else:
-        return None
+def is_requeued():
+    return osp.exists(STATE_FILE)
 
 
-def delete_state_tar():
+def requeue_load_agent_and_replay_buffer(replay_buffer: ReplayBuffer):
+    state_dict = torch.load(STATE_FILE, map_location="cpu")
+    replay_buffer.load(BUFFER_FOLDER)
+    return state_dict["agent"], state_dict["step"]
+
+
+def delete_requeue_state():
     if os.path.exists(STATE_FILE):
         os.remove(STATE_FILE)
+    if os.path.exists(BUFFER_FOLDER):
+        os.rmdir(BUFFER_FOLDER)

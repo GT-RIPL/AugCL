@@ -14,11 +14,12 @@ from video import VideoRecorder
 from interruptible_utils import (
     EXIT,
     REQUEUE,
-    get_requeue_state,
+    is_requeued,
     init_handlers,
     save_state,
     save_and_requeue,
-    delete_state_tar,
+    delete_requeue_state,
+    requeue_load_agent_and_replay_buffer,
 )
 
 
@@ -118,9 +119,7 @@ def main(args):
     print("Working directory:", work_dir)
     args.__dict__["train_date"] = time.strftime("%m-%d-%y", time.gmtime())
 
-    requeue_state = get_requeue_state()
-
-    if not args.test_code_mode and not requeue_state:
+    if not args.test_code_mode and not is_requeued():
         assert (
             args.continue_train
             or args.curriculum_step is not None
@@ -160,10 +159,10 @@ def main(args):
 
     start_step, episode, episode_reward, done = 0, 0, 0, True
 
-    if requeue_state is not None:
-        agent = requeue_state["agent"]
-        replay_buffer = requeue_state["replay_buffer"]
-        start_step = requeue_state["step"]
+    if is_requeued():
+        agent, start_step = requeue_load_agent_and_replay_buffer(
+            replay_buffer=replay_buffer
+        )
     elif args.continue_train:
         print("'continue_train' set to true, loading model ckpt and replay buffer ckpt")
         ckpt_steps = get_ckpt_file_paths(model_dir=model_dir)
@@ -211,13 +210,7 @@ def main(args):
 
             if step % args.requeue_save_freq == 0:
                 print(f"Saving for requeue at step: {step}")
-                save_state(
-                    dict(
-                        agent=agent,
-                        replay_buffer=replay_buffer,
-                        step=step,
-                    )
-                )
+                save_state(agent=agent, replay_buffer=replay_buffer, step=step)
 
             # Evaluate agent periodically
             if step % args.eval_freq == 0 and not (
@@ -293,15 +286,9 @@ def main(args):
 
     if REQUEUE.is_set():
         print(f"Requeued at step: {step}")
-        save_and_requeue(
-            dict(
-                agent=agent,
-                replay_buffer=replay_buffer,
-                step=step - 1,
-            )
-        )
+        save_and_requeue(agent=agent, replay_buffer=replay_buffer, step=step)
     else:
-        delete_state_tar()
+        delete_requeue_state()
         print("Completed training for", work_dir)
 
 
@@ -311,5 +298,5 @@ if __name__ == "__main__":
     try:
         main(args)
     except Exception as e:
-        delete_state_tar()
+        delete_requeue_state()
         raise e
