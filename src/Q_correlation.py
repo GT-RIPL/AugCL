@@ -109,7 +109,7 @@ def main(args):
             obs = env.reset()
             done = False
 
-        action = env.action_space.sample()
+        action = agent.select_action(obs)
         next_obs, reward, done, _ = env.step(action)
         replay_buffer.add(obs, action, reward, next_obs, float(done))
         obs = next_obs
