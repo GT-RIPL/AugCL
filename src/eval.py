@@ -58,6 +58,9 @@ def main(args):
         image_size=args.image_size,
         mode=args.eval_mode,
         intensity=args.distracting_cs_intensity,
+        color_on=not args.color_off,
+        background_on=not args.background_off,
+        camera_on=not args.camera_off,
     )
 
     # Set working directory
