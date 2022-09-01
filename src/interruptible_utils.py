@@ -10,7 +10,7 @@ import torch
 
 SLURM_JOB_ID = os.environ.get("SLURM_JOB_ID", 0)
 STATE_FOLDER = osp.join(os.environ["HOME"], ".interrupted_states")
-BUFFER_FOLDER = osp.join(STATE_FOLDER, SLURM_JOB_ID)
+BUFFER_FOLDER = osp.join(STATE_FOLDER, str(SLURM_JOB_ID))
 STATE_FILE = osp.join(STATE_FOLDER, "{}.tar".format(SLURM_JOB_ID))
 
 REQUEUE = threading.Event()

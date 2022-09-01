@@ -244,6 +244,24 @@
             ]
         },
         {
+            "name": "Curriculum Resample Learn",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/src/train.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": [
+                "--algorithm",
+                "curriculum_resample",
+                "--train_steps",
+                "30k",
+                "--data_aug",
+                "conv",
+                "--test_code_mode",
+                "True"
+            ]
+        },
+        {
             "name": "Compile CSV",
             "type": "python",
             "request": "launch",

@@ -12,6 +12,7 @@ from algorithms.non_naive_rad import NonNaiveRAD
 from algorithms.sac_policy_eval import SAC_policy_eval
 from algorithms.SARSA_policy_eval import SARSA_policy_eval
 from algorithms.curriculum_learning.curriculum_FTL import Curriculum_FTL
+from algorithms.curriculum_learning.curriculum_resample import Curriculum_Resample
 
 algorithm = {
     "sac": SAC,
@@ -28,6 +29,7 @@ algorithm = {
     "sac_policy_eval": SAC_policy_eval,
     "sarsa_policy_eval": SARSA_policy_eval,
     "curriculum_FTL": Curriculum_FTL,
+    "curriculum_resample": Curriculum_Resample,
 }
 
 
