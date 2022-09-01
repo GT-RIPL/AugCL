@@ -1,4 +1,5 @@
 import os
+import shutil
 import os.path as osp
 import signal
 import threading
@@ -66,4 +67,4 @@ def delete_requeue_state():
     if os.path.exists(STATE_FILE):
         os.remove(STATE_FILE)
     if os.path.exists(BUFFER_FOLDER):
-        os.rmdir(BUFFER_FOLDER)
+        shutil.rmtree(BUFFER_FOLDER)
