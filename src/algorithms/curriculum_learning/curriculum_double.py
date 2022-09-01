@@ -1,3 +1,4 @@
+from copy import deepcopy
 from utils import ReplayBuffer
 from augmentations import random_shift
 import torch.nn.functional as F
@@ -9,6 +10,8 @@ import utils
 class Curriculum_Double(Curriculum):
     def __init__(self, obs_shape, action_shape, args):
         super().__init__(obs_shape, action_shape, args)
+        self.critic_weak = deepcopy(self.critic)
+        self.critic_weak_optimizer = deepcopy(self.critic_optimizer)
 
     def load_pretrained_agent(self, pretrained_agent: SAC):
         utils.soft_update_params(
