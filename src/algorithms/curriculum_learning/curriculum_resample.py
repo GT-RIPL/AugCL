@@ -1,5 +1,3 @@
-import torch
-import numpy as np
 from copy import deepcopy
 from utils import ReplayBuffer
 from augmentations import random_shift
