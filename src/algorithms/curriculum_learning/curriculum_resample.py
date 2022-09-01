@@ -45,7 +45,7 @@ class Curriculum_Resample(Curriculum_Double):
         Q1_1, Q1_2 = current_Q1_aug.split(split_sz)
         Q2_1, Q2_2 = current_Q2_aug.split(split_sz)
         current_Q1_aug = (Q1_1 + Q1_2) / 2
-        current_Q2_aug = (Q2_1, Q2_2) / 2
+        current_Q2_aug = (Q2_1 + Q2_2) / 2
         critic_loss_aug = F.mse_loss(current_Q1_aug, target_Q) + F.mse_loss(
             current_Q2_aug, target_Q
         )
