@@ -1,3 +1,4 @@
+from copy import deepcopy
 from utils import ReplayBuffer
 from augmentations import random_shift
 import torch.nn.functional as F
@@ -9,6 +10,8 @@ import utils
 class Curriculum_Resample(Curriculum_Double):
     def __init__(self, obs_shape, action_shape, args):
         super().__init__(obs_shape, action_shape, args)
+        self.critic_weak = deepcopy(self.critic)
+        self.critic_weak_optimizer = deepcopy(self.critic_optimizer)
 
     def load_pretrained_agent(self, pretrained_agent: SAC):
         utils.soft_update_params(
@@ -35,10 +38,10 @@ class Curriculum_Resample(Curriculum_Double):
             current_Q2_shift, target_Q
         )
 
-        current_Q1_aug, current_Q2_aug = self.critic(obs_aug, action.repeat(2, 1, 1, 1))
+        current_Q1_aug, current_Q2_aug = self.critic(obs_aug, action.repeat(2, 1))
         critic_loss_aug = F.mse_loss(
-            current_Q1_aug, target_Q.repeat(2, 1, 1, 1)
-        ) + F.mse_loss(current_Q2_aug, target_Q.repeat(2, 1, 1, 1))
+            current_Q1_aug, target_Q.repeat(2, 1)
+        ) + F.mse_loss(current_Q2_aug, target_Q.repeat(2, 1))
 
         if L is not None:
             L.log("train_critic_weak/loss", critic_loss_shift, step)
