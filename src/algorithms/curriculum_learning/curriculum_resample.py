@@ -1,3 +1,5 @@
+import torch
+import numpy as np
 from copy import deepcopy
 from utils import ReplayBuffer
 from augmentations import random_shift
@@ -39,9 +41,14 @@ class Curriculum_Resample(Curriculum_Double):
         )
 
         current_Q1_aug, current_Q2_aug = self.critic(obs_aug, action.repeat(2, 1))
-        critic_loss_aug = F.mse_loss(
-            current_Q1_aug, target_Q.repeat(2, 1)
-        ) + F.mse_loss(current_Q2_aug, target_Q.repeat(2, 1))
+        split_sz = int(current_Q1_aug.shape[0] / 2)
+        Q1_1, Q1_2 = current_Q1_aug.split(split_sz)
+        Q2_1, Q2_2 = current_Q2_aug.split(split_sz)
+        current_Q1_aug = (Q1_1 + Q1_2) / 2
+        current_Q2_aug = (Q2_1, Q2_2) / 2
+        critic_loss_aug = F.mse_loss(current_Q1_aug, target_Q) + F.mse_loss(
+            current_Q2_aug, target_Q
+        )
 
         if L is not None:
             L.log("train_critic_weak/loss", critic_loss_shift, step)
