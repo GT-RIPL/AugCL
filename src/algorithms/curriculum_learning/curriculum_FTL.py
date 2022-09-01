@@ -130,7 +130,7 @@ class Curriculum_FTL(Curriculum):
             self.soft_update_critic_target()
 
         obs_all = torch.cat((obs, next_obs), dim=0)
-        mu_all = torch.cat((obs_mu, next_obs_mu), dim=0)
-        std_all = torch.cat((obs_log_std, next_obs_log_std), dim=0)
+        mu_all = torch.cat((obs_mu, next_obs_mu), dim=0).detach()
+        std_all = torch.cat((obs_log_std, next_obs_log_std), dim=0).detach()
         obs_all_aug = self.apply_aug(obs_all)
         self.update_augmented_actor(obs=obs_all_aug, obs_mu=mu_all, obs_log_std=std_all)
