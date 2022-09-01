@@ -17,6 +17,18 @@ class Curriculum_FTL(Curriculum):
         )
         self.mse_loss = torch.nn.MSELoss()
 
+    def select_action(self, obs):
+        _obs = self._obs_to_input(obs)
+        with torch.no_grad():
+            if self.training:
+                mu, _, _, _ = self.actor(_obs, compute_pi=False, compute_log_pi=False)
+            else:
+                mu, _, _, _ = self.actor_aug(
+                    _obs, compute_pi=False, compute_log_pi=False
+                )
+
+        return mu.cpu().data.numpy().flatten()
+
     def load_pretrained_agent(self, pretrained_agent: SAC):
         self.actor = pretrained_agent.actor
         self.critic = pretrained_agent.critic
