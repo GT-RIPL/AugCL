@@ -101,10 +101,9 @@ class Curriculum_FTL(Curriculum):
         mu, _, _, log_std = self.actor_aug(obs)
 
         MSE_mu = self.mse_loss(mu, obs_mu)
-        MSE_std = self.mse_loss(obs_log_std, log_std)
-
+        
         self.actor_aug_optimizer.zero_grad()
-        (MSE_mu + MSE_std).backward()
+        MSE_mu.backward()
         self.actor_aug_optimizer.step()
 
     def update(self, replay_buffer: ReplayBuffer, L, step):
