@@ -156,7 +156,7 @@ class ReplayBuffer(object):
     def __save__(self, save_dir, last_save_idx):
         if self.idx == last_save_idx:
             return
-        path = os.path.join(save_dir, "%d_%d.pt" % (last_save_idx, self.idx))
+        path = os.path.join(save_dir, "%d_%d.tar" % (last_save_idx, self.idx))
         payload = [
             self._obses[last_save_idx : self.idx],
             self.actions[last_save_idx : self.idx],
@@ -173,29 +173,21 @@ class ReplayBuffer(object):
         self.__save__(save_dir=save_dir, last_save_idx=self.last_requeue_save)
 
     def load(self, save_dir, end_step=None):
-        try:
-            chunks = os.listdir(save_dir)
-            chucks = sorted(chunks, key=lambda x: int(x.split("_")[0]))
-            for chunk in chucks:
-                start, end = [int(x) for x in chunk.split(".")[0].split("_")]
-                path = os.path.join(save_dir, chunk)
-                payload = torch.load(path)
-                assert self.idx == start
-                self._obses[start:end] = payload[0]
-                self.actions[start:end] = payload[1]
-                self.rewards[start:end] = payload[2]
-                self.not_dones[start:end] = payload[3]
-                self.idx = end
+        chunks = os.listdir(save_dir)
+        chucks = sorted(chunks, key=lambda x: int(x.split("_")[0]))
+        for chunk in chucks:
+            start, end = [int(x) for x in chunk.split(".")[0].split("_")]
+            path = os.path.join(save_dir, chunk)
+            payload = torch.load(path)
+            assert self.idx == start
+            self._obses[start:end] = payload[0]
+            self.actions[start:end] = payload[1]
+            self.rewards[start:end] = payload[2]
+            self.not_dones[start:end] = payload[3]
+            self.idx = end
 
-                if end == end_step:
-                    break
-        except:
-            payload = torch.load(os.path.join(save_dir, "buffer.pt"))
-            self._obses = payload[0]
-            self.actions = payload[1]
-            self.rewards = payload[2]
-            self.not_dones = payload[3]
-            self.idx = end_step if end_step else payload[4]
+            if end == end_step:
+                break
 
     def tensor_buffer_samples(self, idxs):
         obs, next_obs = self._encode_obses(idxs)
