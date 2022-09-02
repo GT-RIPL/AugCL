@@ -153,9 +153,25 @@ class ReplayBuffer(object):
         self.last_requeue_save = 0
         self.full = False
 
-    def __save__(self, save_dir, last_save_idx):
+    def __check_and_fix_chunks__(self, save_dir: str, save_freq: int):
+        for i in range(0, self.last_requeue_save + 1, save_freq):
+            start = i
+            end = i + save_freq
+            path = os.path.join(save_dir, "%d_%d.tar" % (start, end))
+
+            if not os.path.exists(path):
+                payload = [
+                    self._obses[start:end],
+                    self.actions[start:end],
+                    self.rewards[start:end],
+                    self.not_dones[start:end],
+                ]
+                torch.save(payload, path)
+
+    def __save__(self, save_dir, last_save_idx, save_freq):
         if self.idx == last_save_idx:
             return
+        self.__check_and_fix_chunks__(save_dir=save_dir, save_freq=save_freq)
         path = os.path.join(save_dir, "%d_%d.tar" % (last_save_idx, self.idx))
         payload = [
             self._obses[last_save_idx : self.idx],
@@ -167,10 +183,18 @@ class ReplayBuffer(object):
         torch.save(payload, path)
 
     def save(self, save_dir):
-        self.__save__(save_dir=save_dir, last_save_idx=self.last_save)
+        self.__save__(
+            save_dir=save_dir,
+            last_save_idx=self.last_save,
+            save_freq=self.idx - self.last_save,
+        )
 
     def requeue_save(self, save_dir):
-        self.__save__(save_dir=save_dir, last_save_idx=self.last_requeue_save)
+        self.__save__(
+            save_dir=save_dir,
+            last_save_idx=self.last_requeue_save,
+            save_freq=self.idx - self.last_requeue_save,
+        )
 
     def load(self, save_dir, end_step=None):
         chunks = os.listdir(save_dir)
