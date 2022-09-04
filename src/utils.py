@@ -152,23 +152,6 @@ class ReplayBuffer(object):
         self.last_requeue_save = 0
         self.full = False
 
-    def __check_and_fix_chunks__(
-        self, save_dir: str, save_freq: int, last_save_idx: int
-    ):
-        for i in range(0, last_save_idx, save_freq):
-            start = i
-            end = i + save_freq
-            path = os.path.join(save_dir, "%d_%d.tar" % (start, end))
-
-            if not os.path.exists(path):
-                payload = [
-                    self._obses[start:end],
-                    self.actions[start:end],
-                    self.rewards[start:end],
-                    self.not_dones[start:end],
-                ]
-                torch.save(payload, path)
-
     def __save__(self, save_dir, last_save_idx):
         if self.idx == last_save_idx:
             return self.idx
