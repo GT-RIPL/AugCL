@@ -60,6 +60,7 @@ def is_requeued():
 def requeue_load_agent_and_replay_buffer(replay_buffer: ReplayBuffer):
     state_dict = torch.load(STATE_FILE, map_location="cpu")
     replay_buffer.load(BUFFER_FOLDER)
+    state_dict["agent"] = state_dict["agent"].cuda()
     return state_dict["agent"], state_dict["step"]
 
 
