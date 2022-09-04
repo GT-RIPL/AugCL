@@ -265,7 +265,7 @@ def main(args):
 
     if REQUEUE.is_set():
         print(f"Requeued at step: {step}")
-        save_and_requeue(agent=agent, replay_buffer=replay_buffer, step=step)
+        os.system("scontrol requeue " + os.environ["SLURM_JOB_ID"])
     else:
         print("Completed training for", work_dir)
         delete_requeue_state()
