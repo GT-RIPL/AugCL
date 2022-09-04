@@ -188,9 +188,8 @@ def main(args):
                 start_time = time.time()
                 L.dump(step)
 
-            # Save for requeue            
+            # Save for requeue
             if args.requeue_save_freq > 0 and step % args.requeue_save_freq == 0:
-                print(f"Saving for requeue at step: {step}")
                 save_state(agent=agent, replay_buffer=replay_buffer, step=step)
 
             # Evaluate agent periodically
@@ -202,7 +201,6 @@ def main(args):
                     if step == args.train_steps
                     else args.eval_episodes
                 )
-                print("Evaluating:", work_dir)
                 L.log("eval/episode", episode, step)
                 evaluate(env, agent, video, num_episodes, L, step, args=args)
                 if test_env is not None:
@@ -269,8 +267,8 @@ def main(args):
         print(f"Requeued at step: {step}")
         save_and_requeue(agent=agent, replay_buffer=replay_buffer, step=step)
     else:
-        delete_requeue_state()
         print("Completed training for", work_dir)
+        delete_requeue_state()
 
 
 if __name__ == "__main__":
@@ -279,6 +277,6 @@ if __name__ == "__main__":
     try:
         main(args)
     except Exception as e:
-        print(f'Node is: {os.environ.get("SLURM_JOB_NODELIST", None)}')
         delete_requeue_state()
+        print(f'Node is: {os.environ.get("SLURM_JOB_NODELIST", None)}')
         raise e
