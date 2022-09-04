@@ -261,7 +261,7 @@ def main(args):
 
         if EXIT.is_set():
             print(
-                f"Exiting at step: {step}. With continue training at {replay_buffer.last_requeue_save}"
+                f"Exiting at step: {step}. When requeue starts I'll be picking up at step: {replay_buffer.last_requeue_save}"
             )
             break
 
