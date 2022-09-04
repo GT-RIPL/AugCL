@@ -171,7 +171,7 @@ class ReplayBuffer(object):
 
     def __save__(self, save_dir, last_save_idx, save_freq):
         if self.idx == last_save_idx:
-            return
+            return self.idx
         self.__check_and_fix_chunks__(
             save_dir=save_dir, save_freq=save_freq, last_save_idx=last_save_idx
         )
