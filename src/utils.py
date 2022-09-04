@@ -204,7 +204,7 @@ class ReplayBuffer(object):
             payload = torch.load(path)
             assert (
                 self.idx == start
-            ), f"self.idx: {self.idx} DNE start: {start} for save_dir: {save_dir}"
+            ), f"self.idx: {self.idx} DNE start: {start} for save_dir: {save_dir}. Chucks: {chucks}"
             self._obses[start:end] = payload[0]
             self.actions[start:end] = payload[1]
             self.rewards[start:end] = payload[2]
