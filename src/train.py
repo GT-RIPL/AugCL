@@ -208,10 +208,6 @@ def main(args):
                 start_time = time.time()
                 L.dump(step)
 
-            if args.requeue_save_freq > 0 and step % args.requeue_save_freq == 0:
-                print(f"Saving for requeue at step: {step}")
-                save_state(agent=agent, replay_buffer=replay_buffer, step=step)
-
             # Evaluate agent periodically
             if step % args.eval_freq == 0 and not (
                 args.continue_train and step == start_step
@@ -283,6 +279,9 @@ def main(args):
         if EXIT.is_set():
             print(f"Exiting at step: {step}")
             break
+        elif args.requeue_save_freq > 0 and step % args.requeue_save_freq == 0:
+            print(f"Saving for requeue at step: {step}")
+            save_state(agent=agent, replay_buffer=replay_buffer, step=step)
 
     if REQUEUE.is_set():
         print(f"Requeued at step: {step}")
