@@ -137,7 +137,7 @@ def main(args):
         obs_shape=cropped_obs_shape, action_shape=env.action_space.shape, args=args
     )
 
-    start_step, episode, episode_reward, done = 0, 0, 0, True
+    start_step, episode, episode_reward, done = 0, 0, 0, False
 
     if is_requeued():
         agent, start_step = requeue_load_agent_and_replay_buffer(
@@ -179,6 +179,9 @@ def main(args):
 
         agent.load_pretrained_agent(prev_agent)
 
+    obs = env.reset()
+    episode_step = 0
+    episode_reward = 0
     L = Logger(work_dir)
     start_time = time.time()
     for step in range(start_step, args.train_steps + 1):

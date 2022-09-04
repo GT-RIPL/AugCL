@@ -166,11 +166,9 @@ class ReplayBuffer(object):
         return self.idx
 
     def save(self, save_dir):
-        print(f"Buffer save step: {self.last_save} - {self.idx}")
         self.last_save = self.__save__(save_dir=save_dir, last_save_idx=self.last_save)
 
     def requeue_save(self, save_dir):
-        print(f"Buffer requeue save step: {self.last_requeue_save} - {self.idx}")
         self.last_requeue_save = self.__save__(
             save_dir=save_dir, last_save_idx=self.last_requeue_save
         )
