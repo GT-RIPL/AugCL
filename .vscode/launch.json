@@ -154,7 +154,7 @@
             ]
         },
         {
-            "name": "SAC train with replay buffer",
+            "name": "SAC train. Save replay buffer",
             "type": "python",
             "request": "launch",
             "program": "${workspaceFolder}/src/train.py",
@@ -170,7 +170,9 @@
                 "--save_freq",
                 "1k",
                 "--train_steps",
-                "10k"
+                "10k",
+                "--requeue_save_freq",
+                "None"
             ]
         },
         {

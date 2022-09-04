@@ -178,18 +178,18 @@ class ReplayBuffer(object):
             self.rewards[last_save_idx : self.idx],
             self.not_dones[last_save_idx : self.idx],
         ]
-        last_save_idx = self.idx
         torch.save(payload, path)
+        return self.idx
 
     def save(self, save_dir):
-        self.__save__(
+        self.last_save = self.__save__(
             save_dir=save_dir,
             last_save_idx=self.last_save,
             save_freq=self.idx - self.last_save,
         )
 
     def requeue_save(self, save_dir):
-        self.__save__(
+        self.last_requeue_save = self.__save__(
             save_dir=save_dir,
             last_save_idx=self.last_requeue_save,
             save_freq=self.idx - self.last_requeue_save,

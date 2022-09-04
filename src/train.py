@@ -208,7 +208,7 @@ def main(args):
                 start_time = time.time()
                 L.dump(step)
 
-            if args.requeue_save_freq and step % args.requeue_save_freq == 0:
+            if args.requeue_save_freq > 0 and step % args.requeue_save_freq == 0:
                 print(f"Saving for requeue at step: {step}")
                 save_state(agent=agent, replay_buffer=replay_buffer, step=step)
 
