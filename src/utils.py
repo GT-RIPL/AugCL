@@ -169,12 +169,9 @@ class ReplayBuffer(object):
                 ]
                 torch.save(payload, path)
 
-    def __save__(self, save_dir, last_save_idx, save_freq):
+    def __save__(self, save_dir, last_save_idx):
         if self.idx == last_save_idx:
             return self.idx
-        self.__check_and_fix_chunks__(
-            save_dir=save_dir, save_freq=save_freq, last_save_idx=last_save_idx
-        )
         path = os.path.join(save_dir, "%d_%d.tar" % (last_save_idx, self.idx))
         payload = [
             self._obses[last_save_idx : self.idx],
@@ -186,17 +183,13 @@ class ReplayBuffer(object):
         return self.idx
 
     def save(self, save_dir):
-        self.last_save = self.__save__(
-            save_dir=save_dir,
-            last_save_idx=self.last_save,
-            save_freq=self.idx - self.last_save,
-        )
+        print(f"Buffer save step: {self.last_save} - {self.idx}")
+        self.last_save = self.__save__(save_dir=save_dir, last_save_idx=self.last_save)
 
     def requeue_save(self, save_dir):
+        print(f"Buffer requeue save step: {self.last_requeue_save} - {self.idx}")
         self.last_requeue_save = self.__save__(
-            save_dir=save_dir,
-            last_save_idx=self.last_requeue_save,
-            save_freq=self.idx - self.last_requeue_save,
+            save_dir=save_dir, last_save_idx=self.last_requeue_save
         )
 
     def load(self, save_dir, end_step=None):
