@@ -17,7 +17,6 @@ from interruptible_utils import (
     is_requeued,
     init_handlers,
     save_state,
-    save_and_requeue,
     delete_requeue_state,
     requeue_load_agent_and_replay_buffer,
 )
@@ -137,7 +136,7 @@ def main(args):
         obs_shape=cropped_obs_shape, action_shape=env.action_space.shape, args=args
     )
 
-    start_step, episode, episode_reward, done = 0, 0, 0, False
+    start_step, episode, episode_reward, done = 0, 0, 0, True
 
     if is_requeued():
         agent, start_step = requeue_load_agent_and_replay_buffer(
@@ -179,9 +178,6 @@ def main(args):
 
         agent.load_pretrained_agent(prev_agent)
 
-    obs = env.reset()
-    episode_step = 0
-    episode_reward = 0
     L = Logger(work_dir)
     start_time = time.time()
     for step in range(start_step, args.train_steps + 1):
