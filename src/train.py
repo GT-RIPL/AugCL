@@ -187,10 +187,6 @@ def main(args):
                 start_time = time.time()
                 L.dump(step)
 
-            # Save for requeue
-            if args.requeue_save_freq > 0 and step % args.requeue_save_freq == 0:
-                save_state(agent=agent, replay_buffer=replay_buffer, step=step)
-
             # Evaluate agent periodically
             if step % args.eval_freq == 0 and not (
                 args.continue_train or is_requeued() and step == start_step
@@ -214,6 +210,10 @@ def main(args):
                         args=args,
                     )
                 L.dump(step)
+
+            # Save for requeue
+            if args.requeue_save_freq > 0 and step % args.requeue_save_freq == 0:
+                save_state(agent=agent, replay_buffer=replay_buffer, step=step)
 
             # Save agent periodically
             if (
