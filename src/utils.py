@@ -152,8 +152,10 @@ class ReplayBuffer(object):
         self.last_requeue_save = 0
         self.full = False
 
-    def __check_and_fix_chunks__(self, save_dir: str, save_freq: int):
-        for i in range(0, self.last_requeue_save + 1, save_freq):
+    def __check_and_fix_chunks__(
+        self, save_dir: str, save_freq: int, last_save_idx: int
+    ):
+        for i in range(0, last_save_idx, save_freq):
             start = i
             end = i + save_freq
             path = os.path.join(save_dir, "%d_%d.tar" % (start, end))
@@ -170,7 +172,9 @@ class ReplayBuffer(object):
     def __save__(self, save_dir, last_save_idx, save_freq):
         if self.idx == last_save_idx:
             return
-        self.__check_and_fix_chunks__(save_dir=save_dir, save_freq=save_freq)
+        self.__check_and_fix_chunks__(
+            save_dir=save_dir, save_freq=save_freq, last_save_idx=last_save_idx
+        )
         path = os.path.join(save_dir, "%d_%d.tar" % (last_save_idx, self.idx))
         payload = [
             self._obses[last_save_idx : self.idx],

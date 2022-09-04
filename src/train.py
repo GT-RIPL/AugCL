@@ -298,6 +298,6 @@ if __name__ == "__main__":
     try:
         main(args)
     except Exception as e:
-        print(f'Node is: {os.environ["SLURM_JOB_NODELIST"]}')
+        print(f'Node is: {os.environ.get("SLURM_JOB_NODELIST", None)}')
         delete_requeue_state()
         raise e

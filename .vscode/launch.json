@@ -172,7 +172,7 @@
                 "--train_steps",
                 "10k",
                 "--requeue_save_freq",
-                "None"
+                "0"
             ]
         },
         {
