@@ -54,26 +54,6 @@ def evaluate(env, agent, video, num_episodes, L, step, args, test_env=False):
     return np.mean(episode_rewards)
 
 
-def get_ckpt_file_paths(model_dir: str):
-    ckpt_steps = [
-        int(f[:-3])
-        for f in os.listdir(model_dir)
-        if os.path.isfile(os.path.join(model_dir, f)) and f.endswith(".pt")
-    ]
-    return ckpt_steps
-
-
-def load_agent_and_buffer(step: int, model_dir: str, buffer_dir: str, replay_buffer):
-    assert os.path.exists(
-        buffer_dir
-    ), f"No buffer folder exists, replay buffer required in order to continue training."
-    ckpt_path = os.path.join(model_dir, f"{str(step)}.pt")
-    assert os.path.exists(ckpt_path), f"No checkpoint at :{ckpt_path} exists."
-    agent = torch.load(ckpt_path)
-    replay_buffer.load(save_dir=buffer_dir, end_step=step)
-    return agent, replay_buffer
-
-
 def main(args):
     # Set seed
     utils.set_seed_everywhere(args.seed)
@@ -165,11 +145,11 @@ def main(args):
         )
     elif args.continue_train:
         print("'continue_train' set to true, loading model ckpt and replay buffer ckpt")
-        ckpt_steps = get_ckpt_file_paths(model_dir=model_dir)
+        ckpt_steps = utils.get_ckpt_file_paths(model_dir=model_dir)
         if ckpt_steps:
             ckpt_steps.sort()
             start_step = ckpt_steps[-1]
-            agent, replay_buffer = load_agent_and_buffer(
+            agent, replay_buffer = utils.load_agent_and_buffer(
                 step=start_step,
                 model_dir=model_dir,
                 buffer_dir=os.path.join(work_dir, "buffer"),
@@ -190,7 +170,7 @@ def main(args):
             "seed_" + str(args.seed),
         )
 
-        prev_agent, replay_buffer = load_agent_and_buffer(
+        prev_agent, replay_buffer = utils.load_agent_and_buffer(
             step=start_step,
             model_dir=os.path.join(prev_work_dir, "model"),
             buffer_dir=os.path.join(prev_work_dir, "buffer"),

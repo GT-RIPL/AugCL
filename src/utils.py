@@ -336,3 +336,25 @@ def count_parameters(net, as_int=False):
     if as_int:
         return count
     return f"{count:,}"
+
+
+def get_ckpt_file_paths(model_dir: str):
+    ckpt_steps = [
+        int(f[:-3])
+        for f in os.listdir(model_dir)
+        if os.path.isfile(os.path.join(model_dir, f)) and f.endswith(".pt")
+    ]
+    return ckpt_steps
+
+
+def load_agent_and_buffer(
+    step: int, model_dir: str, buffer_dir: str, replay_buffer: ReplayBuffer
+):
+    assert os.path.exists(
+        buffer_dir
+    ), f"No buffer folder exists, replay buffer required in order to continue training."
+    ckpt_path = os.path.join(model_dir, f"{str(step)}.pt")
+    assert os.path.exists(ckpt_path), f"No checkpoint at :{ckpt_path} exists."
+    agent = torch.load(ckpt_path)
+    replay_buffer.load(save_dir=buffer_dir, end_step=step)
+    return agent, replay_buffer
