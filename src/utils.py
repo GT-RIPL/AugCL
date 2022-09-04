@@ -194,6 +194,8 @@ class ReplayBuffer(object):
             if end == end_step:
                 break
 
+        self.last_requeue_save = self.last_save = self.idx
+
     def tensor_buffer_samples(self, idxs):
         obs, next_obs = self._encode_obses(idxs)
         obs = torch.as_tensor(obs).cuda().float()
