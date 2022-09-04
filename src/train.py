@@ -194,7 +194,7 @@ def main(args):
 
             # Evaluate agent periodically
             if step % args.eval_freq == 0 and not (
-                args.continue_train and step == start_step
+                args.continue_train or is_requeued() and step == start_step
             ):
                 num_episodes = (
                     args.eval_episodes_final_step
@@ -260,11 +260,12 @@ def main(args):
         episode_step += 1
 
         if EXIT.is_set():
-            print(f"Exiting at step: {step}")
+            print(
+                f"Exiting at step: {step}. With continue training at {replay_buffer.last_requeue_save}"
+            )
             break
 
     if REQUEUE.is_set():
-        print(f"Requeued at step: {step}")
         os.system("scontrol requeue " + os.environ["SLURM_JOB_ID"])
     else:
         print("Completed training for", work_dir)
