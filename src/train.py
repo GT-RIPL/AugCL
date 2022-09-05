@@ -138,11 +138,7 @@ def main(args):
 
     start_step, episode, episode_reward, done = 0, 0, 0, True
 
-    if is_requeued():
-        agent, start_step = requeue_load_agent_and_replay_buffer(
-            replay_buffer=replay_buffer
-        )
-    elif args.continue_train:
+    if args.continue_train:
         print("'continue_train' set to true, loading model ckpt and replay buffer ckpt")
         ckpt_steps = utils.get_ckpt_file_paths(model_dir=model_dir)
         if ckpt_steps:
@@ -168,15 +164,24 @@ def main(args):
             args.prev_id,
             "seed_" + str(args.seed),
         )
+        buffer_dir = os.path.join(prev_work_dir, "buffer")
 
-        prev_agent, replay_buffer = utils.load_agent_and_buffer(
-            step=start_step,
-            model_dir=os.path.join(prev_work_dir, "model"),
-            buffer_dir=os.path.join(prev_work_dir, "buffer"),
-            replay_buffer=replay_buffer,
+        if is_requeued():
+            replay_buffer.load(save_dir=buffer_dir, end_step=start_step)
+        else:
+            prev_agent, replay_buffer = utils.load_agent_and_buffer(
+                step=start_step,
+                model_dir=os.path.join(prev_work_dir, "model"),
+                buffer_dir=buffer_dir,
+                replay_buffer=replay_buffer,
+            )
+
+            agent.load_pretrained_agent(prev_agent)
+
+    if is_requeued():
+        agent, start_step = requeue_load_agent_and_replay_buffer(
+            replay_buffer=replay_buffer
         )
-
-        agent.load_pretrained_agent(prev_agent)
 
     L = Logger(work_dir)
     start_time = time.time()
