@@ -153,6 +153,9 @@ def main(args):
         else:
             raise ValueError("No checkpoints found exiting...")
     elif args.curriculum_step is not None:
+        print(
+            f"'curriculum_train' is set to true. Loading previous model: {args.prev_aglorithm} with id:{args.prev_id}."
+        )
         assert issubclass(
             agent.__class__, curriculum.Curriculum
         ), f"agent is not a subclass of Curriculum. Aborting..."
