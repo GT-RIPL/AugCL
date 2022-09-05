@@ -320,7 +320,7 @@ def create_rgb_mask(x_rgb, R_thres, G_thres, B_thres):
     return x_rgb > weight.to(x_rgb.get_device())
 
 
-def splice(x, hue_thres=0, sat_thres=0, val_thres=0.4):
+def splice(x, hue_thres=0, sat_thres=0, val_thres=0.6):
     # 0.6 val for video_hard, 0.4 for video_easy
     global data_iter
     load_dataloader(batch_size=x.size(0), image_size=x.size(-1))
