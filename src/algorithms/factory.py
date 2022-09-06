@@ -13,6 +13,7 @@ from algorithms.sac_policy_eval import SAC_policy_eval
 from algorithms.SARSA_policy_eval import SARSA_policy_eval
 from algorithms.curriculum_learning.curriculum_FTL import Curriculum_FTL
 from algorithms.curriculum_learning.curriculum_resample import Curriculum_Resample
+from algorithms.curriculum_learning.curriculum_2x_nu_actor import Curriculum_2x_Nu_Actor
 
 algorithm = {
     "sac": SAC,
@@ -30,6 +31,7 @@ algorithm = {
     "sarsa_policy_eval": SARSA_policy_eval,
     "curriculum_FTL": Curriculum_FTL,
     "curriculum_resample": Curriculum_Resample,
+    "2x_curriculum_nu_actor": Curriculum_2x_Nu_Actor,
 }
 
 
