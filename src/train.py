@@ -192,6 +192,8 @@ def main(args):
         if done:
             if step > start_step:
                 L.log("train/duration", time.time() - start_time, step)
+                L.log("train/episode_reward", episode_reward, step)
+                L.log("train/episode", episode + 1, step)
                 start_time = time.time()
                 L.dump(step)
 
@@ -234,15 +236,11 @@ def main(args):
                 if args.save_buffer:
                     replay_buffer.save(buffer_dir)
 
-            L.log("train/episode_reward", episode_reward, step)
-
             obs = env.reset()
             done = False
             episode_reward = 0
             episode_step = 0
             episode += 1
-
-            L.log("train/episode", episode, step)
 
         # Sample action for data collection
         if step < args.init_steps:
