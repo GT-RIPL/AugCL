@@ -1,4 +1,5 @@
 import torch
+import augmentations
 import torch.nn.functional as F
 from logger import Logger
 import utils
@@ -63,7 +64,8 @@ class SVEA(RAD):
         self.critic_optimizer.step()
 
     def update(self, replay_buffer: utils.ReplayBuffer, L: Logger, step: int):
-        obs, action, reward, next_obs, not_done = replay_buffer.sample_drq()
+        obs, action, reward, next_obs, not_done = replay_buffer.sample()
+        obs = augmentations.random_shift(obs)
 
         self.update_critic(obs, action, reward, next_obs, not_done, L, step)
 

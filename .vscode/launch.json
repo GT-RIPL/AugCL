@@ -32,7 +32,7 @@
                 "--test_code_mode",
                 "True",
                 "--data_aug",
-                "overlay"
+                "conv"
             ]
         },
         {
