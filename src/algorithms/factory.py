@@ -16,6 +16,7 @@ from algorithms.curriculum_learning.curriculum_resample import Curriculum_Resamp
 from algorithms.curriculum_learning.curriculum_2x_nu_actor import Curriculum_2x_Nu_Actor
 from algorithms.curriculum_learning.curriculum_2x_opt import Curriculum_2x_Opt
 from algorithms.curriculum_learning.curriculum_bb import Curriculum_BB
+from algorithms.curriculum_learning.curriculum_single import CurriculumSingle
 
 algorithm = {
     "sac": SAC,
@@ -36,6 +37,7 @@ algorithm = {
     "2x_curriculum_nu_actor": Curriculum_2x_Nu_Actor,
     "2x_curriculum_opt": Curriculum_2x_Opt,
     "2x_curriculum_bb": Curriculum_BB,
+    "curriculum_single": CurriculumSingle,
 }
 
 
