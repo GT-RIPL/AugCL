@@ -184,7 +184,7 @@
             "justMyCode": true,
             "args": [
                 "--data_aug",
-                "random_rescale"
+                "mix_up"
             ]
         },
         {
@@ -303,6 +303,14 @@
                 "--row_value",
                 "step"
             ]
+        },
+        {
+            "name": "Time Augmentation",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/src/time_augmentations.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
         },
     ]
 }

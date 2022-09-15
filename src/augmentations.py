@@ -222,16 +222,7 @@ def pad_to_shape(arr, out_shape):
     return out
 
 
-def random_rescale(imgs):
-    b, c, h, w = imgs.shape
-    factors = np.random.randint(10, 100) / 100
-    for i in range(b):
-        img_scaled = kornia.geometry.transform.rescale(imgs[i], factors[i])
-        imgs[i] = pad_to_shape(img_scaled, (h, w))
-    return imgs
-
-
-def color_jitter(imgs, p):
+def color_jitter(imgs, p=1):
     """
     inputs np array outputs tensor
     """
@@ -288,6 +279,21 @@ def random_overlay(x, dataset="coco"):
     imgs = _get_data_batch(batch_size=x.size(0)).repeat(1, x.size(1) // 3, 1, 1)
 
     return ((1 - alpha) * (x / 255.0) + (alpha) * imgs) * 255.0
+
+
+def mix_up(x, dataset="coco"):
+    global data_iter
+
+    load_dataloader(batch_size=x.size(0), image_size=x.size(-1), dataset=dataset)
+
+    imgs = _get_data_batch(batch_size=x.size(0)).repeat(1, x.size(1) // 3, 1, 1)
+    weights = (
+        torch.from_numpy(np.random.uniform(size=x.shape[0]))
+        .to(x.get_device())
+        .view(-1, 1, 1, 1)
+    )
+
+    return ((1 - weights) * (x / 255.0) + (weights) * imgs) * 255.0
 
 
 def random_conv(x):
@@ -388,31 +394,6 @@ def splice_mix_up_jitter(x, hue_thres=3.5, sat_thres=0, val_thres=0):
     return total_out.reshape(n, c, h, w) * 255.0
 
 
-def splice_mix_up_conv(x, hue_thres=3.5, sat_thres=0, val_thres=0):
-    global data_iter
-    load_dataloader(batch_size=x.size(0), image_size=x.size(-1))
-    n, c, h, w = x.shape
-    overlay = _get_data_batch(x.size(0)).repeat(x.size(1) // 3, 1, 1, 1)
-    x_rgb = x.reshape(-1, 3, h, w)
-    mask = create_hsv_mask(
-        x_rgb,
-        hue_thres=hue_thres,
-        sat_thres=sat_thres,
-        val_thres=val_thres,
-    )
-    for i in range(n):
-        weights = torch.randn(3, 3, 3, 3).to(x.device)
-        temp_x = x[i : i + 1].reshape(-1, 3, h, w) / 255.0
-        mask = create_hsv_mask(
-            temp_x, hue_thres=hue_thres, sat_thres=sat_thres, val_thres=val_thres
-        )
-        temp_x = F.pad(temp_x, pad=[1] * 4, mode="replicate")
-        out = torch.sigmoid(F.conv2d(temp_x, weights))
-        total_out = out if i == 0 else torch.cat([total_out, out], axis=0)
-    total_out[mask] = 0.5 * overlay[mask] + 0.5 * (x_rgb[mask] / 255.0)
-    return total_out.reshape(n, c, h, w) * 255.0
-
-
 def CS_splice(x, hue_thres=3.5, sat_thres=0, val_thres=0):
     global data_iter
     load_dataloader(batch_size=x.size(0), image_size=x.size(-1))
@@ -424,34 +405,10 @@ def CS_splice(x, hue_thres=3.5, sat_thres=0, val_thres=0):
     )
     mask2 = create_hsv_mask(
         x_rgb=x_rgb, hue_thres=0, sat_thres=sat_thres, val_thres=0.6
-    ) 
+    )
     overlay[mask2] = x_rgb[mask2]
     overlay[~mask] = x_rgb[~mask]
     return overlay.reshape(n, c, h, w) * 255.0
-
-
-def splice_conv(x, hue_thres=3.5, sat_thres=0, val_thres=0):
-    global data_iter
-    load_dataloader(batch_size=x.size(0), image_size=x.size(-1))
-    n, c, h, w = x.shape
-    overlay = _get_data_batch(x.size(0)).repeat(x.size(1) // 3, 1, 1, 1)
-    mask = create_hsv_mask(
-        x.reshape(-1, 3, h, w),
-        hue_thres=hue_thres,
-        sat_thres=sat_thres,
-        val_thres=val_thres,
-    )
-    for i in range(n):
-        weights = torch.randn(3, 3, 3, 3).to(x.device)
-        temp_x = x[i : i + 1].reshape(-1, 3, h, w) / 255.0
-        mask = create_hsv_mask(
-            temp_x, hue_thres=hue_thres, sat_thres=sat_thres, val_thres=val_thres
-        )
-        temp_x = F.pad(temp_x, pad=[1] * 4, mode="replicate")
-        out = torch.sigmoid(F.conv2d(temp_x, weights))
-        total_out = out if i == 0 else torch.cat([total_out, out], axis=0)
-    total_out[mask] = overlay[mask]
-    return total_out.reshape(n, c, h, w) * 255.0
 
 
 def splice_jitter(x, hue_thres=0, sat_thres=0, val_thres=0.55):
@@ -643,23 +600,21 @@ aug_to_func = {
     "conv": random_conv,
     "shift": random_shift,
     "color_jitter": color_jitter,
+    "splice_mix_up": splice_mix_up,
     "identity": identity,
-    "overlay": random_overlay,
     "splice": splice,
     "crop": random_crop,
     "drac_crop": DrAC_crop,
     "cutout_color": random_cutout_color,
-    "splice_conv": splice_conv,
     "splice_jitter": splice_jitter,
     "splice_conv_conv": splice_conv_conv,
     "CS_splice": CS_splice,
-    "splice_mix_up": splice_mix_up,
+    "overlay": random_overlay,
     "splice_2x_conv": splice_2x_conv,
     "splice_2x_jitter": splice_2x_jitter,
     "splice_mix_up_jitter": splice_mix_up_jitter,
-    "splice_mix_up_conv": splice_mix_up_conv,
     "random_perspective": random_perspective,
     "random_resize_crop": random_resize_crop,
-    "random_rescale": random_rescale,
     "DrQ2_random_shift": DrQ2_random_shift,
+    "mix_up": mix_up,
 }
