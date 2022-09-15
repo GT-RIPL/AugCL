@@ -94,9 +94,6 @@ def main(args):
         image_size=train_dot_dict.image_size,
         mode=args.env_mode,
         intensity=args.distracting_cs_intensity,
-        color_on=not args.color_off,
-        background_on=not args.background_off,
-        camera_on=not args.camera_off,
     )
 
     # Set working directory
