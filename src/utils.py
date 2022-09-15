@@ -137,7 +137,7 @@ class ReplayBuffer(object):
     """Buffer to store environment transitions"""
 
     def __init__(self, obs_shape, action_shape, capacity, batch_size, prefill=True):
-        self.capacity = capacity
+        self.capacity = capacity + 1
         self.batch_size = batch_size
 
         self._obses = []
@@ -173,7 +173,7 @@ class ReplayBuffer(object):
             save_dir=save_dir, last_save_idx=self.last_requeue_save
         )
 
-    def load(self, save_dir, end_step=None):
+    def load(self, save_dir, end_step=None, is_requeue_load=True, is_load=True):
         chunks = os.listdir(save_dir)
         chucks = sorted(chunks, key=lambda x: int(x.split("_")[0]))
         for chunk in chucks:
@@ -192,7 +192,11 @@ class ReplayBuffer(object):
             if end == end_step:
                 break
 
-        self.last_requeue_save = self.last_save = self.idx
+        if is_requeue_load:
+            self.last_requeue_save = self.idx
+
+        if is_load:
+            self.last_save = self.idx
 
     def tensor_buffer_samples(self, idxs):
         obs, next_obs = self._encode_obses(idxs)
@@ -339,5 +343,5 @@ def load_agent_and_buffer(
     ckpt_path = os.path.join(model_dir, f"{str(step)}.pt")
     assert os.path.exists(ckpt_path), f"No checkpoint at :{ckpt_path} exists."
     agent = torch.load(ckpt_path)
-    replay_buffer.load(save_dir=buffer_dir, end_step=step)
+    replay_buffer.load(save_dir=buffer_dir, end_step=step, is_requeue_load=False)
     return agent, replay_buffer

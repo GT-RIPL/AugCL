@@ -59,7 +59,7 @@ def is_requeued():
 
 def requeue_load_agent_and_replay_buffer(replay_buffer: ReplayBuffer):
     state_dict = torch.load(STATE_FILE)
-    replay_buffer.load(BUFFER_FOLDER)
+    replay_buffer.load(BUFFER_FOLDER, is_load=False)
     return state_dict["agent"], state_dict["step"]
 
 
