@@ -303,31 +303,6 @@
                 "--row_value",
                 "step"
             ]
-        },        {
-            "name": "Curriculum Learn Save",
-            "type": "python",
-            "request": "launch",
-            "program": "${workspaceFolder}/src/train.py",
-            "console": "integratedTerminal",
-            "justMyCode": true,
-            "args": [
-                "--algorithm",
-                "2x_curriculum",
-                "--train_steps",
-                "30k",
-                "--curriculum_step",
-                "4000",
-                "--prev_algorithm",
-                "sac",
-                "--prev_id",
-                "tester",
-                "--data_aug",
-                "conv",
-                "--save_buffer",
-                "True",
-                "--save_freq",
-                "1k"
-            ]
         },
     ]
 }
