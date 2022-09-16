@@ -146,10 +146,12 @@
             "justMyCode": true,
             "args": [
                 "--id",
-                "with_buffer",
+                "no_id",
                 "--eval_mode",
                 "color_hard",
                 "--continue_train",
+                "True",
+                "--refill_buffer",
                 "True"
             ]
         },

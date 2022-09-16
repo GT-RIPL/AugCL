@@ -99,8 +99,9 @@ def add_SAC_args():
     parser.add_argument("--save_video", default=False, action="store_true")
     parser.add_argument("--save_buffer", default=False, type=bool)
 
-    # Continual Training
+    # Continue Training
     parser.add_argument("--continue_train", default=False, type=bool)
+    parser.add_argument("--refill_buffer", default=False, type=bool)
     parser.add_argument("--curriculum_step", default=None, type=int)
     parser.add_argument("--prev_algorithm", default=None, type=str)
     parser.add_argument("--prev_id", default=None, type=str)

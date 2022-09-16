@@ -19,7 +19,8 @@ from interruptible_utils import (
     init_handlers,
     save_state,
     delete_requeue_state,
-    requeue_load_agent_and_replay_buffer,
+    requeue_load_agent,
+    requeue_load_replay_buffer,
 )
 
 
@@ -52,6 +53,24 @@ def evaluate(env, agent, video, num_episodes, L, step, args, test_env=False):
         episode_rewards.append(episode_reward)
 
     return np.mean(episode_rewards)
+
+
+def refill_buffer(env, agent, num_steps: int, replay_buffer: utils.ReplayBuffer):
+    done = True
+    for _ in range(num_steps):
+        if done:
+            obs = env.reset()
+            done = False
+            episode_step = 0
+
+        with utils.eval_mode(agent):
+            action = agent.sample_action(obs)
+
+        next_obs, reward, done, _ = env.step(action)
+        done_bool = 0 if episode_step + 1 == env._max_episode_steps else float(done)
+        replay_buffer.add(obs, action, reward, next_obs, done_bool)
+        obs = next_obs
+    return replay_buffer
 
 
 def main(args):
@@ -123,7 +142,7 @@ def main(args):
     replay_buffer = utils.ReplayBuffer(
         obs_shape=env.observation_space.shape,
         action_shape=env.action_space.shape,
-        capacity=args.train_steps,
+        capacity=args.train_steps + 1,
         batch_size=args.batch_size,
     )
     cropped_obs_shape = (
@@ -140,26 +159,33 @@ def main(args):
     start_step, episode, episode_reward, done = 0, 0, 0, True
 
     if is_requeued():
-        agent, start_step = requeue_load_agent_and_replay_buffer(
-            replay_buffer=replay_buffer
-        )
+        agent, start_step = requeue_load_agent()
+        requeue_load_replay_buffer(replay_buffer=replay_buffer)
     elif args.continue_train:
-        print("'continue_train' set to true, loading model ckpt and replay buffer ckpt")
-        ckpt_steps = utils.get_ckpt_file_paths(model_dir=model_dir)
-        if ckpt_steps:
-            ckpt_steps.sort()
-            start_step = ckpt_steps[-1]
-            agent, replay_buffer = utils.load_agent_and_buffer(
-                step=start_step,
-                model_dir=model_dir,
-                buffer_dir=os.path.join(work_dir, "buffer"),
-                replay_buffer=replay_buffer,
-            )
+        print("'continue_train' set to True. Loading model ckpt and replay buffer checkpoint...")
+        ckpt_step = utils.get_ckpt_file_paths(model_dir=model_dir)
+        if ckpt_step:
+            start_step = ckpt_step
+            agent = utils.load_agent(step=start_step, model_dir=model_dir)
+            if args.refill_buffer:
+                print("'refill_buffer' set to True. Refilling replay buffer...")
+                replay_buffer = refill_buffer(
+                    env=env,
+                    agent=agent,
+                    num_steps=start_step,
+                    replay_buffer=replay_buffer,
+                )
+            else:
+                replay_buffer = replay_buffer.load(
+                    save_dir=os.path.join(work_dir, "buffer"),
+                    end_step=start_step,
+                    is_requeue_load=False,
+                )
         else:
             raise ValueError("No checkpoints found exiting...")
     elif args.curriculum_step is not None:
         print(
-            f"'curriculum_train' is set to true. Loading previous model: {args.prev_algorithm} with id:{args.prev_id}."
+            f"'curriculum_train' is set to True. Loading previous model: {args.prev_algorithm} with id:{args.prev_id}..."
         )
         assert issubclass(
             agent.__class__, curriculum.Curriculum
@@ -172,11 +198,13 @@ def main(args):
             args.prev_id,
             "seed_" + str(args.seed),
         )
-        prev_agent, replay_buffer = utils.load_agent_and_buffer(
-            step=start_step,
-            model_dir=os.path.join(prev_work_dir, "model"),
-            buffer_dir=os.path.join(prev_work_dir, "buffer"),
-            replay_buffer=replay_buffer,
+        prev_agent = utils.load_agent(
+            step=start_step, model_dir=os.path.join(prev_work_dir, "model")
+        )
+        replay_buffer = replay_buffer.load(
+            save_dir=os.path.join(prev_work_dir, "buffer"),
+            end_step=start_step,
+            is_requeue_load=False,
         )
 
         agent.load_pretrained_agent(prev_agent)

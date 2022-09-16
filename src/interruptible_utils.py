@@ -57,9 +57,12 @@ def is_requeued():
     return osp.exists(STATE_FILE)
 
 
-def requeue_load_agent_and_replay_buffer(replay_buffer: ReplayBuffer):
-    state_dict = torch.load(STATE_FILE)
+def requeue_load_replay_buffer(replay_buffer: ReplayBuffer):
     replay_buffer.load(BUFFER_FOLDER)
+
+
+def requeue_load_agent():
+    state_dict = torch.load(STATE_FILE)
     return state_dict["agent"], state_dict["step"]
 
 

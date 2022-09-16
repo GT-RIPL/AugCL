@@ -137,7 +137,7 @@ class ReplayBuffer(object):
     """Buffer to store environment transitions"""
 
     def __init__(self, obs_shape, action_shape, capacity, batch_size, prefill=True):
-        self.capacity = capacity + 1
+        self.capacity = capacity
         self.batch_size = batch_size
 
         self._obses = []
@@ -151,6 +151,7 @@ class ReplayBuffer(object):
         self.last_save = 0
         self.last_requeue_save = 0
         self.full = False
+        self.refilled = False
 
     def __save__(self, save_dir, last_save_idx):
         if self.idx == last_save_idx:
@@ -174,6 +175,9 @@ class ReplayBuffer(object):
         )
 
     def load(self, save_dir, end_step=None, is_requeue_load=True, is_load=True):
+        if self.refilled:
+            return
+
         chunks = os.listdir(save_dir)
         chucks = sorted(chunks, key=lambda x: int(x.split("_")[0]))
         for chunk in chucks:
@@ -331,17 +335,17 @@ def get_ckpt_file_paths(model_dir: str):
         for f in os.listdir(model_dir)
         if os.path.isfile(os.path.join(model_dir, f)) and f.endswith(".pt")
     ]
-    return ckpt_steps
+
+    if ckpt_steps:
+        ckpt_steps.sort()
+        start_step = ckpt_steps[-1]
+        return start_step
+    else:
+        return
 
 
-def load_agent_and_buffer(
-    step: int, model_dir: str, buffer_dir: str, replay_buffer: ReplayBuffer
-):
-    assert os.path.exists(
-        buffer_dir
-    ), f"No buffer folder exists, replay buffer required in order to continue training."
+def load_agent(step: int, model_dir: str):
     ckpt_path = os.path.join(model_dir, f"{str(step)}.pt")
     assert os.path.exists(ckpt_path), f"No checkpoint at :{ckpt_path} exists."
     agent = torch.load(ckpt_path)
-    replay_buffer.load(save_dir=buffer_dir, end_step=step, is_requeue_load=False)
-    return agent, replay_buffer
+    return agent
