@@ -70,7 +70,6 @@ def refill_buffer(env, agent, num_steps: int, replay_buffer: utils.ReplayBuffer)
         done_bool = 0 if episode_step + 1 == env._max_episode_steps else float(done)
         replay_buffer.add(obs, action, reward, next_obs, done_bool)
         obs = next_obs
-    return replay_buffer
 
 
 def main(args):
@@ -162,21 +161,23 @@ def main(args):
         agent, start_step = requeue_load_agent()
         requeue_load_replay_buffer(replay_buffer=replay_buffer)
     elif args.continue_train:
-        print("'continue_train' set to True. Loading model ckpt and replay buffer checkpoint...")
+        print(
+            "'continue_train' set to True. Loading model ckpt and replay buffer checkpoint..."
+        )
         ckpt_step = utils.get_ckpt_file_paths(model_dir=model_dir)
         if ckpt_step:
             start_step = ckpt_step
             agent = utils.load_agent(step=start_step, model_dir=model_dir)
             if args.refill_buffer:
                 print("'refill_buffer' set to True. Refilling replay buffer...")
-                replay_buffer = refill_buffer(
+                refill_buffer(
                     env=env,
                     agent=agent,
                     num_steps=start_step,
                     replay_buffer=replay_buffer,
                 )
             else:
-                replay_buffer = replay_buffer.load(
+                replay_buffer.load(
                     save_dir=os.path.join(work_dir, "buffer"),
                     end_step=start_step,
                     is_requeue_load=False,
@@ -201,7 +202,7 @@ def main(args):
         prev_agent = utils.load_agent(
             step=start_step, model_dir=os.path.join(prev_work_dir, "model")
         )
-        replay_buffer = replay_buffer.load(
+        replay_buffer.load(
             save_dir=os.path.join(prev_work_dir, "buffer"),
             end_step=start_step,
             is_requeue_load=False,
