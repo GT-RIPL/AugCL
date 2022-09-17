@@ -57,7 +57,7 @@ def evaluate(env, agent, video, num_episodes, L, step, args, test_env=False):
 
 def refill_buffer(env, agent, num_steps: int, replay_buffer: utils.ReplayBuffer):
     done = True
-    for _ in range(num_steps):
+    while replay_buffer.idx < num_steps:
         if done:
             obs = env.reset()
             done = False
@@ -158,36 +158,52 @@ def main(args):
     start_step, episode, episode_reward, done = 0, 0, 0, True
 
     if is_requeued():
+        print("Requeue state exists loading agent and replay buffer...")
         agent, start_step = requeue_load_agent()
         requeue_load_replay_buffer(replay_buffer=replay_buffer)
     elif args.continue_train:
-        print(
-            "'continue_train' set to True. Loading model ckpt and replay buffer checkpoint..."
+        print("'continue_train' set to True. Loading agent...")
+        start_step = utils.get_ckpt_file_paths(model_dir=model_dir)
+        if start_step is None:
+            raise ValueError("No checkpoints exist. Exiting...")
+        agent = utils.load_agent(
+            step=start_step, model_dir=os.path.join(work_dir, "model")
         )
-        ckpt_step = utils.get_ckpt_file_paths(model_dir=model_dir)
-        if ckpt_step:
-            start_step = ckpt_step
-            agent = utils.load_agent(step=start_step, model_dir=model_dir)
-            if args.refill_buffer:
-                print("'refill_buffer' set to True. Refilling replay buffer...")
-                refill_buffer(
-                    env=env,
-                    agent=agent,
-                    num_steps=start_step,
-                    replay_buffer=replay_buffer,
-                )
-            else:
-                replay_buffer.load(
-                    save_dir=os.path.join(work_dir, "buffer"),
-                    end_step=start_step,
-                    is_requeue_load=False,
-                )
+
+        if args.curriculum_step:
+            prev_work_dir = os.path.join(
+                args.log_dir,
+                args.domain_name + "_" + args.task_name,
+                args.prev_algorithm,
+                args.prev_id,
+                "seed_" + str(args.seed),
+            )
+            replay_buffer.load(
+                save_dir=os.path.join(prev_work_dir, "buffer"),
+                end_step=args.curriculum_step,
+                is_requeue_load=False,
+            )
+
+        if args.refill_buffer and start_step is not None:
+            print("'refill_buffer' set to True. Refilling replay buffer...")
+            refill_buffer(
+                env=env,
+                agent=agent,
+                num_steps=start_step,
+                replay_buffer=replay_buffer,
+            )
+        elif start_step:
+            print(f"Loading replay buffer up to {start_step}...")
+            replay_buffer.load(
+                save_dir=os.path.join(work_dir, "buffer"),
+                end_step=start_step,
+                is_requeue_load=False,
+            )
         else:
-            raise ValueError("No checkpoints found exiting...")
+            raise ValueError(
+                "No replay buffer checkpoints found and refill set to False..."
+            )
     elif args.curriculum_step is not None:
-        print(
-            f"'curriculum_train' is set to True. Loading previous model: {args.prev_algorithm} with id:{args.prev_id}..."
-        )
         assert issubclass(
             agent.__class__, curriculum.Curriculum
         ), f"agent is not a subclass of Curriculum. Aborting..."
@@ -199,9 +215,13 @@ def main(args):
             args.prev_id,
             "seed_" + str(args.seed),
         )
+        print(
+            f"'curriculum_train' is set to True. Loading previous model: {args.prev_algorithm} with id: {args.prev_id}..."
+        )
         prev_agent = utils.load_agent(
             step=start_step, model_dir=os.path.join(prev_work_dir, "model")
         )
+        print(f"Loading replay buffer up to step {start_step}")
         replay_buffer.load(
             save_dir=os.path.join(prev_work_dir, "buffer"),
             end_step=start_step,
@@ -216,6 +236,7 @@ def main(args):
 
     L = Logger(work_dir)
     start_time = time.time()
+    print("Training commencing...")
     for step in range(start_step, args.train_steps + 1):
         if done:
             if step > start_step:
