@@ -184,6 +184,10 @@ class ReplayBuffer(object):
             start, end = [int(x) for x in chunk.split(".")[0].split("_")]
             path = os.path.join(save_dir, chunk)
             payload = torch.load(path)
+
+            if self.idx > start:
+                continue
+
             assert (
                 self.idx == start
             ), f"self.idx: {self.idx} DNE start: {start} for save_dir: {save_dir}. Current chunk is {chunk}. Chucks: {chucks}."
