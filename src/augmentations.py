@@ -13,7 +13,7 @@ data_iter = None
 
 
 def get_jitter_model(x):
-    return TF.ColorJitter(0, 0, (0, 3), (-0.5, 0.5)).to(x.get_device())
+    return TF.ColorJitter(0, (0, 1), (0, 3), (-0.5, 0.5)).to(x.get_device())
 
 
 def _load_data(
