@@ -14,7 +14,7 @@ for key, value in augmentations.aug_to_func.items():
         dataloader_booted_up = True
 
     time_list = list()
-    for i in range(10):
+    for i in range(200):
         start_time = time.time()
         value(input)
         time_list.append(time.time() - start_time)
