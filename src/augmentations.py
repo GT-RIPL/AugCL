@@ -281,6 +281,21 @@ def random_overlay(x, dataset="coco"):
     return ((1 - alpha) * (x / 255.0) + (alpha) * imgs) * 255.0
 
 
+def random_np_overlay(x, dataset="coco"):
+    """Randomly overlay an image from Places or COCO"""
+    global data_iter
+    alpha = 0.5
+
+    load_dataloader(batch_size=x.size(0), image_size=x.size(-1), dataset=dataset)
+
+    imgs = _get_data_batch(batch_size=x.size(0)).repeat(1, x.size(1) // 3, 1, 1)
+
+    return torch.from_numpy(
+        ((1 - alpha) * (x.cpu().detach().numpy() / 255.0) + (alpha) * imgs.cpu().data.numpy())
+        * 255.0
+    )
+
+
 def mix_up(x, dataset="coco"):
     global data_iter
 
@@ -617,4 +632,5 @@ aug_to_func = {
     "random_resize_crop": random_resize_crop,
     "DrQ2_random_shift": DrQ2_random_shift,
     "mix_up": mix_up,
+    "overlay_np": random_np_overlay,
 }
