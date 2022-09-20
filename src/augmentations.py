@@ -13,7 +13,7 @@ data_iter = None
 
 
 def get_jitter_model(x):
-    return TF.ColorJitter(0, (0, 1), (0, 3), (-0.5, 0.5)).to(x.get_device())
+    return TF.ColorJitter(0, (0, 2), (0, 3), (-0.5, 0.5)).to(x.get_device())
 
 
 def _load_data(
@@ -291,7 +291,10 @@ def random_np_overlay(x, dataset="coco"):
     imgs = _get_data_batch(batch_size=x.size(0)).repeat(1, x.size(1) // 3, 1, 1)
 
     return torch.from_numpy(
-        ((1 - alpha) * (x.cpu().detach().numpy() / 255.0) + (alpha) * imgs.cpu().data.numpy())
+        (
+            (1 - alpha) * (x.cpu().detach().numpy() / 255.0)
+            + (alpha) * imgs.cpu().data.numpy()
+        )
         * 255.0
     )
 
@@ -426,6 +429,26 @@ def CS_splice(x, hue_thres=3.5, sat_thres=0, val_thres=0):
     return overlay.reshape(n, c, h, w) * 255.0
 
 
+def CS_splice_2x_jitter(x, hue_thres=3.5, sat_thres=0, val_thres=0):
+    """Applies a random conv2d, deviates slightly from https://arxiv.org/abs/1910.05396"""
+    n, c, h, w = x.shape
+    model = get_jitter_model(x=x)
+    for i in range(n):
+        temp_x = x[i : i + 1].reshape(-1, 3, h, w) / 255.0
+        mask = create_hsv_mask(
+            x_rgb=temp_x, hue_thres=hue_thres, sat_thres=sat_thres, val_thres=val_thres
+        )
+        mask2 = create_hsv_mask(
+            x_rgb=temp_x, hue_thres=0, sat_thres=sat_thres, val_thres=0.6
+        )
+        out = model(temp_x)
+        out_2 = model(temp_x)
+        out[mask2] = out_2[mask2]
+        out[~mask] = out_2[~mask]
+        total_out = out if i == 0 else torch.cat([total_out, out], axis=0)
+    return total_out.reshape(n, c, h, w) * 255.0
+
+
 def splice_jitter(x, hue_thres=0, sat_thres=0, val_thres=0.55):
     global data_iter
     load_dataloader(batch_size=x.size(0), image_size=x.size(-1))
@@ -442,22 +465,6 @@ def splice_jitter(x, hue_thres=0, sat_thres=0, val_thres=0.55):
         total_out = out if i == 0 else torch.cat([total_out, out], axis=0)
     total_out[~mask] = overlay[~mask]
     return total_out.reshape(n, c, h, w) * 255.0
-
-
-def splice_conv_conv(x, hue_thres=0, sat_thres=0, val_thres=0.6):
-    global data_iter
-    n, c, h, w = x.shape
-    x_rgb = x.reshape(-1, 3, h, w) / 255.0
-    mask = create_hsv_mask(
-        x_rgb=x_rgb, hue_thres=hue_thres, sat_thres=sat_thres, val_thres=val_thres
-    )
-    conv_out = random_conv(x)
-    conv_out = conv_out.reshape(-1, 3, h, w)
-    conv_out_2 = random_conv(x)
-    conv_out_2 = conv_out_2.reshape(-1, 3, h, w)
-    x_rgb[mask] = conv_out[mask]
-    x_rgb[~mask] = conv_out_2[~mask]
-    return x_rgb.reshape(n, c, h, w)
 
 
 def splice_2x_conv(x, hue_thres=0, sat_thres=0, val_thres=0.6):
@@ -622,7 +629,6 @@ aug_to_func = {
     "drac_crop": DrAC_crop,
     "cutout_color": random_cutout_color,
     "splice_jitter": splice_jitter,
-    "splice_conv_conv": splice_conv_conv,
     "CS_splice": CS_splice,
     "overlay": random_overlay,
     "splice_2x_conv": splice_2x_conv,
