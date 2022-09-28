@@ -1,5 +1,8 @@
+# VS code files
+.vscode/
+
 # Log files
-# logs/
+logs/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

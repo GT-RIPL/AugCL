@@ -60,6 +60,22 @@
             ]
         },
         {
+            "name": "Non niave RAD train",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/src/train.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": [
+                "--id",
+                "blah",
+                "--algorithm",
+                "non_naive_rad",
+                "--data_aug",
+                "shift"
+            ]
+        },
+        {
             "name": "SAC train",
             "type": "python",
             "request": "launch",
