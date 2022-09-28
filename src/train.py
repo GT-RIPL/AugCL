@@ -55,21 +55,6 @@ def evaluate(env, agent, video, num_episodes, L, step, args, test_env=False):
     return np.mean(episode_rewards)
 
 
-def refill_buffer(env, agent, num_steps: int, replay_buffer: utils.ReplayBuffer):
-    done = True
-    while replay_buffer.idx < num_steps:
-        if done:
-            obs = env.reset()
-            done = False
-            episode_step = 0
-
-        with utils.eval_mode(agent):
-            action = agent.sample_action(obs)
-
-        next_obs, reward, done, _ = env.step(action)
-        done_bool = 0 if episode_step + 1 == env._max_episode_steps else float(done)
-        replay_buffer.add(obs, action, reward, next_obs, done_bool)
-        obs = next_obs
 
 
 def main(args):
@@ -184,15 +169,7 @@ def main(args):
                 is_requeue_load=False,
             )
 
-        if args.refill_buffer and start_step is not None:
-            print("'refill_buffer' set to True. Refilling replay buffer...")
-            refill_buffer(
-                env=env,
-                agent=agent,
-                num_steps=start_step,
-                replay_buffer=replay_buffer,
-            )
-        elif start_step:
+        if start_step:
             print(f"Loading replay buffer up to {start_step}...")
             replay_buffer.load(
                 save_dir=os.path.join(work_dir, "buffer"),
@@ -201,7 +178,7 @@ def main(args):
             )
         else:
             raise ValueError(
-                "No replay buffer checkpoints found and refill set to False..."
+                "No replay buffer checkpoints found. Exiting..."
             )
     elif args.curriculum_step is not None:
         assert issubclass(
