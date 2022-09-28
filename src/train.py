@@ -7,7 +7,7 @@ import utils
 import time
 from arguments import parse_args
 from env.wrappers import make_env
-from algorithms.curriculum_learning import curriculum
+from algorithms.augcl import AugCL
 from algorithms.factory import make_agent
 from logger import Logger
 from video import VideoRecorder
@@ -205,8 +205,8 @@ def main(args):
             )
     elif args.curriculum_step is not None:
         assert issubclass(
-            agent.__class__, curriculum.Curriculum
-        ), f"agent is not a subclass of Curriculum. Aborting..."
+            agent.__class__, AugCL
+        ), f"agent is not a subclass of AugCL. Aborting..."
         start_step = args.curriculum_step
         prev_work_dir = os.path.join(
             args.log_dir,
