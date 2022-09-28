@@ -1,4 +1,3 @@
-from cv2 import seamlessClone
 import torch
 import os
 import numpy as np
@@ -11,17 +10,6 @@ from algorithms.augcl import AugCL
 from algorithms.factory import make_agent
 from logger import Logger
 from video import VideoRecorder
-
-from interruptible_utils import (
-    EXIT,
-    REQUEUE,
-    is_requeued,
-    init_handlers,
-    save_state,
-    delete_requeue_state,
-    requeue_load_agent,
-    requeue_load_replay_buffer,
-)
 
 
 def evaluate(env, agent, video, num_episodes, L, step, args, test_env=False):
@@ -53,8 +41,6 @@ def evaluate(env, agent, video, num_episodes, L, step, args, test_env=False):
         episode_rewards.append(episode_reward)
 
     return np.mean(episode_rewards)
-
-
 
 
 def main(args):
@@ -101,13 +87,6 @@ def main(args):
     )
     print("Working directory:", work_dir)
     args.__dict__["train_date"] = time.strftime("%m-%d-%y", time.gmtime())
-
-    if not args.test_code_mode and not is_requeued():
-        assert (
-            args.continue_train
-            or args.curriculum_step is not None
-            or not os.path.exists(os.path.join(work_dir, "train.log"))
-        ), "Specified working directory has existing train.log. Ending program."
     os.makedirs(work_dir, exist_ok=True)
     model_dir = utils.make_dir(os.path.join(work_dir, "model"))
 
@@ -142,11 +121,7 @@ def main(args):
 
     start_step, episode, episode_reward, done = 0, 0, 0, True
 
-    if is_requeued():
-        print("Requeue state exists loading agent and replay buffer...")
-        agent, start_step = requeue_load_agent()
-        requeue_load_replay_buffer(replay_buffer=replay_buffer)
-    elif args.continue_train:
+    if args.continue_train:
         print("'continue_train' set to True. Loading agent...")
         start_step = utils.get_ckpt_file_paths(model_dir=model_dir)
         if start_step is None:
@@ -177,9 +152,7 @@ def main(args):
                 is_requeue_load=False,
             )
         else:
-            raise ValueError(
-                "No replay buffer checkpoints found. Exiting..."
-            )
+            raise ValueError("No replay buffer checkpoints found. Exiting...")
     elif args.curriculum_step is not None:
         assert issubclass(
             agent.__class__, AugCL
@@ -225,7 +198,7 @@ def main(args):
 
             # Evaluate agent periodically
             if step % args.eval_freq == 0 and not (
-                args.continue_train or is_requeued() and step == start_step
+                args.continue_train and step == start_step
             ):
                 num_episodes = (
                     args.eval_episodes_final_step
@@ -246,10 +219,6 @@ def main(args):
                         args=args,
                     )
                 L.dump(step)
-
-            # Save for requeue
-            if args.requeue_save_freq > 0 and step % args.requeue_save_freq == 0:
-                save_state(agent=agent, replay_buffer=replay_buffer, step=step)
 
             # Save agent periodically
             if (
@@ -289,26 +258,14 @@ def main(args):
         obs = next_obs
 
         episode_step += 1
-
-        if EXIT.is_set():
-            print(
-                f"Exiting at step: {step}. When requeue starts I'll be picking up at step: {replay_buffer.last_requeue_save}"
-            )
-            break
-
-    if REQUEUE.is_set():
-        os.system("scontrol requeue " + os.environ["SLURM_JOB_ID"])
-    else:
-        print("Completed training for", work_dir)
-        delete_requeue_state()
+    
+    print("Training Complete!")
 
 
 if __name__ == "__main__":
     args = parse_args()
-    init_handlers()
     try:
         main(args)
     except Exception as e:
-        delete_requeue_state()
         print(f'Node is: {os.environ.get("SLURM_JOB_NODELIST", None)}')
         raise e
